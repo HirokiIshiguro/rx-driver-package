@@ -17,6 +17,7 @@
 | crackle | Mindtree | BSD 2-Clause License                                                                                         |
 | TES Dave2D                                            | TES Electronics Solutions GmBH     | [Renesas Open License v1.0](#renesas-open-license-v10)                                      |
 | MCUBoot                                               | TrustedFirmware.org                | Apache-2.0 License                                                                          |
+| lightweight IP (lwIP)                                 | Swedish Institute of Computer Science. | [Modified BSD license](https://github.com/lwip-tcpip/lwip/blob/STABLE-2_2_1_RELEASE/COPYING) |
 |<tr> <td colspan="3"><strong>Renesas Development Tools<strong></td></tr>                                                                                                                  |
 | QE: Tools for Particular Applications                 | Renesas Electronics Corporation    | [BSD-3-Clause](#bsd-3-clause-license)                                                       |
 | RX Smart Configurator                                 | Renesas Electronics Corporation    | [BSD-3-Clause](#bsd-3-clause-license)                                                       |
