@@ -10,7 +10,7 @@
 | rm_rai_data_collector_rx                              | Renesas Electronics Corporation    | [MIT Licence](#MIT-License)|
 | rm_rai_data_shipper_rx                                | Renesas Electronics Corporation    | [MIT Licence](#MIT-License)|
 |<tr> <td colspan="3"><strong>Third-Party components included in the packs<strong></td></tr>                                                                                               |
-| FatFs                                                 | ChaN              | Open License                                                                           |
+| FatFs                                                 | ChaN              | BSD-1-Clause                                                                           |
 | [Aeropoint GUI](https://www.cri-mw.co.jp/business/product/embedded/aeropointgui/)      | CRI Middleware              | *Mass production requires a contract with CRI (fees apply).Please contact CRI for details.                           |
 | [emWin](https://www.segger.com/products/user-interface/emwin/add-ons/emwin-support-renesas-rx-mcu/) | SEGGER-Renesas | Renesas Sub-license Agreement                   |
 | [TinyCrypt](https://github.com/intel/tinycrypt/)      | Intel Corporation     | BSD-3-Clause and BSD-2-Clause. See [LICENSE](https://github.com/intel/tinycrypt/blob/master/LICENSE)|
