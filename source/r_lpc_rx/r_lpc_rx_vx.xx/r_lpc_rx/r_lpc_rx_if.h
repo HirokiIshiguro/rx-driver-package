@@ -34,6 +34,10 @@
  *                              lpc_lowpower_activate_check() functions for RX260, RX261.
  *         : 15.03.2025 2.51    Updated disclaimer.
  *         : 23.06.2025 2.52    Removed doc folder and updated .rcpc file in FITDemos.
+ *         : 30.10.2025 2.60    Added support for RX14T.
+ *                              Fixed to comply with GSCE Coding Standards Rev.6.6.0.
+ *                              Removed \e in Doxygen comment of API function.
+ *                              Modified comment of API function to Doxygen style.
  ***********************************************************************************************************************/
 
 #ifndef R_LPC_RX_IF_H
@@ -58,7 +62,7 @@
 
 /* Version Number of API. */
     #define LPC_RX_VERSION_MAJOR           (2)
-    #define LPC_RX_VERSION_MINOR           (52)
+    #define LPC_RX_VERSION_MINOR           (60)
 
 /***********************************************************************************************************************
  Typedef definitions
@@ -83,7 +87,7 @@ typedef enum lpc_err
  * Argument     : pdata
  * Return Value : .
  *********************************************************************************************************************/
-typedef void (*lpc_callback_set_t)(void *pdata); /* Callback function type */
+typedef void (*lpc_callback_set_t)(void * pdata); /* Callback function type */
 
 /***********************************************************************************************************************
  Exported global variables
@@ -123,6 +127,7 @@ lpc_err_t R_LPC_LowPowerModeConfigure (lpc_low_power_mode_t e_mode);
  *********************************************************************************************************************/
 lpc_err_t R_LPC_LowPowerModeActivate (void (*pcallback)(void* pdata));
 
+#ifndef BSP_MCU_RX14T
 /**********************************************************************************************************************
  * Function Name: R_LPC_ReturnClockSwitch
  * Description  : .
@@ -131,6 +136,8 @@ lpc_err_t R_LPC_LowPowerModeActivate (void (*pcallback)(void* pdata));
  * Return Value : .
  *********************************************************************************************************************/
 lpc_err_t R_LPC_ReturnClockSwitch (lpc_clock_switch_t e_clock_source, bool enable);
+#endif /* BSP_MCU_RX14T */
+
 #ifdef LPC_VALID_SNOOZE_MODE
 /**********************************************************************************************************************
  * Function Name: R_LPC_SnoozeModeConfigure

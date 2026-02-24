@@ -15,6 +15,7 @@
 *         : 31.03.2023 3.10     Supported RX26T.
 *                               Update copyright year follow new rule.
 *         : 15.03.2025 3.51     Updated disclaimer.
+*         : 28.11.2025 3.80     Added support Nested interrupt.
 ***********************************************************************************************************************/
 #ifndef RSPI_CONFIG_HEADER_FILE
 #define RSPI_CONFIG_HEADER_FILE
@@ -77,5 +78,51 @@ ENABLE DEBUGGING INFORMATION
  * This may be enabled by setting RSPI_CFG_USE_RX63_ERROR_INTERRUPT to (1).
  */
 #define RSPI_CFG_USE_RX63_ERROR_INTERRUPT (0)
+
+/* Specifies whether to include code for nested interrupt SPTI in channel 0 */
+#define RSPI_CFG_CH0_SPTI_EN_NESTED_INT (0)
+
+/* Specifies whether to include code for nested interrupt SPRI in channel 0 */
+#define RSPI_CFG_CH0_SPRI_EN_NESTED_INT (0)
+
+/* Specifies whether to include code for nested interrupt SPII in channel 0 */
+#define RSPI_CFG_CH0_SPII_EN_NESTED_INT (0)
+
+/* Specifies whether to include code for nested interrupt SPCI in channel 0 */
+#define RSPI_CFG_CH0_SPCI_EN_NESTED_INT (0)
+
+/* Specifies whether to include code for nested interrupt SPEI in channel 0 */
+#define RSPI_CFG_CH0_SPEI_EN_NESTED_INT (0)
+
+/* Specifies whether to include code for nested interrupt SPTI in channel 1 */
+#define RSPI_CFG_CH1_SPTI_EN_NESTED_INT (0)
+
+/* Specifies whether to include code for nested interrupt SPRI in channel 1 */
+#define RSPI_CFG_CH1_SPRI_EN_NESTED_INT (0)
+
+/* Specifies whether to include code for nested interrupt SPII in channel 1 */
+#define RSPI_CFG_CH1_SPII_EN_NESTED_INT (0)
+
+/* Specifies whether to include code for nested interrupt SPCI in channel 1 */
+#define RSPI_CFG_CH1_SPCI_EN_NESTED_INT (0)
+
+/* Specifies whether to include code for nested interrupt SPEI in channel 1 */
+#define RSPI_CFG_CH1_SPEI_EN_NESTED_INT (0)
+
+/* Specifies whether to include code for nested interrupt SPTI in channel 2 */
+#define RSPI_CFG_CH2_SPTI_EN_NESTED_INT (0)
+
+/* Specifies whether to include code for nested interrupt SPRI in channel 2 */
+#define RSPI_CFG_CH2_SPRI_EN_NESTED_INT (0)
+
+/* Specifies whether to include code for nested interrupt SPII in channel 2 */
+#define RSPI_CFG_CH2_SPII_EN_NESTED_INT (0)
+
+/* Specifies whether to include code for nested interrupt SPCI in channel 2 */
+#define RSPI_CFG_CH2_SPCI_EN_NESTED_INT (0)
+
+/* Specifies whether to include code for nested interrupt SPEI in channel 2 */
+#define RSPI_CFG_CH2_SPEI_EN_NESTED_INT (0)
+
 /**********************************************************************************************************************/
 #endif /* RSPI_CONFIG_HEADER_FILE */

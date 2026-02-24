@@ -23,6 +23,7 @@
 *           15.04.2021 3.90    Added support for RX140.
 *           31.03.2023 4.80    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *           15.03.2025 5.41    Updated disclaimer
+*           30.10.2025 5.60    Added support RX14T.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX_H
@@ -292,6 +293,11 @@ extern void eri_handler (sci_hdl_t const hdl);
         #error "Change to SCI_CFG_CHxx_TX_DTC_DMACA_ENABLE and SCI_CFG_CHxx_RX_DTC_DMACA_ENABLE (1) or (0) in r_sci_rx_config.h."
     #endif
 #elif defined(BSP_MCU_RX140)
+    #if ((SCI_DMACA_ENABLE == (TX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)) || (SCI_DMACA_ENABLE == (RX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)))
+        #error "This MCU does not have DMAC module."
+        #error "Change to SCI_CFG_CHxx_TX_DTC_DMACA_ENABLE and SCI_CFG_CHxx_RX_DTC_DMACA_ENABLE (1) or (0) in r_sci_rx_config.h."
+    #endif
+#elif defined(BSP_MCU_RX14T)
     #if ((SCI_DMACA_ENABLE == (TX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)) || (SCI_DMACA_ENABLE == (RX_DTC_DMACA_ENABLE & SCI_DMACA_ENABLE)))
         #error "This MCU does not have DMAC module."
         #error "Change to SCI_CFG_CHxx_TX_DTC_DMACA_ENABLE and SCI_CFG_CHxx_RX_DTC_DMACA_ENABLE (1) or (0) in r_sci_rx_config.h."

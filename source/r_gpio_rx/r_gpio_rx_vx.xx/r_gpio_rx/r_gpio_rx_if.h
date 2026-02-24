@@ -82,6 +82,7 @@
 *         : 15.03.2025 5.11    Updated disclaimer.
 *         : 23.06.2025 5.20    Added support for RX26T 32pins.
 *                              Removed doc folder and updated .rcpc file in FITDemos.
+*         : 30.10.2025 5.30    Added support for RX14T.
 ***********************************************************************************************************************/
 
 #ifndef GPIO_RX_INTERFACE_HEADER_FILE
@@ -108,6 +109,8 @@ Includes   <System Includes> , "Project Includes"
     #include "./src/targets/rx13t/r_gpio_rx13t.h"
 #elif   defined(BSP_MCU_RX140)
     #include "./src/targets/rx140/r_gpio_rx140.h"
+#elif   defined(BSP_MCU_RX14T)
+    #include "./src/targets/rx14t/r_gpio_rx14t.h"
 #elif defined(BSP_MCU_RX230)
     #include "./src/targets/rx230/r_gpio_rx230.h"
 #elif defined(BSP_MCU_RX231)
@@ -164,7 +167,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define GPIO_RX_VERSION_MAJOR           (5)
-#define GPIO_RX_VERSION_MINOR           (20)
+#define GPIO_RX_VERSION_MINOR           (30)
 
 /***********************************************************************************************************************
 Typedef definitions

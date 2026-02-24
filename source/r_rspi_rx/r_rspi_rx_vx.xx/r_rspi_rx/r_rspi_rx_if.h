@@ -54,6 +54,8 @@
 *         : 30.10.2025 3.70     Removed support for RX26T-32 Pins.
 *                               Removed doc folder and updated .rcpc file in FITDemos.
 *                               Added byte swap feature.
+*         : 28.11.2025 3.80     Added support Nested interrupt.
+*                               Modified comment of API function to Doxygen style.
 ***********************************************************************************************************************/
 #ifndef RSPI_API_HEADER_FILE
 #define RSPI_API_HEADER_FILE
@@ -79,7 +81,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define RSPI_RX_VERSION_MAJOR           (3)
-#define RSPI_RX_VERSION_MINOR           (70)
+#define RSPI_RX_VERSION_MINOR           (80)
 
 /***********************************************************************************************************************
 Typedef definitions

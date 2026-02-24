@@ -14,6 +14,7 @@
 *         : 28.06.2024 1.40    Added support for RX261.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 15.03.2025 1.41    Updated disclaimer.
+*         : 26.12.2025 1.51    Modified comment of API function to Doxygen style.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
  * Includes
@@ -756,7 +757,7 @@ fsp_err_t R_CANFD_Read (can_ctrl_t * const p_api_ctrl, uint32_t buffer, can_fram
  * @retval FSP_ERR_NOT_OPEN                 Control block not open.
  * @retval FSP_ERR_ASSERTION                Null pointer presented
  * @retval FSP_ERR_INVALID_MODE             Cannot change to the requested mode from the current global mode.
- * @details Switch to a different channel, global or test mode.c
+ * @details Switch to a different channel, global or test mode.
  * @note None.
  *****************************************************************************************************************/
 fsp_err_t R_CANFD_ModeTransition (can_ctrl_t * const   p_api_ctrl,

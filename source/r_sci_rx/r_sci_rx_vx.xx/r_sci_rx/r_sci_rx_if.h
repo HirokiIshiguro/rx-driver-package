@@ -86,6 +86,9 @@
 *           15.03.2025 5.41    Updated disclaimer
 *           23.06.2025 5.50    Added support for RX26T-32Pin.
 *                              Removed doc folder and updated .rcpc file in FITDemos.
+*           30.10.2025 5.60    Added support for RX14T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.6.0.
+*                              Updated MDF using Category.
 ***********************************************************************************************************************/
 
 #ifndef SCI_IF_H
@@ -115,7 +118,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define SCI_VERSION_MAJOR  (5)
-#define SCI_VERSION_MINOR  (50)
+#define SCI_VERSION_MINOR  (60)
 
 #define SCI_DTC_DMACA_DISABLE  (0x0)
 #define SCI_DTC_ENABLE         (0x1)

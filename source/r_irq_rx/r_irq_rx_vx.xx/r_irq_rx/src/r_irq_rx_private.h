@@ -55,6 +55,8 @@
 *         : 23.06.2025  4.80    Added support for RX26T-32Pins.
 *                               Updated constraint in MDF file to disable configuration of unsupported channels for RX26T-32Pin.
 *                               Removed doc folder and updated .rcpc file in FITDemos.
+*         : 30.10.2025  4.90    Added support for RX14T.
+*                               Updated MDF using Category.
 ***********************************************************************************************************************/
 
 #include "platform.h"
@@ -68,7 +70,7 @@ Macro definitions
 ******************************************************************************/
 /* Version Number of API. */
 #define IRQ_RX_VERSION_MAJOR           (4)
-#define IRQ_RX_VERSION_MINOR           (80)
+#define IRQ_RX_VERSION_MINOR           (90)
 
 /* Bit position of interrupt enable bits in interrupt enable register. */
 #define IRQ_IEN_MASK_IRQ0   (0x01)

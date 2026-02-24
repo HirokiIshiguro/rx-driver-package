@@ -22,6 +22,7 @@
  *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
  *         : 28.06.2024 2.40    Added RX260, RX261.
  *         : 15.03.2025 2.51    Updated disclaimer.
+ *         : 30.10.2025 2.60    Added support for RX14T.
  ***********************************************************************************************************************/
 #ifndef R_LPC_RX_PLATFORM_H
     #define R_LPC_RX_PLATFORM_H
@@ -40,6 +41,8 @@
         #include "./targets/rx130/r_lpc_rx130_if.h"
     #elif defined(BSP_MCU_RX140)
         #include "./targets/rx140/r_lpc_rx140_if.h"
+    #elif defined(BSP_MCU_RX14T)
+        #include "./targets/rx14t/r_lpc_rx14t_if.h"
     #elif defined(BSP_MCU_RX230)
         #include "./targets/rx230/r_lpc_rx230_if.h"
     #elif defined(BSP_MCU_RX231)

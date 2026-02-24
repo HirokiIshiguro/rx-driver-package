@@ -62,6 +62,10 @@ r_sci_iic_rx
         |       r_sci_iic_rx140.c
         |       r_sci_iic_rx140_private.h
         |
+        +---rx14t
+        |       r_sci_iic_rx14t.c
+        |       r_sci_iic_rx14t_private.h
+        |
         +---rx230
         |       r_sci_iic_rx230.c
         |       r_sci_iic_rx230_private.h

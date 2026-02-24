@@ -40,6 +40,7 @@
 *                               the IAR compiler.
 *         : 18.05.2021 1.04     Added definition for Address exceptions.
 *         : 26.02.2025 1.05     Changed the disclaimer.
+*         : 12.09.2025 1.06     Changed to suppress warnings that started occurring in IAR Compiler 5.20.1.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -640,8 +641,10 @@ extern void * const                   exvectors_start[];
 #define R_BSP_ASM_LAB(n_colon)    R_BSP_ASM(_lab##n_colon)
 #define R_BSP_ASM_BEGIN           R_BSP_PRAGMA(diag_suppress = Pa174)\
                                   R_BSP_PRAGMA(diag_suppress = Pe010)\
+                                  R_BSP_PRAGMA(diag_suppress = Pa209)\
                                   __asm volatile(
 #define R_BSP_ASM_END             );\
+                                  R_BSP_PRAGMA(diag_default = Pa209)\
                                   R_BSP_PRAGMA(diag_default = Pe010)\
                                   R_BSP_PRAGMA(diag_default = Pa174)
 

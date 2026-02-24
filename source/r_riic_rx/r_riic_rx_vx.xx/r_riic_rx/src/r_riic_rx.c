@@ -65,6 +65,8 @@
  *                                    Apply a digital noise filter circuit to the riic_bps_calc function.
  *                                    Added new macros for SCL rise time and SCL fall time.
  *              : 15.03.2025 3.01     Updated disclaimer.
+ *              : 30.10.2025 3.10     Added RX14T support.
+                                      Fixed to comply with GSCE Coding Standards Rev.6.6.0.
  **********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -478,8 +480,8 @@ riic_return_t R_RIIC_MasterSend(riic_info_t * p_riic_info)
 
     /* ---- CHECK ARGUMENTS ---- */
 #if (1U == RIIC_CFG_PARAM_CHECKING_ENABLE)
-    if ((((NULL == p_riic_info) || ((0 == p_riic_info->cnt1st) && ((uint8_t *) FIT_NO_PTR != p_riic_info->p_data1st)))
-            || ((0 == p_riic_info->cnt2nd) && ((uint8_t *) FIT_NO_PTR != p_riic_info->p_data2nd)))
+    if ((((NULL == p_riic_info) || ((0 == p_riic_info->cnt1st) && ((uint8_t *)FIT_NO_PTR != p_riic_info->p_data1st)))
+            || ((0 == p_riic_info->cnt2nd) && ((uint8_t *)FIT_NO_PTR != p_riic_info->p_data2nd)))
             || (NULL == p_riic_info->callbackfunc))
     {
         return RIIC_ERR_INVALID_ARG;
@@ -809,7 +811,7 @@ riic_return_t R_RIIC_SlaveTransfer(riic_info_t * p_riic_info)
 #if (1U == RIIC_CFG_PARAM_CHECKING_ENABLE)
     /* Parameter check */
     if (((NULL == p_riic_info)
-            || (((uint8_t *) FIT_NO_PTR == p_riic_info->p_data1st) && ((uint8_t *) FIT_NO_PTR == p_riic_info->p_data2nd)))
+            || (((uint8_t *)FIT_NO_PTR == p_riic_info->p_data1st) && ((uint8_t *)FIT_NO_PTR == p_riic_info->p_data2nd)))
             || (NULL == p_riic_info->callbackfunc))
     {
         return RIIC_ERR_INVALID_ARG;
@@ -875,17 +877,17 @@ static riic_return_t riic_slave_transfer(riic_info_t * p_riic_info)
     g_riic_callbackfunc_s[p_riic_info->ch_no] = callbackfunc;
 
     /* ---- Enables IIC bus interrupt enable register. ---- */
-    if (((uint8_t *) FIT_NO_PTR != p_riic_info->p_data1st) && ((uint8_t *) FIT_NO_PTR != p_riic_info->p_data2nd))
+    if (((uint8_t *)FIT_NO_PTR != p_riic_info->p_data1st) && ((uint8_t *)FIT_NO_PTR != p_riic_info->p_data2nd))
     {
         /* Enables slave send and slave receive */
         riic_int_icier_setting(p_riic_info, RIIC_ICIER_TX_RX);
     }
-    else if (((uint8_t *) FIT_NO_PTR != p_riic_info->p_data1st) && ((uint8_t *) FIT_NO_PTR == p_riic_info->p_data2nd))
+    else if (((uint8_t *)FIT_NO_PTR != p_riic_info->p_data1st) && ((uint8_t *)FIT_NO_PTR == p_riic_info->p_data2nd))
     {
         /* Enable slave send */
         riic_int_icier_setting(p_riic_info, RIIC_ICIER_TX);
     }
-    else if (((uint8_t *) FIT_NO_PTR == p_riic_info->p_data1st) && ((uint8_t *) FIT_NO_PTR != p_riic_info->p_data2nd))
+    else if (((uint8_t *)FIT_NO_PTR == p_riic_info->p_data1st) && ((uint8_t *)FIT_NO_PTR != p_riic_info->p_data2nd))
     {
         /* Enable slave receive */
         riic_int_icier_setting(p_riic_info, RIIC_ICIER_RX);
@@ -1310,7 +1312,7 @@ static riic_return_t riic_control(riic_info_t * p_riic_info, uint8_t ctrl_ptn)
     }
 
     if ((0 != (uint8_t) (((RIIC_GEN_START_CON | RIIC_GEN_RESTART_CON) | RIIC_GEN_STOP_CON) & ctrl_ptn))
-            && (0 == (uint8_t) (((RIIC_GEN_SDA_HI_Z | RIIC_GEN_SCL_ONESHOT) | RIIC_GEN_RESET) & ctrl_ptn)))
+       && (0 == (uint8_t) (((RIIC_GEN_SDA_HI_Z | RIIC_GEN_SCL_ONESHOT) | RIIC_GEN_RESET) & ctrl_ptn)))
     {
         /* ==== Check request output pattern ==== */
         /* ---- Generate the start condition ---- */
@@ -1329,6 +1331,7 @@ static riic_return_t riic_control(riic_info_t * p_riic_info, uint8_t ctrl_ptn)
 
             /* Wait the request generation has been completed */
             cnt = RIIC_CFG_BUS_CHECK_COUNTER;
+
             /* WAIT_LOOP */
             while (RIIC_ICSR2_START_SET != ((*picsr2_reg) & RIIC_ICSR2_START))
             {
@@ -1373,6 +1376,7 @@ static riic_return_t riic_control(riic_info_t * p_riic_info, uint8_t ctrl_ptn)
 
             /* Wait the request generation has been completed*/
             cnt = RIIC_CFG_BUS_CHECK_COUNTER;
+
             /* WAIT_LOOP */
             while (RIIC_ICSR2_START_SET != ((*picsr2_reg) & RIIC_ICSR2_START))
             {
@@ -1417,6 +1421,7 @@ static riic_return_t riic_control(riic_info_t * p_riic_info, uint8_t ctrl_ptn)
 
             /* Wait the request generation has been completed*/
             cnt = RIIC_CFG_BUS_CHECK_COUNTER;
+
             /* WAIT_LOOP */
             while (RIIC_ICSR2_STOP_SET != ((*picsr2_reg) & RIIC_ICSR2_STOP))
             {
@@ -1445,8 +1450,8 @@ static riic_return_t riic_control(riic_info_t * p_riic_info, uint8_t ctrl_ptn)
             (*picsr2_reg) &= RIIC_ICSR2_STOP_CLR;
         }
     }
-    else if ((0x00 != (uint8_t) ((RIIC_GEN_SDA_HI_Z | RIIC_GEN_SCL_ONESHOT) & ctrl_ptn))
-            && (0x00 == (uint8_t) ((((RIIC_GEN_START_CON | RIIC_GEN_RESTART_CON) | RIIC_GEN_STOP_CON) |
+    else if ((0x00 != (uint8_t) ((RIIC_GEN_SDA_HI_Z | RIIC_GEN_SCL_ONESHOT) & ctrl_ptn)) &&
+             (0x00 == (uint8_t) ((((RIIC_GEN_START_CON | RIIC_GEN_RESTART_CON) | RIIC_GEN_STOP_CON) |
             RIIC_GEN_RESET) & ctrl_ptn)))
     {
         /* ---- Select SDA pin in a high-impedance state ---- */
@@ -1465,6 +1470,7 @@ static riic_return_t riic_control(riic_info_t * p_riic_info, uint8_t ctrl_ptn)
 
             /* Wait output scl oneshot has been completed */
             cnt = RIIC_CFG_BUS_CHECK_COUNTER;
+
             /* WAIT_LOOP */
             while (RIIC_ICCR1_CLO_SET == ((*piccr1_reg) & RIIC_ICCR1_CLO_SET))
             {
@@ -1485,8 +1491,8 @@ static riic_return_t riic_control(riic_info_t * p_riic_info, uint8_t ctrl_ptn)
             }
         }
     }
-    else if ((0x00 != (uint8_t) ((RIIC_GEN_RESET) & ctrl_ptn))
-            && (0x00 == (uint8_t) (((((RIIC_GEN_START_CON | RIIC_GEN_RESTART_CON) | RIIC_GEN_STOP_CON) |
+    else if ((0x00 != (uint8_t) ((RIIC_GEN_RESET) & ctrl_ptn)) &&
+             (0x00 == (uint8_t) (((((RIIC_GEN_START_CON | RIIC_GEN_RESTART_CON) | RIIC_GEN_STOP_CON) |
             RIIC_GEN_SDA_HI_Z) | RIIC_GEN_SCL_ONESHOT) & ctrl_ptn)))
     {
         /* ---- Generate Reset ---- */
@@ -1761,20 +1767,20 @@ static riic_return_t riic_advance(riic_info_t * p_riic_info)
                         riic_api_status_set(p_riic_info, RIIC_STS_IDLE_EN_SLV);
 
                         /* ---- Enables IIC bus interrupt enable register. ---- */
-                        if (((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
-                                && ((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
+                        if (((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
+                                && ((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
                         {
                             /* Enables slave send and slave receive */
                             riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_TX_RX);
                         }
-                        else if (((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
-                                && ((uint8_t *) FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data2nd))
+                        else if (((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
+                                && ((uint8_t *)FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data2nd))
                         {
                             /* Enable slave send */
                             riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_TX);
                         }
-                        else if (((uint8_t *) FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data1st)
-                                && ((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
+                        else if (((uint8_t *)FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data1st)
+                                && ((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
                         {
                             /* Enable slave receive */
                             riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_RX);
@@ -1792,6 +1798,7 @@ static riic_return_t riic_advance(riic_info_t * p_riic_info)
 
                         /* Initializes ICIER register. */
                         *picier_reg = RIIC_ICIER_INIT;
+
                         /* WAIT_LOOP */
                         while (RIIC_ICIER_INIT != (*picier_reg))
                         {
@@ -1912,6 +1919,7 @@ static riic_return_t riic_generate_start_cond(riic_info_t * p_riic_info)
     {
         /* Clears each status flag. */
         (*picsr2_reg) &= RIIC_ICSR2_STOP_CLR;
+
         /* WAIT_LOOP */
         while (0x00 != (((*picsr2_reg) & RIIC_ICSR2_START) || ((*picsr2_reg) & RIIC_ICSR2_STOP)))
         {
@@ -1928,20 +1936,20 @@ static riic_return_t riic_generate_start_cond(riic_info_t * p_riic_info)
         /* Enables IIC bus interrupt enable register. */
         if (RIIC_MODE_S_READY == riic_api_info[p_riic_info->ch_no].B_Mode)
         {
-            if (((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
+            if (((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
             {
                 /* Enables slave send and slave receive */
                 riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_ST_NAK_AL | RIIC_ICIER_TX_RX);
             }
-            else if (((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data2nd))
+            else if (((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data2nd))
             {
                 /* Enable slave send */
                 riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_ST_NAK_AL | RIIC_ICIER_TX);
             }
-            else if (((uint8_t *) FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
+            else if (((uint8_t *)FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
             {
                 /* Enable slave receive */
                 riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_ST_NAK_AL | RIIC_ICIER_RX);
@@ -2001,7 +2009,7 @@ static riic_return_t riic_after_gen_start_cond(riic_info_t * p_riic_info)
                 case RIIC_STS_IDLE_EN_SLV :
 
                     /* Is the slave address pointer set? */
-                    if ((uint8_t *) FIT_NO_PTR == p_riic_info->p_slv_adr) /* Pattern 4 of Master Write */
+                    if ((uint8_t *)FIT_NO_PTR == p_riic_info->p_slv_adr) /* Pattern 4 of Master Write */
                     {
                         /* Sets the internal status. */
                         riic_api_status_set(p_riic_info, RIIC_STS_SP_COND_WAIT);
@@ -2009,22 +2017,22 @@ static riic_return_t riic_after_gen_start_cond(riic_info_t * p_riic_info)
                         /* Enables the IIC bus interrupt. */
                         if (RIIC_MODE_S_READY == riic_api_info[p_riic_info->ch_no].B_Mode)
                         {
-                            if (((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
-                                    && ((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
+                            if (((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
+                                    && ((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
                             {
                                 /* Enables slave send and slave receive */
                                 riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_SP_NAK_AL |
                                 RIIC_ICIER_TX_RX);
                             }
-                            else if (((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
-                                    && ((uint8_t *) FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data2nd))
+                            else if (((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
+                                    && ((uint8_t *)FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data2nd))
                             {
                                 /* Enable slave send */
                                 riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_SP_NAK_AL |
                                 RIIC_ICIER_TX);
                             }
-                            else if (((uint8_t *) FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data1st)
-                                    && ((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
+                            else if (((uint8_t *)FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data1st)
+                                    && ((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
                             {
                                 /* Enable slave receive */
                                 riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_SP_NAK_AL |
@@ -2042,6 +2050,7 @@ static riic_return_t riic_after_gen_start_cond(riic_info_t * p_riic_info)
 
                         /* check SCL line */
                         scl_low_chk = false;
+
                         /* WAIT_LOOP */
                         for (cnt = RIIC_CFG_SCL_CHECK_COUNTER; (false == scl_low_chk) && (cnt > 0x00000000); cnt--)
                         {
@@ -2072,22 +2081,22 @@ static riic_return_t riic_after_gen_start_cond(riic_info_t * p_riic_info)
                         /* Transmit data empty interrupt request is enabled. */
                         if (RIIC_MODE_S_READY == riic_api_info[p_riic_info->ch_no].B_Mode)
                         {
-                            if (((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
-                                    && ((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
+                            if (((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
+                                    && ((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
                             {
                                 /* Enables slave send and slave receive */
                                 riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_TEND_NAK_AL |
                                 RIIC_ICIER_TX_RX);
                             }
-                            else if (((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
-                                    && ((uint8_t *) FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data2nd))
+                            else if (((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
+                                    && ((uint8_t *)FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data2nd))
                             {
                                 /* Enable slave send */
                                 riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_TEND_NAK_AL |
                                 RIIC_ICIER_TX);
                             }
-                            else if (((uint8_t *) FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data1st)
-                                    && ((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
+                            else if (((uint8_t *)FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data1st)
+                                    && ((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
                             {
                                 /* Enable slave receive */
                                 riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_TEND_NAK_AL |
@@ -2146,21 +2155,21 @@ static riic_return_t riic_after_gen_start_cond(riic_info_t * p_riic_info)
             /* Enables the IIC bus interrupt. */
             if (RIIC_MODE_S_READY == riic_api_info[p_riic_info->ch_no].B_Mode)
             {
-                if (((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
-                        && ((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
+                if (((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
+                        && ((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
                 {
                     /* Enables slave send and slave receive */
                     riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_RX_NAK_AL |
                     RIIC_ICIER_TX_RX);
                 }
-                else if (((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
-                        && ((uint8_t *) FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data2nd))
+                else if (((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
+                        && ((uint8_t *)FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data2nd))
                 {
                     /* Enable slave send */
                     riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_RX_NAK_AL | RIIC_ICIER_TX);
                 }
-                else if (((uint8_t *) FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data1st)
-                        && ((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
+                else if (((uint8_t *)FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data1st)
+                        && ((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
                 {
                     /* Enable slave receive */
                     riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_RX_NAK_AL | RIIC_ICIER_RX);
@@ -2207,8 +2216,8 @@ static riic_return_t riic_after_send_slvadr(riic_info_t * p_riic_info)
         case RIIC_MODE_M_SEND :
 
             /* --- Pattern 1 of Master Write --- */
-            if (((uint8_t *) FIT_NO_PTR != (uint8_t *) p_riic_info->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR != (uint8_t *) p_riic_info->p_data2nd))
+            if (((uint8_t *)FIT_NO_PTR != (uint8_t *)p_riic_info->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR != (uint8_t *)p_riic_info->p_data2nd))
             {
                 /* Sets the internal status. */
                 riic_api_status_set(p_riic_info, RIIC_STS_SEND_DATA_WAIT);
@@ -2235,8 +2244,8 @@ static riic_return_t riic_after_send_slvadr(riic_info_t * p_riic_info)
             }
 
             /* --- Pattern 2 of Master Write --- */
-            else if (((uint8_t *) FIT_NO_PTR == p_riic_info->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR != p_riic_info->p_data2nd))
+            else if (((uint8_t *)FIT_NO_PTR == p_riic_info->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR != p_riic_info->p_data2nd))
             {
                 /* Sets the internal status. */
                 riic_api_status_set(p_riic_info, RIIC_STS_SEND_DATA_WAIT);
@@ -2263,8 +2272,8 @@ static riic_return_t riic_after_send_slvadr(riic_info_t * p_riic_info)
             }
 
             /* --- Pattern 3 of Master Write --- */
-            else if (((uint8_t *) FIT_NO_PTR == p_riic_info->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR == p_riic_info->p_data2nd))
+            else if (((uint8_t *)FIT_NO_PTR == p_riic_info->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR == p_riic_info->p_data2nd))
             {
                 /* Sets the internal status. */
                 riic_api_status_set(p_riic_info, RIIC_STS_SP_COND_WAIT);
@@ -2383,14 +2392,15 @@ static riic_return_t riic_after_send_slvadr(riic_info_t * p_riic_info)
  **********************************************************************************************************************/
 static riic_return_t riic_after_receive_slvadr(riic_info_t * p_riic_info)
 {
-    volatile uint8_t * const picsr2_reg = RIIC_ICSR2_ADR(p_riic_info->ch_no);
-    volatile uint8_t * const piccr2_reg = RIIC_ICCR2_ADR(p_riic_info->ch_no);
-    volatile uint8_t         uctmp      = 0x00;
-    uint8_t blank_data[1] =
+    volatile uint8_t * const picsr2_reg    = RIIC_ICSR2_ADR(p_riic_info->ch_no);
+    volatile uint8_t * const piccr2_reg    = RIIC_ICCR2_ADR(p_riic_info->ch_no);
+    volatile uint8_t         uctmp         = 0x00;
+    uint8_t                  blank_data[1] =
     { BLANK };
 
     /* Clears each status flag. */
     (*picsr2_reg) &= RIIC_ICSR2_STOP_CLR;
+
     /* WAIT_LOOP */
     while (0x00 != ((*picsr2_reg) & RIIC_ICSR2_STOP))
     {
@@ -2398,17 +2408,17 @@ static riic_return_t riic_after_receive_slvadr(riic_info_t * p_riic_info)
     }
 
     /* ---- Enables IIC bus interrupt enable register. ---- */
-    if (((uint8_t *) FIT_NO_PTR != p_riic_info->p_data1st) && ((uint8_t *) FIT_NO_PTR != p_riic_info->p_data2nd))
+    if (((uint8_t *)FIT_NO_PTR != p_riic_info->p_data1st) && ((uint8_t *)FIT_NO_PTR != p_riic_info->p_data2nd))
     {
         /* Enables slave send and slave receive */
         riic_int_icier_setting(p_riic_info, RIIC_ICIER_TX_RX_SP_NAK);
     }
-    else if (((uint8_t *) FIT_NO_PTR != p_riic_info->p_data1st) && ((uint8_t *) FIT_NO_PTR == p_riic_info->p_data2nd))
+    else if (((uint8_t *)FIT_NO_PTR != p_riic_info->p_data1st) && ((uint8_t *)FIT_NO_PTR == p_riic_info->p_data2nd))
     {
         /* Enable slave send */
         riic_int_icier_setting(p_riic_info, RIIC_ICIER_TX_SP_NAK);
     }
-    else if (((uint8_t *) FIT_NO_PTR == p_riic_info->p_data1st) && ((uint8_t *) FIT_NO_PTR != p_riic_info->p_data2nd))
+    else if (((uint8_t *)FIT_NO_PTR == p_riic_info->p_data1st) && ((uint8_t *)FIT_NO_PTR != p_riic_info->p_data2nd))
     {
         /* Enable slave receive */
         riic_int_icier_setting(p_riic_info, RIIC_ICIER_RX_SP);
@@ -2449,7 +2459,7 @@ static riic_return_t riic_after_receive_slvadr(riic_info_t * p_riic_info)
         /* 1st data counter = 0?  */
         if (0x00000000 != p_riic_info->cnt1st)
         {
-            if ((uint8_t *) FIT_NO_PTR == p_riic_info->p_data1st)
+            if ((uint8_t *)FIT_NO_PTR == p_riic_info->p_data1st)
             {
                 /* Internal error */
                 return RIIC_ERR_OTHER;
@@ -2497,7 +2507,7 @@ static riic_return_t riic_write_data_sending(riic_info_t * p_riic_info)
         case RIIC_MODE_M_SEND :
 
             /* Is 1st data pointer set? */
-            if ((uint8_t *) FIT_NO_PTR != p_riic_info->p_data1st)
+            if ((uint8_t *)FIT_NO_PTR != p_riic_info->p_data1st)
             {
                 /* 1st data counter = 0?  */
                 if (0x00000000 != p_riic_info->cnt1st) /* Pattern 1 of Master Write */
@@ -2516,7 +2526,7 @@ static riic_return_t riic_write_data_sending(riic_info_t * p_riic_info)
             }
 
             /* Is 2nd data pointer set? */
-            if ((uint8_t *) FIT_NO_PTR != p_riic_info->p_data2nd)
+            if ((uint8_t *)FIT_NO_PTR != p_riic_info->p_data2nd)
             {
                 /* 2nd data counter = 0? */
                 if (0x00000000 != p_riic_info->cnt2nd) /* Pattern 2 of Master Write */
@@ -2576,7 +2586,7 @@ static riic_return_t riic_write_data_sending(riic_info_t * p_riic_info)
         case RIIC_MODE_S_SEND :
 
             /* Is 1st data pointer set? */
-            if ((uint8_t *) FIT_NO_PTR != p_riic_info->p_data1st)
+            if ((uint8_t *)FIT_NO_PTR != p_riic_info->p_data1st)
             {
                 /* 1st data counter = 0?  */
                 if (0x00000000 != p_riic_info->cnt1st)
@@ -2689,8 +2699,8 @@ static riic_return_t riic_read_data_receiving(riic_info_t * p_riic_info)
  **********************************************************************************************************************/
 static riic_return_t riic_after_dtct_stop_cond(riic_info_t * p_riic_info)
 {
-    riic_return_t ret = RIIC_SUCCESS;
-    bool boolret = RIIC_FALSE;
+    riic_return_t ret                   = RIIC_SUCCESS;
+    bool boolret                        = RIIC_FALSE;
     volatile uint8_t * const picser_reg = RIIC_ICSER_ADR(p_riic_info->ch_no);
 
     /* Waits from "bus busy" to "bus ready". */
@@ -2759,20 +2769,20 @@ static riic_return_t riic_arbitration_lost(riic_info_t * p_riic_info)
             riic_api_status_set(priic_info_s[p_riic_info->ch_no], RIIC_STS_AL);
 
             /* ---- Enables IIC bus interrupt enable register. ---- */
-            if (((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
+            if (((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
             {
                 /* Enables slave send and slave receive */
                 riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_TX_RX_SP_NAK);
             }
-            else if (((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data2nd))
+            else if (((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data2nd))
             {
                 /* Enable slave send */
                 riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_TX_SP_NAK);
             }
-            else if (((uint8_t *) FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data1st)
-                    && ((uint8_t *) FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
+            else if (((uint8_t *)FIT_NO_PTR == priic_info_s[p_riic_info->ch_no]->p_data1st)
+                    && ((uint8_t *)FIT_NO_PTR != priic_info_s[p_riic_info->ch_no]->p_data2nd))
             {
                 /* Enable slave receive */
                 riic_int_icier_setting(priic_info_s[p_riic_info->ch_no], RIIC_ICIER_RX_SP);
@@ -3738,12 +3748,14 @@ static void riic_clear_ir_flag(riic_info_t * p_riic_info)
 
             /* Clears ICCR1.ICE bit and sets ICCR1.IICRST bit. */
             (*piccr1_reg) |= RIIC_ICCR1_RIIC_RESET;
+
             /* WAIT_LOOP */
             while (RIIC_ICCR1_RIIC_RESET != ((*piccr1_reg) & RIIC_ICCR1_RIIC_RESET))
             {
                 /* Do Nothing */
             }
             (*piccr1_reg) &= RIIC_ICCR1_ICE_CLR;
+
             /* WAIT_LOOP */
             while (RIIC_ICCR1_NOT_DRIVEN != ((*piccr1_reg) & RIIC_ICCR1_ICE))
             {
@@ -3753,6 +3765,7 @@ static void riic_clear_ir_flag(riic_info_t * p_riic_info)
 
         /* Initializes ICIER register. */
         *picier_reg = RIIC_ICIER_INIT;
+
         /* WAIT_LOOP */
         while (RIIC_ICIER_INIT != (*picier_reg))
         {
@@ -3817,7 +3830,7 @@ static riic_return_t riic_bps_calc(riic_info_t * p_riic_info, uint16_t kbps)
     uint8_t          nf_replace;
 
     pclk_val = riic_mcu_check_freq(); /* Store pclk frequency */
-
+    
     /* Set Rise up time and down time */
     if (kbps > RIIC_FAST_SPPED_MAX)
     {
@@ -3943,7 +3956,7 @@ static riic_return_t riic_bps_calc(riic_info_t * p_riic_info, uint16_t kbps)
         }
 
         /* Set value to ICBRL register */
-        *picbrl_reg = (uint8_t) ((((uint8_t) (calc_val - 1 - nf_replace) | BIT7) | BIT6) | BIT5);
+        *picbrl_reg = (uint8_t) ((((uint8_t) ((calc_val - 1) - nf_replace) | BIT7) | BIT6) | BIT5);
     }
     else
     {
@@ -3972,7 +3985,7 @@ static riic_return_t riic_bps_calc(riic_info_t * p_riic_info, uint16_t kbps)
         }
 
         /* Set value to ICBRH register */
-        *picbrh_reg = (uint8_t) ((((uint8_t) (calc_val - 1 - nf_replace) | BIT7) | BIT6) | BIT5);
+        *picbrh_reg = (uint8_t) ((((uint8_t) ((calc_val - 1) - nf_replace) | BIT7) | BIT6) | BIT5);
     }
     else
     {
@@ -4008,6 +4021,7 @@ void riic0_eei_sub(void)
     {
         /* all interrupt disable */
         RIIC0.ICIER.BIT.TMOIE = 0U;
+
         /* WAIT_LOOP */
         while (0U != RIIC0.ICIER.BIT.TMOIE)
         {
@@ -4020,6 +4034,7 @@ void riic0_eei_sub(void)
     if ((0U != RIIC0.ICSR2.BIT.AL) && (0U != RIIC0.ICIER.BIT.ALIE))
     {
         RIIC0.ICIER.BIT.ALIE = 0U;
+
         /* WAIT_LOOP */
         while (0U != RIIC0.ICIER.BIT.ALIE)
         {
@@ -4049,6 +4064,7 @@ void riic0_eei_sub(void)
         RIIC0.ICMR3.BIT.ACKWP = 1U; /* Refer to the technical update. */
         RIIC0.ICMR3.BIT.ACKBT = 0U; /* Refer to the technical update. */
         RIIC0.ICMR3.BIT.ACKWP = 0U; /* Refer to the technical update. */
+
         /* WAIT_LOOP */
         while ((0U != RIIC0.ICMR3.BIT.RDRFS) || (0U != RIIC0.ICMR3.BIT.ACKBT))
         {
@@ -4057,6 +4073,7 @@ void riic0_eei_sub(void)
 
         /* Clears each status flag. */
         RIIC0.ICSR2.BIT.STOP = 0U;
+
         /* WAIT_LOOP */
         while (0U != RIIC0.ICSR2.BIT.STOP)
         {
@@ -4078,6 +4095,7 @@ void riic0_eei_sub(void)
         RIIC0.ICIER.BIT.TEIE = 0U;
         RIIC0.ICIER.BIT.TIE  = 0U;
         RIIC0.ICIER.BIT.RIE  = 0U;
+
         /* WAIT_LOOP */
         while (((0U != RIIC0.ICIER.BIT.TEIE) || (0U != RIIC0.ICIER.BIT.TIE)) || (0U != RIIC0.ICIER.BIT.RIE))
         {
@@ -4100,6 +4118,7 @@ void riic0_eei_sub(void)
         /* Clears status flag. */
         RIIC0.ICIER.BIT.STIE  = 0U;
         RIIC0.ICSR2.BIT.START = 0U;
+
         /* WAIT_LOOP */
         while ((0U != RIIC0.ICSR2.BIT.START) || (0U != RIIC0.ICIER.BIT.STIE))
         {
@@ -4291,6 +4310,7 @@ void riic0_tei_sub(void)
 
     /* Clears ICSR2.TEND. */
     RIIC0.ICSR2.BIT.TEND = 0U;
+
     /* WAIT_LOOP */
     while (0U != RIIC0.ICSR2.BIT.TEND)
     {

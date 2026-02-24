@@ -59,6 +59,8 @@
 *         : 14.04.2025 3.60     Fixed a bug that could not receive 1 byte in slave mode by removing 
 *                               the "Master mode or tx_count > 1" condition in rspi_sptiX_isr (X = 0, 1, 2).
 *         : 30.10.2025 3.70     Added byte swap feature.
+*         : 28.11.2025 3.80     Added support Nested interrupt.
+*                               Modified comment of API function to Doxygen style.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -337,6 +339,8 @@ static void rspi_spii_grp_isr (void * pdata);
  *            once prior to calling any other RSPI API functions (except R_RSPI_GetVersion). Once successfully completed
  *            ,the status of the selected RSPI will be set to "open". After that, this function should not be called
  *            again for the same RSPI channel without first performing a "close" by calling R_RSPI_Close().
+ *            Communication is not yet available upon completion of this processing. Set MPC and PMR in the I/O ports to
+ *            peripheral module.
  * @note      Take note of the following points when specifying DMAC transfer or DTC transfer.\n
  *            \li The DMAC FIT module, DTC FIT module, and timer module (CMT FIT module, for example) must be obtained
  *            separately.
@@ -734,7 +738,7 @@ rspi_err_t   R_RSPI_Control(rspi_handle_t  handle,
  *            Handle for the channel
  * @param[in] spcmd_command_word
  *            Bit field data consisting of all the RSPI command register settings for SPCMD for this operation.\n
- *            See 2.14  in application note.
+ *            See 2.14 in application note.
  * @param[out] *pdest
  *            Void type pointer to a destination buffer into which data will be copied that has been received from a SPI
  *            device. It is the responsibility of the caller to ensure that adequate space is available to hold the
@@ -1470,9 +1474,9 @@ rspi_err_t R_RSPI_GetBuffRegAddress(rspi_handle_t handle, uint32_t *p_spdr_adr)
  *****************************************************************************************************************/ /**
  * @brief     Fully disables the RSPI channel designated by the handle.
  * @param[in] handle
- *            RSPI handle number
+ *            Handle for the channel
  * @retval    RSPI_SUCCESS
- *             Successful : channel closed
+ *             Successful; channel closed
  * @retval    RSPI_ERR_CH_NOT_OPENED
  *             The channel has not been opened so closing has no effect.
  * @retval    RSPI_ERR_NULL_PTR
@@ -2376,11 +2380,6 @@ static void rspi_interrupts_enable(uint8_t channel, bool enabled)
  *            are the major version number and the bottom two bytes are the minor version number.
  * @note      None.
  */
-/**********************************************************************************************************************
- * Function Name: R_RSPI_GetVersion
- * Description  : .
- * Return Value : .
- *********************************************************************************************************************/
 uint32_t R_RSPI_GetVersion(void)
 {
     uint32_t version_number = 0;
@@ -2584,7 +2583,6 @@ static void rspi_tx_common(uint8_t channel)
 ******************************************************************************/
 static void rspi_rx_common(uint8_t channel)
 {
-
     void *      pdest     = g_rspi_tcb[channel].pdest;
     uint16_t    rx_count  = g_rspi_tcb[channel].rx_count;
     uint8_t     data_size = g_rspi_tcb[channel].bytes_per_transfer;
@@ -2681,8 +2679,6 @@ static void rspi_rx_common(uint8_t channel)
 } /* End of function rspi_rx_common */
 
 #if RSPI_CFG_USE_CHAN0 == 1
-R_BSP_PRAGMA_STATIC_INTERRUPT (rspi_spri0_isr, VECT(RSPI0, SPRI0))
-
 /******************************************************************************
 * Function Name:    rspi_spri0_isr
 * Description  :    RSPI SPRI receive buffer full ISR.
@@ -2690,12 +2686,18 @@ R_BSP_PRAGMA_STATIC_INTERRUPT (rspi_spri0_isr, VECT(RSPI0, SPRI0))
 * Arguments    :    N/A
 * Return Value :    N/A
 ******************************************************************************/
+R_BSP_PRAGMA_STATIC_INTERRUPT (rspi_spri0_isr, VECT(RSPI0, SPRI0))
 R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spri0_isr(void)
 {
+#if RSPI_CFG_CH0_SPRI_EN_NESTED_INT == 1
+        /* Set bit PSW.I = 1 to allow nested interrupt */
+        R_BSP_SETPSW_I();
+#endif
     if (RSPI_TRANS_MODE_SW == g_rspi_tcb[0].data_tran_mode)
     {
         g_rxdata[0] = (*g_rspi_channels[0]).SPDR.LONG; // Need to read RX data reg ASAP.
         g_rspi_tcb[0].rx_count++;
+
         #if RSPI_CFG_HIGH_SPEED_READ == 0
         rspi_tx_common(0);
         #endif
@@ -2720,7 +2722,6 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spri0_isr(void)
 #endif /* RSPI_CFG_USE_CHAN0 == 1 */
 
 #if RSPI_CFG_USE_CHAN1 == 1
-R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spri1_isr, VECT(RSPI1, SPRI1))
 /******************************************************************************
 * Function Name:    rspi_spri1_isr
 * Description  :    RSPI SPRI receive buffer full ISR.
@@ -2728,8 +2729,13 @@ R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spri1_isr, VECT(RSPI1, SPRI1))
 * Arguments    :    N/A
 * Return Value :    N/A
 ******************************************************************************/
+R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spri1_isr, VECT(RSPI1, SPRI1))
 R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spri1_isr(void)
 {
+#if RSPI_CFG_CH1_SPRI_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
     if (RSPI_TRANS_MODE_SW == g_rspi_tcb[1].data_tran_mode)
     {
         g_rxdata[1] = (*g_rspi_channels[1]).SPDR.LONG; // Need to read RX data reg ASAP.
@@ -2743,6 +2749,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spri1_isr(void)
     {
         R_RSPI_IntSpriIerClear(&g_rspi_handles[1]);
         R_RSPI_DisableRSPI(&g_rspi_handles[1]);
+
         /* Transfer complete. Call the user callback function passing pointer to the result structure. */
         if ((FIT_NO_FUNC != g_rspi_handles[1].pcallback) && (NULL != g_rspi_handles[1].pcallback))
         {
@@ -2755,7 +2762,6 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spri1_isr(void)
 #endif /* RSPI_CFG_USE_CHAN1 == 1 */
 
 #if RSPI_CFG_USE_CHAN2 == 1
-R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spri2_isr, VECT(RSPI2, SPRI2))
 /******************************************************************************
 * Function Name:    rspi_spri2_isr
 * Description  :    RSPI SPRI receive buffer full ISR.
@@ -2763,8 +2769,13 @@ R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spri2_isr, VECT(RSPI2, SPRI2))
 * Arguments    :    N/A
 * Return Value :    N/A
 ******************************************************************************/
+R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spri2_isr, VECT(RSPI2, SPRI2))
 R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spri2_isr(void)
 {
+#if RSPI_CFG_CH2_SPRI_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
     if (RSPI_TRANS_MODE_SW == g_rspi_tcb[2].data_tran_mode)
     {
         g_rxdata[2] = (*g_rspi_channels[2]).SPDR.LONG; // Need to read RX data reg ASAP.
@@ -2778,6 +2789,7 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spri2_isr(void)
     {
         R_RSPI_IntSpriIerClear(&g_rspi_handles[2]);
         R_RSPI_DisableRSPI(&g_rspi_handles[2]);
+
         /* Transfer complete. Call the user callback function passing pointer to the result structure. */
         if ((FIT_NO_FUNC != g_rspi_handles[2].pcallback) && (NULL != g_rspi_handles[2].pcallback))
         {
@@ -2790,8 +2802,6 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spri2_isr(void)
 #endif /* RSPI_CFG_USE_CHAN2 == 1 */
 
 #if RSPI_CFG_USE_CHAN0 == 1
-R_BSP_PRAGMA_STATIC_INTERRUPT (rspi_spti0_isr, VECT(RSPI0, SPTI0))
-
 /******************************************************************************
 * Function Name:    rspi_spti0_isr
 * Description  :    RSPI SPTI transmit buffer empty ISR.
@@ -2799,8 +2809,13 @@ R_BSP_PRAGMA_STATIC_INTERRUPT (rspi_spti0_isr, VECT(RSPI0, SPTI0))
 * Arguments    :    N/A
 * Return Value :    N/A
 ******************************************************************************/
+R_BSP_PRAGMA_STATIC_INTERRUPT (rspi_spti0_isr, VECT(RSPI0, SPTI0))
 R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spti0_isr(void)
 {
+#if RSPI_CFG_CH0_SPTI_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
     if (RSPI_TRANS_MODE_SW == g_rspi_tcb[0].data_tran_mode)
     {
         if (0 == g_rspi_tcb[0].tx_count)
@@ -2838,7 +2853,6 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spti0_isr(void)
 #endif /* RSPI_CFG_USE_CHAN0 == 1 */
 
 #if RSPI_CFG_USE_CHAN1 == 1
-R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spti1_isr, VECT(RSPI1, SPTI1))
 /******************************************************************************
 * Function Name:    rspi_spti1_isr
 * Description  :    RSPI SPTI transmit buffer empty ISR.
@@ -2846,8 +2860,13 @@ R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spti1_isr, VECT(RSPI1, SPTI1))
 * Arguments    :    N/A
 * Return Value :    N/A
 ******************************************************************************/
+R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spti1_isr, VECT(RSPI1, SPTI1))
 R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spti1_isr(void)
 {
+#if RSPI_CFG_CH1_SPTI_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
     if (RSPI_TRANS_MODE_SW == g_rspi_tcb[1].data_tran_mode)
     {
         if (0 == g_rspi_tcb[1].tx_count)
@@ -2885,7 +2904,6 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spti1_isr(void)
 #endif /* RSPI_CFG_USE_CHAN1 == 1 */
 
 #if RSPI_CFG_USE_CHAN2 == 1
-R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spti2_isr, VECT(RSPI2, SPTI2))
 /******************************************************************************
 * Function Name:    rspi_spti2_isr
 * Description  :    RSPI SPTI transmit buffer empty ISR.
@@ -2893,8 +2911,13 @@ R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spti2_isr, VECT(RSPI2, SPTI2))
 * Arguments    :    N/A
 * Return Value :    N/A
 ******************************************************************************/
+R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spti2_isr, VECT(RSPI2, SPTI2))
 R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spti2_isr(void)
 {
+#if RSPI_CFG_CH2_SPTI_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
     if (RSPI_TRANS_MODE_SW == g_rspi_tcb[2].data_tran_mode)
     {
         if (0 == g_rspi_tcb[2].tx_count)
@@ -3017,6 +3040,9 @@ static void rspi_spei_isr_common(uint8_t channel)
     }
 } /* End of function rspi_spei_isr_common */
 
+#if !(defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX71M) \
+||  defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)\
+||  defined(BSP_MCU_RX671) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T))
 /******************************************************************************
 * Function Name:    rspi_spei0_isr, rspi_spei1_isr, rspi_spei2_isr
 * Description  :    RSPI SPEI RSPI-error ISR.
@@ -3024,41 +3050,42 @@ static void rspi_spei_isr_common(uint8_t channel)
 * Arguments    :    N/A
 * Return Value :    N/A
 ******************************************************************************/
-#if !(defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX71M) \
-||  defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)\
-||  defined(BSP_MCU_RX671) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T))
-
-    #if RSPI_CFG_USE_CHAN0 == 1
-    R_BSP_PRAGMA_STATIC_INTERRUPT (rspi_spei0_isr, VECT(RSPI0, SPEI0))
-
-/**********************************************************************************************************************
- * Function Name: rspi_spei0_isr
- * Description  : .
- * Return Value : .
- *********************************************************************************************************************/
+#if RSPI_CFG_USE_CHAN0 == 1
+R_BSP_PRAGMA_STATIC_INTERRUPT (rspi_spei0_isr, VECT(RSPI0, SPEI0))
 R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spei0_isr(void)
-    {
-        rspi_spei_isr_common(0);
-    } /* End of function rspi_spei0_isr */
-    #endif
-
-    #if RSPI_CFG_USE_CHAN1 == 1
-    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spei1_isr, VECT(RSPI1, SPEI1))
-    R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spei1_isr(void)
-    {
-        rspi_spei_isr_common(1);
-    } /* End of function rspi_spei1_isr */
-    #endif
-
-    #if RSPI_CFG_USE_CHAN2 == 1
-    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spei2_isr, VECT(RSPI2, SPEI2))
-    R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spei2_isr(void)
-    {
-        rspi_spei_isr_common(2);
-    } /* End of function rspi_spei2_isr */
-    #endif
+{
+#if RSPI_CFG_CH0_SPEI_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    rspi_spei_isr_common(0);
+} /* End of function rspi_spei0_isr */
 #endif
 
+#if RSPI_CFG_USE_CHAN1 == 1
+R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spei1_isr, VECT(RSPI1, SPEI1))  
+R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spei1_isr(void)
+{
+#if RSPI_CFG_CH1_SPEI_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    rspi_spei_isr_common(1);
+} /* End of function rspi_spei1_isr */
+#endif
+
+#if RSPI_CFG_USE_CHAN2 == 1
+R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spei2_isr, VECT(RSPI2, SPEI2)) 
+R_BSP_ATTRIB_STATIC_INTERRUPT void rspi_spei2_isr(void)
+{
+#if RSPI_CFG_CH2_SPEI_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    rspi_spei_isr_common(2);
+} /* End of function rspi_spei2_isr */
+#endif
+#endif
 
 #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T \
 ||  defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N \
@@ -3076,6 +3103,10 @@ static void rspi_spei_grp_isr(void *pdata)
     ||  defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N \
     ||  defined BSP_MCU_RX671 || defined BSP_MCU_RX660 || defined BSP_MCU_RX26T
         #if RSPI_CFG_USE_CHAN0 == 1
+#if RSPI_CFG_CH0_SPEI_EN_NESTED_INT == 1
+        /* Set bit PSW.I = 1 to allow nested interrupt */
+        R_BSP_SETPSW_I();
+#endif
         if (IS(RSPI0, SPEI0))
         {
             rspi_spei_isr_common(0);
@@ -3086,6 +3117,10 @@ static void rspi_spei_grp_isr(void *pdata)
     #if defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N \
     ||  defined BSP_MCU_RX66N || defined BSP_MCU_RX671
         #if RSPI_CFG_USE_CHAN1 == 1
+#if RSPI_CFG_CH1_SPEI_EN_NESTED_INT == 1
+        /* Set bit PSW.I = 1 to allow nested interrupt */
+        R_BSP_SETPSW_I();
+#endif
         if (IS(RSPI1, SPEI1))
         {
             rspi_spei_isr_common(1);
@@ -3096,6 +3131,10 @@ static void rspi_spei_grp_isr(void *pdata)
     #if defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N \
     ||  defined BSP_MCU_RX671
         #if RSPI_CFG_USE_CHAN2 == 1
+#if RSPI_CFG_CH2_SPEI_EN_NESTED_INT == 1
+        /* Set bit PSW.I = 1 to allow nested interrupt */
+        R_BSP_SETPSW_I();
+#endif
         if (IS(RSPI2, SPEI2))
         {
             rspi_spei_isr_common(2);
@@ -3105,7 +3144,6 @@ static void rspi_spei_grp_isr(void *pdata)
 
 } /* End of function rspi_spei_grp_isr */
 #endif
-
 
 #if defined BSP_MCU_RX671 || defined BSP_MCU_RX26T
 /******************************************************************************
@@ -3156,31 +3194,42 @@ static void rspi_spci_isr_common(uint8_t channel)
 * Arguments    :    N/A
 * Return Value :    N/A
 ******************************************************************************/
-    #if RSPI_CFG_USE_CHAN0 == 1
-    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci0_isr, VECT(RSPI0, SPCI0))
-    R_BSP_ATTRIB_INTERRUPT void rspi_spci0_isr(void)
-    {
-        rspi_spci_isr_common(0);
-    } /* End of function rspi_spci0_isr */
-    #endif
+#if RSPI_CFG_USE_CHAN0 == 1
+R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci0_isr, VECT(RSPI0, SPCI0))
+R_BSP_ATTRIB_INTERRUPT void rspi_spci0_isr(void)
+{
+#if RSPI_CFG_CH0_SPCI_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    rspi_spci_isr_common(0);
+} /* End of function rspi_spci0_isr */
+#endif
 
-    #if RSPI_CFG_USE_CHAN1 == 1
-    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci1_isr, VECT(RSPI1, SPCI1))
-    R_BSP_ATTRIB_INTERRUPT void rspi_spci1_isr(void)
-    {
-        rspi_spci_isr_common(1);
-    } /* End of function rspi_spci1_isr */
-    #endif
+#if RSPI_CFG_USE_CHAN1 == 1
+R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci1_isr, VECT(RSPI1, SPCI1))
+R_BSP_ATTRIB_INTERRUPT void rspi_spci1_isr(void)
+{
+#if RSPI_CFG_CH1_SPCI_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    rspi_spci_isr_common(1);
+} /* End of function rspi_spci1_isr */
+#endif
 
-    #if RSPI_CFG_USE_CHAN2 == 1
-    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci2_isr, VECT(RSPI2, SPCI2))
-    R_BSP_ATTRIB_INTERRUPT void rspi_spci2_isr(void)
-    {
-        rspi_spci_isr_common(2);
-    } /* End of function rspi_spci2_isr */
-    #endif
+#if RSPI_CFG_USE_CHAN2 == 1
+R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spci2_isr, VECT(RSPI2, SPCI2))
+R_BSP_ATTRIB_INTERRUPT void rspi_spci2_isr(void)
+{
+#if RSPI_CFG_CH2_SPCI_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    rspi_spci_isr_common(2);
+} /* End of function rspi_spci2_isr */
+#endif
 #endif /* defined BSP_MCU_RX671 || defined BSP_MCU_RX26T */
-
 
 /******************************************************************************
 * Function Name:    rspi_spii_isr_common
@@ -3221,7 +3270,6 @@ static void rspi_spii_isr_common(uint8_t channel)
     }
 } /* End of function rspi_spii_isr_common() */
 
-
 #if !(defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T)\
 || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M)\
 || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX671)\
@@ -3233,37 +3281,42 @@ static void rspi_spii_isr_common(uint8_t channel)
 * Arguments    :    N/A
 * Return Value :    N/A
 ******************************************************************************/
-    #if RSPI_CFG_USE_CHAN0 == 1
-    R_BSP_PRAGMA_STATIC_INTERRUPT (rspi_spii0_isr, VECT(RSPI0, SPII0))
-
-/**********************************************************************************************************************
- * Function Name: rspi_spii0_isr
- * Description  : .
- * Return Value : .
- *********************************************************************************************************************/
+#if RSPI_CFG_USE_CHAN0 == 1
+R_BSP_PRAGMA_STATIC_INTERRUPT (rspi_spii0_isr, VECT(RSPI0, SPII0))
 R_BSP_ATTRIB_INTERRUPT void rspi_spii0_isr(void)
-    {
-        rspi_spii_isr_common(0);
-    } /* End of function rspi_spii0_isr */
-    #endif
-
-    #if RSPI_CFG_USE_CHAN1 == 1
-    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spii1_isr, VECT(RSPI1, SPII1))
-    R_BSP_ATTRIB_INTERRUPT void rspi_spii1_isr(void)
-    {
-        rspi_spii_isr_common(1);
-    } /* End of function rspi_spii1_isr */
-    #endif
-
-    #if RSPI_CFG_USE_CHAN2 == 1
-    R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spii2_isr, VECT(RSPI2, SPII2))
-    R_BSP_ATTRIB_INTERRUPT void rspi_spii2_isr(void)
-    {
-        rspi_spii_isr_common(2);
-    } /* End of function rspi_spii2_isr */
-    #endif
+{
+#if RSPI_CFG_CH0_SPII_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    rspi_spii_isr_common(0);
+} /* End of function rspi_spii0_isr */
 #endif
 
+#if RSPI_CFG_USE_CHAN1 == 1
+R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spii1_isr, VECT(RSPI1, SPII1))
+R_BSP_ATTRIB_INTERRUPT void rspi_spii1_isr(void)
+{
+#if RSPI_CFG_CH1_SPII_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    rspi_spii_isr_common(1);
+} /* End of function rspi_spii1_isr */
+#endif
+
+#if RSPI_CFG_USE_CHAN2 == 1
+R_BSP_PRAGMA_STATIC_INTERRUPT(rspi_spii2_isr, VECT(RSPI2, SPII2))
+R_BSP_ATTRIB_INTERRUPT void rspi_spii2_isr(void)
+{
+#if RSPI_CFG_CH2_SPII_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    rspi_spii_isr_common(2);
+} /* End of function rspi_spii2_isr */
+#endif
+#endif
 
 #if defined BSP_MCU_RX64M || defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX66T\
 ||  defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N\
@@ -3281,6 +3334,10 @@ static void rspi_spii_grp_isr(void *pdata)
     ||  defined BSP_MCU_RX72T || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N \
     ||  defined BSP_MCU_RX660 || defined BSP_MCU_RX671 || defined BSP_MCU_RX26T
         #if RSPI_CFG_USE_CHAN0 == 1
+#if RSPI_CFG_CH0_SPII_EN_NESTED_INT == 1
+        /* Set bit PSW.I = 1 to allow nested interrupt */
+        R_BSP_SETPSW_I();
+#endif
         if (IS(RSPI0, SPII0))
         {
             rspi_spii_isr_common(0);
@@ -3291,6 +3348,10 @@ static void rspi_spii_grp_isr(void *pdata)
     #if defined BSP_MCU_RX71M || defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N \
     ||  defined BSP_MCU_RX66N || defined BSP_MCU_RX671
         #if RSPI_CFG_USE_CHAN1 == 1
+#if RSPI_CFG_CH1_SPII_EN_NESTED_INT == 1
+        /* Set bit PSW.I = 1 to allow nested interrupt */
+        R_BSP_SETPSW_I();
+#endif
         if (IS(RSPI1, SPII1))
         {
             rspi_spii_isr_common(1);
@@ -3301,6 +3362,10 @@ static void rspi_spii_grp_isr(void *pdata)
     #if defined BSP_MCU_RX65N || defined BSP_MCU_RX72M || defined BSP_MCU_RX72N || defined BSP_MCU_RX66N \
     || defined BSP_MCU_RX671
         #if RSPI_CFG_USE_CHAN2 == 1
+#if RSPI_CFG_CH2_SPII_EN_NESTED_INT == 1
+        /* Set bit PSW.I = 1 to allow nested interrupt */
+        R_BSP_SETPSW_I();
+#endif
         if (IS(RSPI2, SPII2))
         {
             rspi_spii_isr_common(2);

@@ -26,6 +26,7 @@
 *           29.05.2023 4.90    Added support for RX23E-B.
 *           28.06.2024 5.30    Added support for RX260, RX261.
 *           15.03.2025 5.41    Updated disclaimer
+*           30.10.2025 5.60    Added support RX14T.
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX_PLATFORM_H
@@ -48,6 +49,8 @@ Includes   <System Includes> , "Project Includes"
 #include "./targets/rx13t/r_sci_rx13t_private.h"  /* RX13T */
 #elif defined(BSP_MCU_RX140)
 #include "./targets/rx140/r_sci_rx140_private.h"  /* RX140 */
+#elif defined(BSP_MCU_RX14T)
+#include "./targets/rx14t/r_sci_rx14t_private.h"  /* RX14T */
 #elif defined(BSP_MCU_RX230)
 #include "./targets/rx230/r_sci_rx230_private.h"  /* RX230 */
 #elif defined(BSP_MCU_RX231)

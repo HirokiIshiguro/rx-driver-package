@@ -38,6 +38,7 @@
  *         : 29.05.2023 2.70     RX23E-B support added.
  *         : 28.06.2024 2.80     RX260, RX261 support added.
  *         : 15.03.2025 2.81     Updated disclaimer
+ *         : 30.10.2025 2.90     RX14T support added.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef SCI_IIC_CONFIG_H
@@ -59,6 +60,7 @@
 /*  RX130    : ch0, ch1,    ,    ,    , ch5, ch6,    , ch8, ch9,    ,    ,ch12 */
 /*  RX13T    :    , ch1,    ,    ,    , ch5,    ,    ,    ,    ,    ,    ,ch12 */
 /*  RX140    :    , ch1,    ,    ,    , ch5, ch6,    , ch8, ch9,    ,    ,ch12 */
+/*  RX14T    :    , ch1,    ,    ,    , ch5, ch6,    ,    ,    ,    ,    ,ch12 */
 /*  RX230    : ch0, ch1,    ,    ,    , ch5, ch6,    , ch8, ch9,    ,    ,ch12 */
 /*  RX231    : ch0, ch1,    ,    ,    , ch5, ch6,    , ch8, ch9,    ,    ,ch12 */
 /*  RX23E-A  :    , ch1,    ,    ,    , ch5, ch6,    ,    ,    ,    ,    ,ch12 */

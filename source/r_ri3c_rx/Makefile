@@ -1,5 +1,5 @@
 MODULE_NAME = 	r_ri3c_rx
-VERSION = 		1.12
+VERSION = 		1.13
 MDF = V2
 
 CONFIG_FOLDER = r_config

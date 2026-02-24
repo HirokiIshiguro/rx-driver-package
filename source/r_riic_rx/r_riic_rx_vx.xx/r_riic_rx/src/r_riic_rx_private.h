@@ -63,6 +63,7 @@
  *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0
  *         : 08.08.2024 3.00     Added RX260, RX261 support.
  *         : 15.03.2025 3.01     Updated disclaimer.
+ *         : 30.10.2025 3.10     Added RX14T support.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_PRIVATE_H
@@ -100,6 +101,8 @@
         #include "./targets/rx130/r_riic_rx130_private.h"
     #elif defined(BSP_MCU_RX140)
         #include "./targets/rx140/r_riic_rx140_private.h"
+    #elif defined(BSP_MCU_RX14T)
+        #include "./targets/rx14t/r_riic_rx14t_private.h"
     #elif defined(BSP_MCU_RX230)
         #include "./targets/rx230/r_riic_rx230_private.h"
     #elif defined(BSP_MCU_RX23T)

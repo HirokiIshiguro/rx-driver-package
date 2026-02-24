@@ -5,12 +5,12 @@ r_flash_rx
 
 Document Number 
 ---------------
-r01an2184ej0522
-r01an2184jj0522
+r01an2184ej0530
+r01an2184jj0530
 
 Version
 -------
-v5.22
+v5.30
 
 Overview
 --------
@@ -39,6 +39,7 @@ Supported MCUs
 * RX130 Group
 * RX13T Group
 * RX140 Group
+* RX14T Group
 * RX230 Group
 * RX231 Group
 * RX23E-A Group
@@ -69,6 +70,7 @@ Boards Tested On
 * RSKRX130
 * RX13T CPU Card
 * RX140 Target Board
+* MCB-RX14T
 * RSKRX231
 * RSSKRX23E-A
 * RSSKRX23E-B
@@ -106,7 +108,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp      V7.52
+* r_bsp      V7.70
 
 How to add to your project
 --------------------------
@@ -138,8 +140,8 @@ How to add to your project
 Toolchain(s) Used
 -----------------
 * Renesas RXC 3.07.00
-* GNU GNURX 8.03.00.202411
-* IAR ICCRX 5.10.01
+* GNU GNURX 14.2.0.202505
+* IAR ICCRX 5.20.01
 
 
 File Structure
@@ -150,9 +152,9 @@ r_flash_rx
 |
 +---doc
 |   +-- en
-|   |   +-- r01an2184ej0522-rx-flash.pdf
+|   |   +-- r01an2184ej0530-rx-flash.pdf
 |   +-- ja
-|       +-- r01an2184jj0522-rx-flash.pdf
+|       +-- r01an2184jj0530-rx-flash.pdf
 |
 +---ref
 |   +-- r_flash_rx_config_reference.h
@@ -207,6 +209,9 @@ r_flash_rx
         |
         +--rx140
              +-- r_flash_rx140.h
+        |
+        +--rx14t
+             +-- r_flash_rx14t.h
         |
         +--rx231
              +-- r_flash_rx231.h

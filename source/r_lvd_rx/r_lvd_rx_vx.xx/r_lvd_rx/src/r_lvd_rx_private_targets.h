@@ -47,6 +47,8 @@
 *                                    Added support for RX260, RX261.
 *              : 15.03.2025 4.81     Updated disclaimer.
 *              : 23.06.2025 4.82     Removed doc folder and updated .rcpc file in FITDemos.
+*              : 30.10.2025 4.90     Added support for RX14T.
+*                                    Updated MDF using Category.
 ***********************************************************************************************************************/
 #ifndef LVD_PRIVATE_TARGETS_HEADER_FILE
 #define LVD_PRIVATE_TARGETS_HEADER_FILE
@@ -69,6 +71,8 @@ Includes <System Includes> , "Project Includes"
     #include "./targets/rx13t/r_lvd_rx13t.h"
 #elif defined(BSP_MCU_RX140)
     #include "./targets/rx140/r_lvd_rx140.h"
+#elif defined(BSP_MCU_RX14T)
+    #include "./targets/rx14t/r_lvd_rx14t.h"
 #elif defined(BSP_MCU_RX23T)
     #include "./targets/rx23t/r_lvd_rx23t.h"
 #elif defined(BSP_MCU_RX230)
@@ -120,7 +124,7 @@ Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
 #define LVD_RX_VERSION_MAJOR                    (4)
-#define LVD_RX_VERSION_MINOR                    (82)
+#define LVD_RX_VERSION_MINOR                    (90)
 
 /***********************************************************************************************************************
 Typedef definitions

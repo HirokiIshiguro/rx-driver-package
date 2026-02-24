@@ -44,6 +44,8 @@
  *         : 28.06.2024 2.80     RX260, RX261 support added.
  *         : 15.03.2025 2.81     Updated disclaimer
  *         : 23.06.2025 2.82     Removed doc folder and updated .rcpc file in FITDemos.
+ *         : 30.10.2025 2.90     RX14T support added.
+ *                               Updated MDF using Category.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef SCI_IIC_IF_H
@@ -61,7 +63,7 @@ R_BSP_PRAGMA_UNPACK
 
 /* Version Number of API. */
     #define SCI_IIC_VERSION_MAJOR  (2)
-    #define SCI_IIC_VERSION_MINOR  (82)
+    #define SCI_IIC_VERSION_MINOR  (90)
 
 /*----------------------------------------------------------------------------*/
 /*   Define return values and values of channel state flag.                   */
@@ -155,9 +157,8 @@ sci_iic_return_t R_SCI_IIC_MasterReceive (sci_iic_info_t * p_sci_iic_info);
 sci_iic_return_t R_SCI_IIC_GetStatus (sci_iic_info_t * p_sci_iic_info, sci_iic_mcu_status_t * p_sci_iic_status);
 sci_iic_return_t R_SCI_IIC_Control (sci_iic_info_t * p_sci_iic_info, sci_iic_ctrl_ptn_t ctrl_ptn);
 sci_iic_return_t R_SCI_IIC_Close (sci_iic_info_t * p_sci_iic_info);
-uint32_t R_SCI_IIC_GetVersion (void);
+uint32_t         R_SCI_IIC_GetVersion (void);
 
 R_BSP_PRAGMA_PACKOPTION
 
 #endif /* SCI_IIC_IF_H */
-

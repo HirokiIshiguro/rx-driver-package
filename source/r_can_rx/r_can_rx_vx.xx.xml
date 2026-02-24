@@ -32,6 +32,7 @@
     <version>8.03.00.202305</version>
     <version>8.03.00.202311</version>
     <version>8.03.00.202411</version>
+    <version>14.02.00.202505</version>
   </toolchain>
   <toolchain>
     <brand>IAR</brand>
@@ -43,6 +44,7 @@
     <version>4.20.01</version>
     <version>4.20.03</version>
     <version>5.10.01</version>
+    <version>5.20.01</version>
   </toolchain>
 
   <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -67,11 +69,11 @@
     <type>fitmodule</type>
     <name>r_can_rx</name>
     <version>x.xx</version>
+    <zipsource>r_can_rx_vx.xx.zip</zipsource>
     <dependency>
       <module>r_bsp</module>
-      <version>7.60</version>
+      <version>7.70</version>
     </dependency>
-    <zipsource>r_can_rx_vx.xx.zip</zipsource>
     <application>Communications</application>
     <application>Connectivity</application>
     <function>CAN</function>

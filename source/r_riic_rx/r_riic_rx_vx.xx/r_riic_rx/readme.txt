@@ -60,6 +60,10 @@ r_riic_rx
         |      r_riic_rx140.c
         |      r_riic_rx140_private.h
         |
+	+---rx14t
+        |      r_riic_rx14t.c
+        |      r_riic_rx14t_private.h
+        |
         +---rx13t
         |      r_riic_rx13t.c
         |      r_riic_rx13t_private.h

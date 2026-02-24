@@ -18,6 +18,7 @@
  *           29.05.2023 2.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
  *           28.06.2024 2.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
  *           15.03.2025 2.51    Updated disclaimer.
+ *           30.10.2025 2.60    Added support for RX14T.
  ***********************************************************************************************************************/
 #ifndef R_LPC_RX_PRIVATE_H
     #define R_LPC_RX_PRIVATE_H
@@ -62,6 +63,7 @@ lpc_err_t lpc_low_power_mode_configure (lpc_low_power_mode_t e_mode);
  *********************************************************************************************************************/
 lpc_err_t lpc_lowpower_activate (lpc_callback_set_t pcallback);
 
+#ifndef BSP_MCU_RX14T
 /**********************************************************************************************************************
  * Function Name: lpc_return_clock_switch
  * Description  : .
@@ -70,6 +72,8 @@ lpc_err_t lpc_lowpower_activate (lpc_callback_set_t pcallback);
  * Return Value : .
  *********************************************************************************************************************/
 lpc_err_t lpc_return_clock_switch (lpc_clock_switch_t e_clock_source, bool enable);
+#endif /* BSP_MCU_RX14T */
+
 #ifdef LPC_VALID_SNOOZE_MODE
 /**********************************************************************************************************************
  * Function Name: lpc_snooze_mode_configure

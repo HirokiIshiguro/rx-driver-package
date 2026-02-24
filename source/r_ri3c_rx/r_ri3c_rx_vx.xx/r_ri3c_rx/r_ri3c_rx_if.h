@@ -16,6 +16,7 @@
  *         : 30.06.2023 1.10    Supported for RX26T-256KB.
  *         : 13.12.2023 1.11    Added WAIT_LOOP comments.
  *         : 15.03.2025 1.12    Updated disclaimer
+ *         : 26.12.2025 1.13    Modified comment of API function to Doxygen style.
  **********************************************************************************************************************/
 
 #ifndef R_RI3C_IF_H
@@ -34,7 +35,7 @@
 #endif
 
 #define RI3C_RX_VERSION_MAJOR           (1)
-#define RI3C_RX_VERSION_MINOR           (12)
+#define RI3C_RX_VERSION_MINOR           (13)
 /* The process of getting the version number is done through the macro below. The version number is encoded where the
    top 2 bytes are the major version number and the bottom 2 bytes are the minor version number. For example,
    Version 1.10 would be returned as 0x00010010. */

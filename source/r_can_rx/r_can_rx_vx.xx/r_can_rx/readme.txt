@@ -50,7 +50,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp_rx     v7.60 or greater (See platform.h)
+* r_bsp_rx     v7.70 or greater (See platform.h)
 
 How to add the driver to your project
 ----------------------------------------
@@ -65,8 +65,8 @@ How to add the driver to your project
 Toolchain(s) Used
 -----------------
 * Renesas RX v3.07
-* GNURX 8.3.0.202411
-* ICCRX 5.10.01
+* GNURX 14.2.0.202505
+* ICCRX 5.20.01
 
 File Structure
 --------------

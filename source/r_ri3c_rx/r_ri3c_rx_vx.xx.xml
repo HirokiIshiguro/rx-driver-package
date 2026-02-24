@@ -23,12 +23,14 @@
         <version>8.03.00.202204</version>
         <version>8.03.00.202305</version>
         <version>8.03.00.202411</version>
+        <version>14.02.00.202505</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
         <product>ICCRX</product>
         <version>4.20.03</version>
         <version>5.10.01</version>
+        <version>5.20.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -45,7 +47,7 @@
         <version>x.xx</version>
         <dependency>
             <module>r_bsp</module>
-            <version>7.52</version>
+            <version>7.70</version>
         </dependency>
         <zipsource>r_ri3c_rx_vx.xx.zip</zipsource>
         <application>Improved Inter-Integrated Circuit bus interface</application>

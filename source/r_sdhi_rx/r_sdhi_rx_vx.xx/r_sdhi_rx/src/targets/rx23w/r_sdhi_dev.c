@@ -6,7 +6,7 @@
 /**********************************************************************************************************************
 * System Name  : SDHI Driver
 * File Name    : r_sdhi_dev.c
-* Version      : 2.13
+* Version      : 2.20
 * Device       : RX23W
 * Abstract     : API & Sub module
 * Tool-Chain   : For RX23W Group e2_studio
@@ -23,6 +23,7 @@
 *              : 27.12.2022 2.10    Updated slash format of included header file paths for Linux compatibility.
 *              : 15.03.2025 2.12    Updated disclaimer.
 *              : 30.10.2025 2.13    Modified comment of API function to Doxygen style.
+*              : 28.11.2025 2.20    Added support for Nested interrupt.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -59,6 +60,11 @@ Private global variables and functions
 R_BSP_PRAGMA_STATIC_INTERRUPT(r_sdhi_dev_sbfai_isr, VECT(SDHI, SBFAI))
 R_BSP_ATTRIB_STATIC_INTERRUPT void r_sdhi_dev_sbfai_isr(void)
 {
+#if (SDHI_CFG_CH0_EN_SBFAI_NESTED_INT == 1)
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     sdhi_sdhndl_t   * p_hndl = 0;
     uint32_t channel = 0;
 
@@ -501,6 +507,11 @@ sdhi_status_t r_sdhi_check_clksel(uint32_t channel)
  */
 void R_SDHI_IntHandler0(void * vect)
 {
+#if (SDHI_CFG_CH0_EN_NESTED_INT == 1)
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     sdhi_sdhndl_t   * p_hndl = 0;
     uint32_t          channel = 0;
     uint32_t          sdsts1 = 0;

@@ -53,6 +53,8 @@
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 15.03.2025 4.51    Updated disclaimer.
 *         : 23.06.2025 4.52    Removed doc folder and updated .rcpc file in FITDemos.
+*         : 30.10.2025 4.60    Added support for RX14T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.6.0.
 *******************************************************************************/
 #ifndef DTC_RX_IF_H
 #define DTC_RX_IF_H
@@ -75,7 +77,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DTC_VERSION_MAJOR  (4)
-#define DTC_VERSION_MINOR  (52)
+#define DTC_VERSION_MINOR  (60)
 
 /*******************************************************************************
 Typedef definitions
@@ -244,6 +246,8 @@ typedef struct st_transfer_data { /* 4 long-words */
     #include "./src/targets/rx110/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX140)
     #include "./src/targets/rx140/r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX14T)
+    #include "./src/targets/rx14t/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX64M)
     #include "./src/targets/rx64m/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX71M)

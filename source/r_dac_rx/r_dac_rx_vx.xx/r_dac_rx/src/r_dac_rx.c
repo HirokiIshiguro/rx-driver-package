@@ -45,6 +45,7 @@
 *                              from DA0 and DA1 for RX66T, RX72T, RX660, RX26T.
 *           28.06.2024 5.30    Added support for RX260, RX261.
 *           15.03.2025 5.31    Updated disclaimer.
+*           30.10.2025 5.40    Added support for RX14T.
 ******************************************************************************/
 /*****************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -74,7 +75,7 @@ Private global variables and functions
 ******************************************************************************/
 static void      power_on (void);
 static void      power_off (void);
-static dac_err_t dac_set_options (dac_cfg_t *p_cfg);
+static dac_err_t dac_set_options (dac_cfg_t * p_cfg);
 
 
 /***********************************************************************************************************************
@@ -105,7 +106,7 @@ dac_err_t err;
         return DAC_ERR_NULL_PTR;
     }
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX72M) \
- || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
+|| defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
     if (p_cfg->sync_unit > 1)
     {
         return DAC_ERR_INVALID_ARG;
@@ -300,8 +301,8 @@ static dac_err_t dac_set_options(dac_cfg_t *p_cfg)
     /* OPTION: SYNCHRONIZE WITH ADC */
 
 #if defined(BSP_MCU_RX113) || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX231) || defined(BSP_MCU_RX230) \
- || defined(BSP_MCU_RX23W) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX260) \
- || defined(BSP_MCU_RX261)
+|| defined(BSP_MCU_RX23W) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX260) \
+|| defined(BSP_MCU_RX261)
     if (p_cfg->sync_with_adc == false)
     {
         DA.DAADSCR.BIT.DAADST = 0;      // do not sync with ADC
@@ -319,7 +320,8 @@ static dac_err_t dac_set_options(dac_cfg_t *p_cfg)
         DA.DAADSCR.BIT.DAADST = 1;      // set sync with ADC
     }
 #elif defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX66T) \
- || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX26T)
+|| defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N) \
+|| defined(BSP_MCU_RX26T)
     if (false == p_cfg->sync_with_adc)
     {
         /* Not sync with ADC */
@@ -328,7 +330,7 @@ static dac_err_t dac_set_options(dac_cfg_t *p_cfg)
     else
     {
 #if defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX72M) \
- || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
+|| defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
         /*
          * This function returns an error because unit0 can not be selected
          * when synchronous conversion is enabled.
@@ -373,7 +375,7 @@ static dac_err_t dac_set_options(dac_cfg_t *p_cfg)
         else
         {
         /* Do Nothing */
-          
+
         }
 
         if (DAC_SUCCESS == err)
@@ -419,12 +421,29 @@ static dac_err_t dac_set_options(dac_cfg_t *p_cfg)
     {
         DA0.DACR1.BIT.DAADST = 1;      // set sync with ADC
     }
+#elif defined(BSP_MCU_RX14T)
+    if (false == p_cfg->sync_with_adc)
+    {
+        DA.DAADSCR.BIT.DAADST = 0;      // do not sync with ADC
+    }
+    else if ((0 == SYSTEM.MSTPCRA.BIT.MSTPA16) && (1 == S12AD1.ADCSR.BIT.ADST))
+    {
+        err = DAC_ERR_ADC_CONVERTING;
+    }
+    else if (1 == SYSTEM.MSTPCRA.BIT.MSTPA16)
+    {
+        err = DAC_ERR_ADC_NOT_POWERED;
+    }
+    else
+    {
+        DA.DAADSCR.BIT.DAADST = 1;      // set sync with ADC
+    }
 #endif
 
     /* OPTION: TURN CHANNEL CONVERTER OFF WHEN CHANNEL OUTPUT IS DISABLED */
 #if defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) \
- || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) \
- || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T)
+|| defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) \
+|| defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T)
 
     DA.DACR.BIT.DAE = ((true == p_cfg->ch_conv_off_when_output_off) ? 0 : 1);
 #endif
@@ -593,7 +612,7 @@ dac_err_t   err=DAC_SUCCESS;
 * 4. Write D/A output value in R_DAC_Write function.\n
 * The DAC_CMD_OUTPUT_ON and DAC_CMD_OUTPUT_OFF commands must be executed while the A/D converter (1) to be synchronized
 *  with is stopped when the D/A A/D synchronous conversion is enabled.\n
-* Note 1. For RX64M/RX651/RX65N/RX66N/RX71M/RX72M/RX72N, unit 1 of the A/D converter is to be stopped,
+* Note 1. For RX14T/RX64M/RX651/RX65N/RX66N/RX71M/RX72M/RX72N, unit 1 of the A/D converter is to be stopped,
 * and for RX24U/RX26T/RX66T/RX72T, unit 2 is to be stopped. The other MCUs do not need to specify the unit to be
 * stopped since they only have one unit.
 *
@@ -767,7 +786,7 @@ dac_err_t   err=DAC_SUCCESS;
 * @details Disables DAC channel output and powers down the peripheral.
 * @note When the D/A A/D synchronous conversion (sync_with_adc = true) is enabled, if the A/D converter (1) is to be
 * placed in the module stop state, first, execute the R_DAC_Close function.\n
-* Note 1. The intended A/D converter is unit 1 for RX64M/RX651/RX65N/RX66N/RX71M/RX72M/RX72N
+* Note 1. The intended A/D converter is unit 1 for RX14T/RX64M/RX651/RX65N/RX66N/RX71M/RX72M/RX72N
 * and unit 2 for RX24U/RX26T/RX66T/RX72T.
 */
 dac_err_t R_DAC_Close(void)
@@ -803,16 +822,16 @@ dac_err_t R_DAC_Close(void)
 #endif
 
 #if defined(BSP_MCU_RX113) || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX231) || defined(BSP_MCU_RX230) \
- || defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) \
- || defined(BSP_MCU_RX24U) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) \
- || defined(BSP_MCU_RX23W) || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX140)\
- || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX260) || defined(BSP_MCU_RX261)
+|| defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX24U) \
+|| defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX23W) || defined(BSP_MCU_RX72M) \
+|| defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX660) \
+|| defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX260) || defined(BSP_MCU_RX261) || defined(BSP_MCU_RX14T)
     /* Not sync with ADC */
     DA.DAADSCR.BIT.DAADST = 0;
 #endif
 
 #if defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72M) \
- || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
+|| defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
     DA.DAAMPCR.BIT.DAAMP0 = 0;          // not used AMP0
     DA.DAAMPCR.BIT.DAAMP1 = 0;          // not used AMP1
 #endif
@@ -823,7 +842,7 @@ dac_err_t R_DAC_Close(void)
 #endif
 
 #if defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX72M) \
- || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
+|| defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX66N)
     DA.DAADUSR.BIT.AMADSEL1 = 0;        // not sync unit1
 #endif
 

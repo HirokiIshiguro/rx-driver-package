@@ -78,6 +78,7 @@
         <group>RX130</group>
         <group>RX13T</group>
         <group>RX140</group>
+        <group>RX14T</group>
         <group>RX230</group>
         <group>RX231</group>
         <group>RX23E-A</group>
@@ -106,6 +107,7 @@
         <board>GENERIC_RX130</board>
         <board>GENERIC_RX13T</board>
         <board>GENERIC_RX140</board>
+        <board>GENERIC_RX14T</board>
         <board>GENERIC_RX230</board>
         <board>GENERIC_RX231</board>
         <board>GENERIC_RX23E-A</board>

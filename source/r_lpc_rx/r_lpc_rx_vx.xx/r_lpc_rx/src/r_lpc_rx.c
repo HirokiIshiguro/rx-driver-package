@@ -24,6 +24,9 @@
  *                              Modified comment of API R_LPC_OperatingModeSet (), R_LPC_ReturnClockSwitch (),
  *                              and R_LPC_LowPowerModeActivate () functions.
  *         : 15.03.2025 2.51    Updated disclaimer.
+ *         : 30.10.2025 2.60    Added support for RX14T.
+ *                              Removed \e in Doxygen comment of API function.
+ *                              Modified comment of API function to Doxygen style.
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
   Includes <System Includes> , "Project Includes"
@@ -40,7 +43,7 @@
  ******************************************************************************************************************/ /**
  * @brief This function configures the MCU for the supported Operating Power Control modes(See Table "1.1 Operating 
  *        Power Control modes" in the application note).
- * @param[in] e_mode The modes for all supported MCUs are specified in enum \e lpc_operating_mode_t in section 2.9.1 of 
+ * @param[in] e_mode The modes for all supported MCUs are specified in enum lpc_operating_mode_t in section 2.9.1 of 
  *                   the application note.
  * @retval    LPC_SUCCESS 
  * @retval    LPC_ERR_CLOCK_EXCEEDED: Clock exceeds the limit of the operating power control mode.
@@ -82,7 +85,7 @@ lpc_err_t R_LPC_OperatingModeSet(lpc_operating_mode_t e_mode)
  ******************************************************************************************************************/ /**
  * @brief This function configures the low power consumption modes(see Table "1.2 Low Power Consumption modes" in 
  *        the application note) when the WAIT instruction is executed.
- * @param[in] e_mode The modes for all supported MCUs are specified in enum \e lpc_low_power_mode_t.
+ * @param[in] e_mode The modes for all supported MCUs are specified in enum lpc_low_power_mode_t.
  * @retval    LPC_SUCCESS
  * @details   This function configures the MCU for the different Low Power Consumption modes shown in Table "1.2 Low
  *            Power Consumption modes" in the application note. Note that this function does not activate the low power 
@@ -106,13 +109,18 @@ lpc_err_t R_LPC_LowPowerModeConfigure(lpc_low_power_mode_t e_mode)
  ******************************************************************************************************************/ /**
  * @brief This function configures the conditions for entering the snooze mode, returning to the software standby mode
  *        or releasing from the snooze mode.
- *        (See section "3.4" in the application note)
- * @param[in] snooze_mode  The snooze_mode  for all supported MCUs are specified in enum \e lpc_snooze_mode_t.
+ *        (See section R_LPC_SnoozeModeConfigure() in the application note)
+ * @param[in] snooze_mode  The snooze_mode  for all supported MCUs are specified in enum lpc_snooze_mode_t.
  * @retval    LPC_SUCCESS
  * @retval    LPC_ERR_ILLEGAL
  * @details   For the peripheral functions that can be operated in snooze mode, refer to the user's manual hardware.
- * @note      In order for each peripheral function to operate in snooze mode, it is necessary to meet the conditions for
- *            each peripheral function to be used before switching to software standby.
+ * @note      In order to operate each peripheral function in snooze mode, the conditions for each peripheral function
+ *            to be used must be satisfied before transitioning to software standby. For details, refer to the power
+ *            consumption reduction function in the user's manual hardware.\n
+ *            The snooze mode release interrupt condition is valid even in operation modes other than snooze mode.
+ *            If you do not want to generate a snooze release interrupt in an operation mode other than the snooze mode,
+ *            please use the settings to initialize the snooze mode to cancel the snooze mode before transitioning to
+ *            software standby.
  */
 lpc_err_t R_LPC_SnoozeModeConfigure(lpc_snooze_mode_t * snooze_mode)
 {
@@ -168,13 +176,14 @@ lpc_err_t R_LPC_LowPowerModeActivate(lpc_callback_set_t pcallback)
  End of function R_LPC_LowPowerModeActivate
  ***********************************************************************************************************************/
 
+#ifndef BSP_MCU_RX14T
 /***********************************************************************************************************************
  * Function Name: R_LPC_ReturnClockSwitch
  ******************************************************************************************************************/ /**
  * @brief This function configures the MCU to switch clock sources on waking up from Sleep mode.
  * @param[in] e_clock_source
  *            This parameter selects the clock source to be used at the time of release from sleep mode. The supported
- *            clock sources are specified in the enum \e lpc_clock_switch_t in section 2.9.3 in the application note.
+ *            clock sources are specified in the enum lpc_clock_switch_t in section 2.9.3 in the application note.
  * @param[in] enable
  *            Enables or disables clock source switching at the time of release from sleep mode. The clock source
  *            selected by e_clock_source is enabled only when enable = 1.
@@ -209,6 +218,7 @@ lpc_err_t R_LPC_ReturnClockSwitch(lpc_clock_switch_t e_clock_source, bool enable
 /***********************************************************************************************************************
  End of function R_LPC_ReturnClockSwitch
  ***********************************************************************************************************************/
+#endif /* BSP_MCU_RX14T */
 
 /***********************************************************************************************************************
  * Function Name: R_LPC_GetVersion

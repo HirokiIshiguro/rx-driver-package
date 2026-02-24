@@ -135,6 +135,7 @@
 *         : 10.03.2023 7.40     Added support for GENERIC_RX23E-B.
 *         : 31.05.2024 7.50     Added support for GENERIC_RX261 and GENERIC_RX260.
 *         : 26.02.2025 7.53     Changed the disclaimer.
+*         : 12.09.2025 7.70     Added support for GENERIC_RX14T.
 ***********************************************************************************************************************/
 
 /* Multiple inclusion prevention macro */
@@ -224,6 +225,9 @@ DEFINE YOUR SYSTEM - UNCOMMENT THE INCLUDE PATH FOR THE PLATFORM YOU ARE USING.
 
 /* GENERIC_RX140 */
 //#include "./board/generic_rx140/r_bsp.h"
+
+/* GENERIC_RX14T */
+//#include "./board/generic_rx14t/r_bsp.h"
 
 /* User Board - Define your own board here. */
 //#include "./board/user/r_bsp.h"

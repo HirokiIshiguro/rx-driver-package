@@ -274,5 +274,61 @@
             <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_BANK_SWAP_FUNCTION}")</constraint>
             <description>User r_fwup_wrap_bank_swap() function name.</description>
         </property>
+        <property id="FWUP_CFG_USER_EXT_FLASH_OPEN_ENABLED" display="Enable user external flash open function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_EXT_FLASH_OPEN_ENABLED.0" display="Use FWUP r_fwup_wrap_ext_flash_open() function" value="0"/>
+            <option id="FWUP_CFG_USER_EXT_FLASH_OPEN_ENABLED.1" display="Use user r_fwup_wrap_ext_flash_open() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_ext_flash_open() function.
+1 = Use user r_fwup_wrap_ext_flash_open() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_EXT_FLASH_OPEN_FUNCTION" display="User external flash open function name" default="my_ext_flash_open_function" type="textbox">
+            <constraint display="when Enable user external flash open function is Use user ext_flash_open() function only" actionOnFail="disable">${FWUP_CFG_USER_EXT_FLASH_OPEN_ENABLED} == ${FWUP_CFG_USER_EXT_FLASH_OPEN_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_EXT_FLASH_OPEN_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_ext_flash_open() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_EXT_FLASH_CLOSE_ENABLED" display="Enable user external flash close function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_EXT_FLASH_CLOSE_ENABLED.0" display="Use FWUP r_fwup_wrap_ext_flash_close() function" value="0"/>
+            <option id="FWUP_CFG_USER_EXT_FLASH_CLOSE_ENABLED.1" display="Use user r_fwup_wrap_ext_flash_close() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_ext_flash_close() function.
+1 = Use user r_fwup_wrap_ext_flash_close() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_EXT_FLASH_CLOSE_FUNCTION" display="User external flash close function name" default="my_ext_flash_close_function" type="textbox">
+            <constraint display="when Enable user external flash close function is Use user ext_flash_close() function only" actionOnFail="disable">${FWUP_CFG_USER_EXT_FLASH_CLOSE_ENABLED} == ${FWUP_CFG_USER_EXT_FLASH_CLOSE_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_EXT_FLASH_CLOSE_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_ext_flash_close() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_EXT_FLASH_ERASE_ENABLED" display="Enable user external flash erase function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_EXT_FLASH_ERASE_ENABLED.0" display="Use FWUP r_fwup_wrap_ext_flash_erase() function" value="0"/>
+            <option id="FWUP_CFG_USER_EXT_FLASH_ERASE_ENABLED.1" display="Use user r_fwup_wrap_ext_flash_erase() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_ext_flash_erase() function.
+1 = Use user r_fwup_wrap_ext_flash_erase() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_EXT_FLASH_ERASE_FUNCTION" display="User external flash erase function name" default="my_ext_flash_erase_function" type="textbox">
+            <constraint display="when Enable user external flash erase function is Use user ext_flash_erase() function only" actionOnFail="disable">${FWUP_CFG_USER_EXT_FLASH_ERASE_ENABLED} == ${FWUP_CFG_USER_EXT_FLASH_ERASE_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_EXT_FLASH_ERASE_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_ext_flash_erase() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_EXT_FLASH_WRITE_ENABLED" display="Enable user external flash write function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_EXT_FLASH_WRITE_ENABLED.0" display="Use FWUP r_fwup_wrap_ext_flash_write() function" value="0"/>
+            <option id="FWUP_CFG_USER_EXT_FLASH_WRITE_ENABLED.1" display="Use user r_fwup_wrap_ext_flash_write() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_ext_flash_write() function.
+1 = Use user r_fwup_wrap_ext_flash_write() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_EXT_FLASH_WRITE_FUNCTION" display="User external flash write function name" default="my_ext_flash_write_function" type="textbox">
+            <constraint display="when Enable user external flash write function is Use user ext_flash_write() function only" actionOnFail="disable">${FWUP_CFG_USER_EXT_FLASH_WRITE_ENABLED} == ${FWUP_CFG_USER_EXT_FLASH_WRITE_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_EXT_FLASH_WRITE_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_ext_flash_write() function name.</description>
+        </property>
+        <property id="FWUP_CFG_USER_EXT_FLASH_READ_ENABLED" display="Enable user external flash read function" default="0" type="combobox">
+            <option id="FWUP_CFG_USER_EXT_FLASH_READ_ENABLED.0" display="Use FWUP r_fwup_wrap_ext_flash_read() function" value="0"/>
+            <option id="FWUP_CFG_USER_EXT_FLASH_READ_ENABLED.1" display="Use user r_fwup_wrap_ext_flash_read() function" value="1"/>
+            <description>0 = Use FWUP r_fwup_wrap_ext_flash_read() function.
+1 = Use user r_fwup_wrap_ext_flash_read() function.</description>
+        </property>
+        <property id="FWUP_CFG_USER_EXT_FLASH_READ_FUNCTION" display="User external flash read function name" default="my_ext_flash_read_function" type="textbox">
+            <constraint display="when Enable user external flash read function is Use user ext_flash_read() function only" actionOnFail="disable">${FWUP_CFG_USER_EXT_FLASH_READ_ENABLED} == ${FWUP_CFG_USER_EXT_FLASH_READ_ENABLED.1}</constraint>
+            <constraint display="Please enter a valid function name without spaces or funny characters" actionOnFail="error">testSymbol("${FWUP_CFG_USER_EXT_FLASH_READ_FUNCTION}")</constraint>
+            <description>User r_fwup_wrap_ext_flash_read() function name.</description>
+        </property>
+
     </configuration>
 </module>

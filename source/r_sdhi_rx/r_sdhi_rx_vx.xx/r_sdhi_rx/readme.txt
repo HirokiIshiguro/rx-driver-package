@@ -5,12 +5,12 @@ r_sdhi_rx
 
 Document Number 
 ---------------
-R01AN3852EJ0213
-R01AN3852JJ0213
+R01AN3852EJ0220
+R01AN3852JJ0220
 
 Version
 -------
-v2.13
+v2.20
 
 Overview
 --------
@@ -60,7 +60,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp    v7.60
+* r_bsp    v7.70
 
 How to add to your project
 --------------------------
@@ -103,9 +103,9 @@ r_sdhi_rx
 +---doc
 |   |
 |   +---en
-|   |       r01an3852ej0213-rx-communication.pdf
+|   |       r01an3852ej0220-rx-communication.pdf
 |   +---ja
-|           r01an3852jj0213-rx-communication.pdf
+|           r01an3852jj0220-rx-communication.pdf
 |
 +---src
     |   r_sdhi_int.c

@@ -14,9 +14,9 @@ MODULE_NAME_LIST_LATEST = 	r_aeropoint_rx r_aes_rx \
 					r_lcdc_rx r_longq r_lpc_rx r_lpt_rx r_lvd_rx r_lwip_rx r_lwip_driver_rx \
 					r_memdrv_rx r_mesh_rx23w r_mmcif_rx r_mpc_rx r_nfc_ptx_rx r_pdc_rx \
 					r_qe_display_rx r_qspi_smstr_rx r_qspix_rx \
-					r_ri3c_rx r_riic_rx r_riichs_rx r_rsa_rx r_rscan_rx r_rsip_cm_rx r_rsip_protected_rx r_rsci_rx r_rspi_rx r_rspia_rx r_rtc_rx \
-					r_s12ad_rx r_s2_rx r_sci_iic_rx r_sci_rx r_scif_rx r_sdc_sdmem_rx r_sdc_spi_rx r_sdhi_rx r_sdsi_rx r_sha_rx \
-					r_src_api_rx r_ssi_api_rx r_sys_time_rx \
+					r_ri3c_rx r_riic_rx r_riichs_rx r_rsa_rx r_rscan_rx r_rsip_cm_rx r_rsip_protected_rx r_rsci_rx r_rsci_iic_rx r_rspi_rx \
+					r_rspia_rx r_rtc_rx r_s12ad_rx r_s2_rx r_sci_iic_rx r_sci_rx r_scif_rx r_sdc_sdmem_rx r_sdc_spi_rx r_sdhi_rx \
+					r_sdsi_rx r_sha_rx r_src_api_rx r_ssi_api_rx r_sys_time_rx \
 					r_tfat_driver_rx r_tfat_rx r_tsip_rx_lib \
 					r_uid_rx r_usb_basic r_usb_basic_mini \
 					r_usb_hcdc r_usb_hcdc_mini r_usb_hhid r_usb_hhid_mini r_usb_hmsc r_usb_hmsc_mini \

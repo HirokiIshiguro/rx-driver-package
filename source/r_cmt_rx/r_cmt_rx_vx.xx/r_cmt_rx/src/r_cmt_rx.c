@@ -53,6 +53,7 @@
 *         : 28.06.2024 5.70    Added support for RX260, RX261.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 15.03.2025 5.71    Updated disclaimer.
+*         : 30.10.2025 5.80    Added support for RX14T.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -73,7 +74,7 @@ Macro definitions
 
     #define CMT_RX_NUM_CHANNELS        (4)
 #elif defined(BSP_MCU_RX111)  || defined(BSP_MCU_RX110)    || defined(BSP_MCU_RX130)  || defined(BSP_MCU_RX13T) || \
-    defined(BSP_MCU_RX23E_A) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX23E_B)
+    defined(BSP_MCU_RX23E_A) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX14T) || defined(BSP_MCU_RX23E_B)
     #define CMT_RX_NUM_CHANNELS        (2)
 #else
     #error "Error! Number of channels for this MCU is not defined in r_cmt_rx.c"
@@ -92,7 +93,7 @@ Macro definitions
 #if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71_ALL) || defined(BSP_MCU_RX113) || \
     defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX13_ALL) || defined(BSP_MCU_RX24_ALL) || \
     defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL) ||defined(BSP_MCU_RX671) || \
-    defined(BSP_MCU_RX140) || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX260) || defined(BSP_MCU_RX261)
+    defined(BSP_MCU_RX14_ALL) || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX260) || defined(BSP_MCU_RX261)
     #define CMT_PCLK_HZ                 (BSP_PCLKB_HZ)
 #else
     #define CMT_PCLK_HZ                 (BSP_PCLK_HZ)
@@ -102,7 +103,8 @@ Macro definitions
 #if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX64_ALL) || defined(BSP_MCU_RX71_ALL) || \
     defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX13_ALL) || defined(BSP_MCU_RX24_ALL) || \
     defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66_ALL) || defined(BSP_MCU_RX72_ALL) || \
-    defined(BSP_MCU_RX671) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX26T) || defined(BSP_MCU_RX260) || defined(BSP_MCU_RX261)
+    defined(BSP_MCU_RX671) || defined(BSP_MCU_RX14_ALL) || defined(BSP_MCU_RX26T) || \
+    defined(BSP_MCU_RX260) || defined(BSP_MCU_RX261)
     #define CMT_REG_PROTECT             (1)
 #else
     #define CMT_REG_PROTECT             (0)

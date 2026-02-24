@@ -101,7 +101,19 @@
       </peripheral>
     </resourceInfo>
     <configuration>
-        <property id="RSPI_CFG_PARAM_CHECKING_ENABLE" display="Parameter check" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+        <category id="COMMON" display="Common settings">
+            <description>Common settings</description>
+        </category>
+        <category id="CHANNEL_0" display="RSPI Channel 0 settings">
+            <description>RSPI Channel 0 settings</description>
+        </category>
+        <category id="CHANNEL_1" display="RSPI Channel 1 settings">
+            <description>RSPI Channel 1 settings</description>
+        </category>
+        <category id="CHANNEL_2" display="RSPI Channel 2 settings">
+            <description>RSPI Channel 2 settings</description>
+        </category>
+        <property id="RSPI_CFG_PARAM_CHECKING_ENABLE" display="Parameter check" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox" category="COMMON">
             <option id="RSPI_CFG_PARAM_CHECKING_ENABLE.0" display="Disable parameter checks" value="0"/>
             <option id="RSPI_CFG_PARAM_CHECKING_ENABLE.1" display="Enable parameter checks" value="1"/>
             <option id="RSPI_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="Use system default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
@@ -110,39 +122,39 @@ By default the module is configured to use the setting of the system-wide BSP_CF
 This can be overridden for the local module by redefining RSPI_CFG_PARAM_CHECKING_ENABLE.
 To control parameter checking locally, set RSPI_CFG_PARAM_CHECKING_ENABLE to 1 to enable it, otherwise set to 0 skip checking.</description>
         </property>
-        <property id="RSPI_CFG_HIGH_SPEED_READ" display="Use high speed read of hardware" default="1" type="combobox">
+        <property id="RSPI_CFG_HIGH_SPEED_READ" display="Use high speed read of hardware" default="1" type="combobox" category="COMMON">
             <option id="RSPI_CFG_HIGH_SPEED_READ.0" display="Disabled" value="0"/>
             <option id="RSPI_CFG_HIGH_SPEED_READ.1" display="Enabled" value="1"/>
             <description>If this is defined, then High Speed Read Operation is valid.
 RSPI can speed up the consecutive reception with the function of receive buffer. 
 If the MCU does not have RSPCK Auto-Stop Function, this module disables interrupts during the High Speed Read Operation.</description>
         </property>
-        <property id="RSPI_CFG_REQUIRE_LOCK" display="Require lock" default="1" type="combobox">
+        <property id="RSPI_CFG_REQUIRE_LOCK" display="Require lock" default="1" type="combobox" category="COMMON">
             <option id="RSPI_CFG_REQUIRE_LOCK.0" display="No" value="0"/>
             <option id="RSPI_CFG_REQUIRE_LOCK.1" display="Yes" value="1"/>
             <description>If this is set to (1) then the RSPI driver will attempt to obtain the lock for the channel when performing certain operations to prevent concurrent access conflicts.</description>
         </property>
-        <property id="RSPI_CFG_DUMMY_TXDATA" display="Dummy data of reception" default="0xFFFFFFFF" type="textbox">
+        <property id="RSPI_CFG_DUMMY_TXDATA" display="Dummy data of reception" default="0xFFFFFFFF" type="textbox" category="COMMON">
             <constraint display="Value must be an integer">testHexInteger("${RSPI_CFG_DUMMY_TXDATA}")</constraint>
             <constraint display="Value must be in the range 0x00000000 ~ 0xFFFFFFFF">("${RSPI_CFG_DUMMY_TXDATA}".replace(/[LUlu]+$/, '')  &gt;= 0) &amp;&amp; ("${RSPI_CFG_DUMMY_TXDATA}".replace(/[LUlu]+$/, '')  &lt;= 0xffffffff)</constraint>
             <description>Fixed data that is transmitted during receive-only operations. Change as needed.</description>
         </property>
-        <property id="RSPI_CFG_USE_CHAN0" display="RSPI channel 0" default="1" type="combobox">
+        <property id="RSPI_CFG_USE_CHAN0" display="RSPI channel 0" default="1" type="combobox" category="CHANNEL_0">
             <option id="RSPI_CFG_USE_CHAN0.0" display="Unused" value="0"/>
             <option id="RSPI_CFG_USE_CHAN0.1" display="Used" value="1"/>
             <description>Enable the RSPI channels to use in this build. (0) = not used. (1) = used.</description>
         </property>
-        <property id="RSPI_CFG_USE_CHAN1" display="RSPI channel 1" default="0" type="combobox">
+        <property id="RSPI_CFG_USE_CHAN1" display="RSPI channel 1" default="0" type="combobox" category="CHANNEL_1">
             <option id="RSPI_CFG_USE_CHAN1.0" display="Unused" value="0"/>
             <option id="RSPI_CFG_USE_CHAN1.1" display="Used" value="1"/>
             <description>Enable the RSPI channels to use in this build. (0) = not used. (1) = used.</description>
         </property>
-        <property id="RSPI_CFG_USE_CHAN2" display="RSPI channel 2" default="0" type="combobox">
+        <property id="RSPI_CFG_USE_CHAN2" display="RSPI channel 2" default="0" type="combobox" category="CHANNEL_2">
             <option id="RSPI_CFG_USE_CHAN2.0" display="Unused" value="0"/>
             <option id="RSPI_CFG_USE_CHAN2.1" display="Used" value="1"/>
             <description>Enable the RSPI channels to use in this build. (0) = not used. (1) = used.</description>
         </property>
-        <property id="RSPI_CFG_IR_PRIORITY_CHAN0" display="Interrupt priority level of RSPI channel 0" default="3" type="combobox" interrupt="RSPI0_SPTI0;RSPI0_SPRI0">
+        <property id="RSPI_CFG_IR_PRIORITY_CHAN0" display="Interrupt priority level of RSPI channel 0" default="3" type="combobox" interrupt="RSPI0_SPTI0;RSPI0_SPRI0" category="CHANNEL_0">
             <option id="RSPI_CFG_IR_PRIORITY_CHAN0.0" display="Level 0" value="0"/>
             <option id="RSPI_CFG_IR_PRIORITY_CHAN0.1" display="Level 1" value="1"/>
             <option id="RSPI_CFG_IR_PRIORITY_CHAN0.2" display="Level 2" value="2"/>
@@ -164,7 +176,52 @@ If the MCU does not have RSPCK Auto-Stop Function, this module disables interrup
 Priority is shared by all interrupt sources in a channel.
 Values must be in the range 0 (interrupt disabled) to 15 (highest)</description>
         </property>
-        <property id="RSPI_CFG_IR_PRIORITY_CHAN1" display="Interrupt priority level of RSPI channel 1" default="3" type="combobox" interrupt="RSPI1_SPTI1;RSPI1_SPRI1">
+        <property id="RSPI_CFG_CH0_SPTI_EN_NESTED_INT" display="Use SPTI Nested Interrupt for channel 0" default="0" type="combobox" category="CHANNEL_0">
+            <option id="RSPI_CFG_CH0_SPTI_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH0_SPTI_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN0}" == "${RSPI_CFG_USE_CHAN0.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPTI in RSPI channel 0.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_CH0_SPRI_EN_NESTED_INT" display="Use SPRI Nested Interrupt for channel 0" default="0" type="combobox" category="CHANNEL_0">
+            <option id="RSPI_CFG_CH0_SPRI_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH0_SPRI_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN0}" == "${RSPI_CFG_USE_CHAN0.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPRI in RSPI channel 0.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_CH0_SPII_EN_NESTED_INT" display="Use SPII Nested Interrupt for channel 0" default="0" type="combobox" category="CHANNEL_0">
+            <option id="RSPI_CFG_CH0_SPII_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH0_SPII_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN0}" == "${RSPI_CFG_USE_CHAN0.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPII in RSPI channel 0.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_CH0_SPCI_EN_NESTED_INT" display="Use SPCI Nested Interrupt for channel 0" default="0" type="combobox" category="CHANNEL_0">
+            <option id="RSPI_CFG_CH0_SPCI_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH0_SPCI_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN0}" == "${RSPI_CFG_USE_CHAN0.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPCI in RSPI channel 0.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_CH0_SPEI_EN_NESTED_INT" display="Use SPEI Nested Interrupt for channel 0" default="0" type="combobox" category="CHANNEL_0">
+            <option id="RSPI_CFG_CH0_SPEI_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH0_SPEI_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN0}" == "${RSPI_CFG_USE_CHAN0.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPEI in RSPI channel 0.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_IR_PRIORITY_CHAN1" display="Interrupt priority level of RSPI channel 1" default="3" type="combobox" interrupt="RSPI1_SPTI1;RSPI1_SPRI1" category="CHANNEL_1">
             <option id="RSPI_CFG_IR_PRIORITY_CHAN1.0" display="Level 0" value="0"/>
             <option id="RSPI_CFG_IR_PRIORITY_CHAN1.1" display="Level 1" value="1"/>
             <option id="RSPI_CFG_IR_PRIORITY_CHAN1.2" display="Level 2" value="2"/>
@@ -186,7 +243,52 @@ Values must be in the range 0 (interrupt disabled) to 15 (highest)</description>
 Priority is shared by all interrupt sources in a channel.
 Values must be in the range 0 (interrupt disabled) to 15 (highest)</description>
         </property>
-        <property id="RSPI_CFG_IR_PRIORITY_CHAN2" display="Interrupt priority level of RSPI channel 2" default="3" type="combobox" interrupt="RSPI2_SPTI2;RSPI2_SPRI2">
+        <property id="RSPI_CFG_CH1_SPTI_EN_NESTED_INT" display="Use SPTI Nested Interrupt for channel 1" default="0" type="combobox" category="CHANNEL_1">
+            <option id="RSPI_CFG_CH1_SPTI_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH1_SPTI_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN1}" == "${RSPI_CFG_USE_CHAN1.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPTI of RSPI channel 1.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_CH1_SPRI_EN_NESTED_INT" display="Use SPRI Nested Interrupt for channel 1" default="0" type="combobox" category="CHANNEL_1">
+            <option id="RSPI_CFG_CH1_SPRI_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH1_SPRI_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN1}" == "${RSPI_CFG_USE_CHAN1.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPRI of RSPI channel 1.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_CH1_SPII_EN_NESTED_INT" display="Use SPII Nested Interrupt for channel 1" default="0" type="combobox" category="CHANNEL_1">
+            <option id="RSPI_CFG_CH1_SPII_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH1_SPII_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN1}" == "${RSPI_CFG_USE_CHAN1.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPII of RSPI channel 1.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_CH1_SPCI_EN_NESTED_INT" display="Use SPCI Nested Interrupt for channel 1" default="0" type="combobox" category="CHANNEL_1">
+            <option id="RSPI_CFG_CH1_SPCI_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH1_SPCI_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN1}" == "${RSPI_CFG_USE_CHAN1.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPCI of RSPI channel 1.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_CH1_SPEI_EN_NESTED_INT" display="Use SPEI Nested Interrupt for channel 1" default="0" type="combobox" category="CHANNEL_1">
+            <option id="RSPI_CFG_CH1_SPEI_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH1_SPEI_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN1}" == "${RSPI_CFG_USE_CHAN1.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPEI of RSPI channel 1.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_IR_PRIORITY_CHAN2" display="Interrupt priority level of RSPI channel 2" default="3" type="combobox" interrupt="RSPI2_SPTI2;RSPI2_SPRI2" category="CHANNEL_2">
             <option id="RSPI_CFG_IR_PRIORITY_CHAN2.0" display="Level 0" value="0"/>
             <option id="RSPI_CFG_IR_PRIORITY_CHAN2.1" display="Level 1" value="1"/>
             <option id="RSPI_CFG_IR_PRIORITY_CHAN2.2" display="Level 2" value="2"/>
@@ -208,19 +310,64 @@ Values must be in the range 0 (interrupt disabled) to 15 (highest)</description>
 Priority is shared by all interrupt sources in a channel.
 Values must be in the range 0 (interrupt disabled) to 15 (highest)</description>
         </property>
-        <property id="RSPI_CFG_LONGQ_ENABLE" display="Enable debugging information" default="0" type="combobox">
+        <property id="RSPI_CFG_CH2_SPTI_EN_NESTED_INT" display="Use SPTI Nested Interrupt for channel 2" default="0" type="combobox" category="CHANNEL_2">
+            <option id="RSPI_CFG_CH2_SPTI_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH2_SPTI_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN2}" == "${RSPI_CFG_USE_CHAN2.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPTI of RSPI channel 2.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_CH2_SPRI_EN_NESTED_INT" display="Use SPRI Nested Interrupt for channel 2" default="0" type="combobox" category="CHANNEL_2">
+            <option id="RSPI_CFG_CH2_SPRI_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH2_SPRI_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN2}" == "${RSPI_CFG_USE_CHAN2.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPRI of RSPI channel 2.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_CH2_SPII_EN_NESTED_INT" display="Use SPII Nested Interrupt for channel 2" default="0" type="combobox" category="CHANNEL_2">
+            <option id="RSPI_CFG_CH2_SPII_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH2_SPII_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN2}" == "${RSPI_CFG_USE_CHAN2.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPII of RSPI channel 2.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_CH2_SPCI_EN_NESTED_INT" display="Use SPCI Nested Interrupt for channel 2" default="0" type="combobox" category="CHANNEL_2">
+            <option id="RSPI_CFG_CH2_SPCI_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH2_SPCI_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN2}" == "${RSPI_CFG_USE_CHAN2.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPCI of RSPI channel 2.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_CH2_SPEI_EN_NESTED_INT" display="Use SPEI Nested Interrupt for channel 2" default="0" type="combobox" category="CHANNEL_2">
+            <option id="RSPI_CFG_CH2_SPEI_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RSPI_CFG_CH2_SPEI_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">"${RSPI_CFG_USE_CHAN2}" == "${RSPI_CFG_USE_CHAN2.1}"</constraint>
+            <description>Specifies whether to include code for nested interrupt SPEI of RSPI channel 2.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RSPI_CFG_LONGQ_ENABLE" display="Enable debugging information" default="0" type="combobox" category="COMMON">
             <option id="RSPI_CFG_LONGQ_ENABLE.0" display="Disabled" value="0"/>
             <option id="RSPI_CFG_LONGQ_ENABLE.1" display="Enabled" value="1"/>
             <description>Stores error log information using LONGQ driver</description>
         </property>
-        <property id="RSPI_CFG_MASK_UNUSED_BITS" display="Clear unused upper bits when eading the RSPI received data register for data frame bit lengths" default="0" type="combobox">
+        <property id="RSPI_CFG_MASK_UNUSED_BITS" display="Clear unused upper bits when eading the RSPI received data register for data frame bit lengths" default="0" type="combobox" category="COMMON">
             <option id="RSPI_CFG_MASK_UNUSED_BITS.0" display="Not bit clear" value="0"/>
             <option id="RSPI_CFG_MASK_UNUSED_BITS.1" display="Bit clear" value="1"/>
             <description>When reading the RSPI received data register for data frame bit lengths that are not 8, 16, or 32-bits the unused upper bits will contain residual values from the transmit data. As a convenience, these unused upper bits may be optionally masked off (cleared to 0) by the driver when the data is transferred to the user-data buffer.
 Since this takes additional processing time in the data transfer interrupt handler it will cause a reduction in performance for the highest bit rate settings.
 This is not needed for 8, 16, or 32-bit transfers. So only enable this option when using data frame bit lengths that are not 8, 16, or 32-bits.   (0) = do not clear. (1) = clear unused upper bits.</description>
         </property>
-        <property id="RSPI_CFG_USE_RX63_ERROR_INTERRUPT" display="For RX63 group MCUs the RSPI error interrupt" default="0" type="combobox">
+        <property id="RSPI_CFG_USE_RX63_ERROR_INTERRUPT" display="For RX63 group MCUs the RSPI error interrupt" default="0" type="combobox" category="COMMON">
             <option id="RSPI_CFG_USE_RX63_ERROR_INTERRUPT.0" display="Disable error interrupt" value="0"/>
             <option id="RSPI_CFG_USE_RX63_ERROR_INTERRUPT.1" display="Enable error interrupt" value="1"/>
             <description>For RX63 group MCUs the RSPI error interrupt is a group interrupt shared with the SCI peripheral. So the error interrupt is disabled by default for RX63 group to prevent conflict with SCI FIT module. However, if not using the SCI FIT module, this may be enabled by setting RSPI_CFG_USE_RX63_ERROR_INTERRUPT to (1). </description>

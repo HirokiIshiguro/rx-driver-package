@@ -4,12 +4,12 @@ rm_mcuboot
 
 Document Number
 ---------------
-r01an7374ej0101
-r01an7374jj0101
+r01an7374ej0102
+r01an7374jj0102
 
 Version
 -------
-v1.01
+v1.02
 
 Overview
 --------
@@ -97,9 +97,9 @@ rm_mcuboot
 |
 +---doc
 |   +-- en
-|   |       r01an7374ej0101-rx-mcuboot.pdf
+|   |       r01an7374ej0102-rx-mcuboot.pdf
 |   +-- ja
-|           r01an7374jj0101-rx-mcuboot.pdf
+|           r01an7374jj0102-rx-mcuboot.pdf
 |
 \---src
     +---mcu-tools

@@ -104,7 +104,7 @@
         <zipsource>r_rspi_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.60</version>
+            <version>7.70</version>
         </dependency>
         <application>Serial Communications</application>
         <desc>RSPI Driver</desc>

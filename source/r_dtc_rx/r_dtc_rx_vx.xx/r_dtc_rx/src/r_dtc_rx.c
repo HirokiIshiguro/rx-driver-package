@@ -52,6 +52,7 @@
 *         : 29.05.2023 4.40    Fixed warnings in IAR.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 15.03.2025 4.51    Updated disclaimer.
+*         : 30.10.2025 4.60    Fixed to comply with GSCE Coding Standards Rev.6.6.0.
 *******************************************************************************/
 
 /*******************************************************************************
@@ -204,20 +205,21 @@ dtc_err_t R_DTC_Open(void)
 * p_data_cfg->disp_add_enable = DTC_SRC_ADDR_DISP_ADD_DISABLE;\n
 * @param[in] chain_transfer_nr Number of chain transfer.\n
 * The number of Transfer data and corresponding configurations is (number of chain transfer + 1).
-* Example: if chain_transfer_nr = 1, it means that there are 2 continuous Transfer data and 2 corresponding configurations
-* and the first configuration enable the chain transfer.\n
+* Example: if chain_transfer_nr = 1, it means that there are 2 continuous Transfer data
+* and 2 corresponding configurations and the first configuration enable the chain transfer.\n
 * See Section 3 in application note for details.
 * @retval DTC_SUCCESS Successful operation
 * @retval DTC_ERR_NOT_OPEN DTC is not initialized yet.
 * @retval DTC_ERR_INVALID_ARG Parameters are invalid.
 * @retval DTC_ERR_NULL_PTR Argument pointers are NULL.
-* @details Writes the configuration to Transfer data. Writes the start address of Transfer data corresponding to interrupt
-* number into DTC vector table.
-* @note Before calling R_DTC_Create(), user must disable the current interrupt request (the interrupt source is passed to
-* R_DTC_Create()) by clearing Interrupt Request Enable bit IERm.IENj:\n\n
+* @details Writes the configuration to Transfer data. Writes the start address of Transfer data
+* corresponding to interrupt number into DTC vector table.
+* @note Before calling R_DTC_Create(), user must disable the current interrupt request (the interrupt source
+* is passed to R_DTC_Create()) by clearing Interrupt Request Enable bit IERm.IENj:\n\n
 * ICU.IER[m].BIT.IENj = 0;\n\n
-* Then, enable the interrupt request disabled after R_DTC_Create() is ended. The correspondence between IERm.IENj bit and
-* interrupt source is described in Interrupt Vector Table, chapter Interrupt Controller (ICU) of User's Manual: Hardware.
+* Then, enable the interrupt request disabled after R_DTC_Create() is ended.
+* The correspondence between IERm.IENj bit and interrupt source is described in
+* Interrupt Vector Table, chapter Interrupt Controller (ICU) of User's Manual: Hardware.
 */
 dtc_err_t R_DTC_Create(dtc_activation_source_t act_source, dtc_transfer_data_t *p_transfer_data,
                         dtc_transfer_data_cfg_t *p_data_cfg, uint32_t chain_transfer_nr)
@@ -318,16 +320,16 @@ dtc_err_t R_DTC_Create(dtc_activation_source_t act_source, dtc_transfer_data_t *
 * @param[in] sequence_transfer_nr Transfer information counts per sequence transfer (0 - 4294967295)\n
 * See Section 3 in application note for details.\n\n
 * @param[in] sequence_no Sequence number (0 - 255)\n
-* The type definition of the transfer information and the data structure are the same as R_DTC_Create(). Total of 256 ways
-* of the sequence information can be set.
+* The type definition of the transfer information and the data structure are the same as R_DTC_Create().
+* Total of 256 ways of the sequence information can be set.
 * @retval DTC_SUCCESS Successful operation
 * @retval DTC_ERR_NOT_OPEN DTC is not initialized yet.
 * @retval DTC_ERR_INVALID_ARG Arguments are invalid.
 * @retval DTC_ERR_NULL_PTR Argument pointers are NULL.
 * @details This function writes the setting information to the transfer information. Start address of the transfer
 * information for the sequence number is written to DTC index table.
-* @note Before calling R_DTC_CreateSeq(), user must disable the current interrupt request (the interrupt source is passed
-* to R_DTC_CreateSeq()) by clearing Interrupt Request Enable bit (IERm.IENj):\n\n
+* @note Before calling R_DTC_CreateSeq(), user must disable the current interrupt request (the interrupt
+* source is passed to R_DTC_CreateSeq()) by clearing Interrupt Request Enable bit (IERm.IENj):\n\n
 * ICU.IER[m].BIT.IENj = 0;\n\n
 * Then, enable the interrupt request disabled after R_DTC_CreateSeq() is ended. The correspondence between IERm.IENj bit
 * and interrupt source is described in Interrupt Vector Table, chapter Interrupt Controller (ICU) of User's Manual:
@@ -430,18 +432,18 @@ dtc_err_t R_DTC_CreateSeq(dtc_activation_source_t act_source, dtc_transfer_data_
 * @brief This function is used to release the resources of the DTC.
 * @retval DTC_SUCCESS Successful operation
 * @retval DTC_SUCCESS_DMAC_BUSY Successful operation.One or some DMAC resources are locked.
-* @details Unlocks*1 the DTC and disable all DTC activation source by clearing the DTC Activation Enable Register DTCERn;
-* stop supplying clock to DTC and put it to Module stop state. If in addition all DMAC channels have been unlocked, the
-* function sets the DMAC and DTC to the module stop state.*2\n\n
-* Note:\n 1. The DTC FIT module uses the r_bsp default lock function. As a result, the DTC is in the unlocked state after
-* a successful end.\n 2. Because a shared bit is used as both the DMAC module stop setting bit and the DTC module stop
-* setting bit, the function confirms that all DMAC channels are unlocked before making the module stop setting. (For
-* details, see the "Low Power Consumption" section in the User's Manual: Hardware.)\n
+* @details Unlocks*1 the DTC and disable all DTC activation source by clearing the DTC Activation Enable Register
+* DTCERn; stop supplying clock to DTC and put it to Module stop state.If in addition all
+* DMAC channels have been unlocked, the function sets the DMAC and DTC to the module stop state.*2\n\n
+* Note:\n 1. The DTC FIT module uses the r_bsp default lock function. As a result, the DTC is in the unlocked
+* state after a successful end.\n 2. Because a shared bit is used as both the DMAC module stop setting bit and
+* the DTC module stop setting bit, the function confirms that all DMAC channels are unlocked before making the
+* module stop setting. (For details, see the "Low Power Consumption" section in the User's Manual: Hardware.)\n
 * See Section 3 in application note for details.
 * @note When controlling the DMAC without using the DMAC FIT module, make sure to monitor the usage of the DMAC and
-* control locking and unlocking of the DMAC so that calling this function does not set the DMAC to the module stop state.
-* Note that even if the DMAC has not been activated, it is necessary to keep it in the locked state when not making DMAC
-* transfer settings.
+* control locking and unlocking of the DMAC so that calling this function does not set the DMAC to the module
+* stop state. Note that even if the DMAC has not been activated, it is necessary to keep it in the locked state
+* when not making DMAC transfer settings.
 */
 dtc_err_t R_DTC_Close(void)
 {
@@ -775,19 +777,21 @@ static dtc_err_t r_dtc_set_transfer_data(dtc_transfer_data_t *p_transfer_data,
     t_mrc.BYTE = (uint8_t)(p_cfg->disp_add_enable);
 #endif /* (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE) */
     /* Casting to match type of "t_mra.BYTE" */
-    t_mra.BYTE = ((((uint8_t)p_cfg->writeback_disable | (uint8_t)p_cfg->src_addr_mode) | (uint8_t)p_cfg->data_size) | (uint8_t)p_cfg->transfer_mode);
+    t_mra.BYTE = ((((uint8_t)p_cfg->writeback_disable | (uint8_t)p_cfg->src_addr_mode) | (uint8_t)p_cfg->data_size) |
+            (uint8_t)p_cfg->transfer_mode);
 
     /* Casting to match type of "t_mrb.BYTE" */
-    t_mrb.BYTE = (((((((uint8_t)p_cfg->sequence_end |(uint8_t)p_cfg->refer_index_table_enable) | (uint8_t)p_cfg->dest_addr_mode) |
-                        (uint8_t)p_cfg->repeat_block_side) | (uint8_t)p_cfg->response_interrupt) |
-                        (uint8_t)p_cfg->chain_transfer_enable) | (uint8_t)p_cfg->chain_transfer_mode);
+    t_mrb.BYTE = (((((((uint8_t)p_cfg->sequence_end | (uint8_t)p_cfg->refer_index_table_enable) |
+            (uint8_t)p_cfg->dest_addr_mode) | (uint8_t)p_cfg->repeat_block_side) | (uint8_t)p_cfg->response_interrupt) |
+            (uint8_t)p_cfg->chain_transfer_enable) | (uint8_t)p_cfg->chain_transfer_mode);
 #else
     /* Casting to match type of "t_mra.BYTE" */
     t_mra.BYTE = (((uint8_t)p_cfg->src_addr_mode | (uint8_t)p_cfg->data_size) | (uint8_t)p_cfg->transfer_mode);
 
     /* Casting to match type of "t_mrb.BYTE" */
-    t_mrb.BYTE = (((((uint8_t)p_cfg->dest_addr_mode | (uint8_t)p_cfg->repeat_block_side) | (uint8_t)p_cfg->response_interrupt) |
-                    (uint8_t)p_cfg->chain_transfer_enable) | (uint8_t)p_cfg->chain_transfer_mode);
+    t_mrb.BYTE = (((((uint8_t)p_cfg->dest_addr_mode | (uint8_t)p_cfg->repeat_block_side) |
+            (uint8_t)p_cfg->response_interrupt) | (uint8_t)p_cfg->chain_transfer_enable) |
+            (uint8_t)p_cfg->chain_transfer_mode);
 #endif /* (DTC_IP_VER_DTCb <= DTC_IP) */
 
     switch (t_mra.BIT.MD) /* DTC transfer mode */

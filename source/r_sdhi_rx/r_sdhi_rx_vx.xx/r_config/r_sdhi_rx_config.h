@@ -14,6 +14,7 @@
 * History      : DD.MM.YYYY Version Description
 *              : 31.07.2017 2.00    First Release
 *              : 15.03.2025 2.12    Updated disclaimer.
+*              : 28.11.2025 2.20    Added support for Nested interrupt.
 **********************************************************************************************************************/
 
 #ifndef SDHI_CONFIG_H
@@ -58,6 +59,10 @@ Macro definitions
 #define SDHI_CFG_PARAM_CHECKING_ENABLE  (1)         /* Parameter Checking Active */
 
 /* #define SDHI_CFG_LONGQ_ENABLE */
+
+/* #define for SDHI nested interrupt */
+#define SDHI_CFG_CH0_EN_NESTED_INT          (0)    /* CDETI, CACI, SDACI nested interrupts */
+#define SDHI_CFG_CH0_EN_SBFAI_NESTED_INT    (0)    /* SBFAI nested interrupt */
 
 /**********************************************************************************************************************
 Exported global functions (to be accessed by other files)

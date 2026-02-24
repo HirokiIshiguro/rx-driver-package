@@ -15,6 +15,7 @@
  *                              Supported for RX26T.
  *         : 13.12.2023 1.11    Added WAIT_LOOP comments.
  *         : 15.03.2025 1.12    Updated disclaimer
+ *         : 26.12.2025 1.13    Modified comment of API function to Doxygen style.
  *********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -127,13 +128,15 @@ static uint32_t ext_pp_low_setting;
  * Function Name: R_RI3C_Open
  ******************************************************************************************************************//**
  * @brief Configure an RI3C instance.
- * @param[in] p_api_ctrl Pointer to RI3C control block.
- * @param[in] p_cfg Pointer to User configuration structure.
+ * @param[in] p_api_ctrl Pointer to RI3C control block. \n
+ *                       See section R_RI3C_Open() in the application note for details.
+ * @param[in] p_cfg This is the pointer to RI3C configuration structure. \n
+ *                  See section R_RI3C_Open() in the application note for details.
  * @retval FSP_SUCCESS                    Open successful.
  * @retval FSP_ERR_ASSERTION              An argument was invalid.
- * @retval FSP_ERR_ALREADY_OPEN           Open has already been called for this instance.
+ * @retval FSP_ERR_ALREADY_OPEN           Open has already called for this instance.
  * @retval FSP_ERR_UNSUPPORTED            A selected feature is not supported with the current configuration.
- * @details Configure an RI3C instance.
+ * @details Configure an RI3C instance. See section R_RI3C_Open() in the application note for details.
  * @note None.
  */
 fsp_err_t R_RI3C_Open(ri3c_ctrl_t *const p_api_ctrl, ri3c_cfg_t const *const p_cfg)
@@ -215,7 +218,7 @@ fsp_err_t R_RI3C_Open(ri3c_ctrl_t *const p_api_ctrl, ri3c_cfg_t const *const p_c
  * @retval FSP_ERR_ASSERTION              An argument was NULL.
  * @retval FSP_ERR_NOT_OPEN               This instance has not been opened yet.
  * @retval FSP_ERR_INVALID_MODE           This instance is already enabled.
- * @details Enable the RI3C device.
+ * @details Enable the RI3C device. See section R_RI3C_Enable() in the application note for details.
  * @note None.
  */
 fsp_err_t R_RI3C_Enable(ri3c_ctrl_t *const p_api_ctrl)
@@ -512,7 +515,8 @@ fsp_err_t R_RI3C_Enable(ri3c_ctrl_t *const p_api_ctrl)
  * @retval FSP_ERR_ASSERTION              An argument was NULL.
  * @retval FSP_ERR_NOT_OPEN               This instance has not been opened yet.
  * @retval FSP_ERR_UNSUPPORTED            The device cannot be a secondary controller if controller support is disabled.
- * @details Set the configuration for this device.
+ * @details Set the configuration for this device. \n
+ *          See section R_RI3C_DeviceCfgSet() in the application note for details.
  * @note None.
  */
 fsp_err_t R_RI3C_DeviceCfgSet(ri3c_ctrl_t *const p_api_ctrl, ri3c_device_cfg_t const *const p_device_cfg)
@@ -604,12 +608,13 @@ fsp_err_t R_RI3C_DeviceCfgSet(ri3c_ctrl_t *const p_api_ctrl, ri3c_device_cfg_t c
  * @brief Configure an entry in the controller device table.
  * @param[in] p_api_ctrl Pointer to RI3C control block.
  * @param[in] device_index Index into the device table.
- * @param[in] p_device_table_cfg Pointer to the table settings for the entry in the master device table.
+ * @param[in] p_device_table_cfg Pointer to the table settings for the entry in the controller device table.
  * @retval FSP_SUCCESS                    Open successful.
  * @retval FSP_ERR_ASSERTION              An argument was NULL.
  * @retval FSP_ERR_NOT_OPEN               This instance has not been opened yet.
  * @retval FSP_ERR_UNSUPPORTED            Controller Role requests must be rejected if target support is disabled.
- * @details Configure an entry in the controller device table.
+ * @details Configure an entry in the controller device table. \n
+ *          See section R_RI3C_ControllerDeviceTableSet() in the application note for details.
  * @note This function is called in controller mode in order to configure the devices on the RI3C bus.
  * It may also be called in target mode when the target receives the DEFSVLS command.
  */
@@ -706,13 +711,14 @@ fsp_err_t R_RI3C_ControllerDeviceTableSet(ri3c_ctrl_t *const p_api_ctrl,
  *******************************************************************************************************************//**
  * @brief Set the status returned to the controller in response to a GETSTATUS command.
  * @param[in] p_api_ctrl Pointer to RI3C control block.
- * @param[in] status New status settings for responding to the GETSTATUS command code.
+ * @param[in] status The current status of the target device.
  * @retval FSP_SUCCESS                    Open successful.
  * @retval FSP_ERR_ASSERTION              An argument was NULL.
  * @retval FSP_ERR_NOT_OPEN               This instance has not been opened yet.
  * @retval FSP_ERR_INVALID_MODE           The instance is not in target mode.
  * @retval FSP_ERR_UNSUPPORTED            Target support is disabled.
- * @details Set the status returned to the controller in response to a GETSTATUS command.
+ * @details Set the status returned to the controller in response to a GETSTATUS command. \n
+            See section R_RI3C_TargetStatusSet() in the application note for details.
  * @note None.
  */
 fsp_err_t R_RI3C_TargetStatusSet(ri3c_ctrl_t *const p_api_ctrl, ri3c_device_status_t status)
@@ -925,8 +931,9 @@ fsp_err_t R_RI3C_DynamicAddressAssignmentStart(ri3c_ctrl_t *const p_api_ctrl,
  *                                        also be a multiple of 4 bytes.
  * @retval FSP_ERR_UNSUPPORTED            Controller support must be enabled to call this function.
  *                                        Target support must be enabled when sending the GETACCMST command.
- * @details Send a broadcast or direct command to target devices on the bus.
- * @note None.
+ * @details Send a broadcast or direct command to target devices on the bus. \n
+ *          See section R_RI3C_CommandSend() in the application note for details.
+ * @note See section R_RI3C_CommandSend() in the application note for details.
  */
 fsp_err_t R_RI3C_CommandSend(ri3c_ctrl_t *const p_api_ctrl, ri3c_command_descriptor_t *p_command_descriptor)
 {
@@ -1069,7 +1076,8 @@ fsp_err_t R_RI3C_CommandSend(ri3c_ctrl_t *const p_api_ctrl, ri3c_command_descrip
  * @retval FSP_ERR_INVALID_MODE           This driver is disabled.
  * @retval FSP_ERR_INVALID_ALIGNMENT      The buffer must be aligned to 4 bytes.
  * @details Set the write buffer for the transfer. In controller mode, start the transfer.
- *  When the transfer is completed send a stop condition or a repeated-start.
+ *  When the transfer is completed send a stop condition or a repeated-start. \n
+ *  See section R_RI3C_Write() in the application note for details.
  * @note None.
  */
 fsp_err_t R_RI3C_Write(ri3c_ctrl_t *const p_api_ctrl, uint8_t const *const p_data, uint32_t length, bool restart)
@@ -1184,7 +1192,8 @@ fsp_err_t R_RI3C_Write(ri3c_ctrl_t *const p_api_ctrl, uint8_t const *const p_dat
  * @retval FSP_ERR_INVALID_ALIGNMENT      The buffer must be aligned to 4 bytes and the length must be a multiple of
  *                                        4 bytes.
  * @details Set the read buffer for the transfer. In controller mode, start the transfer. When the transfer is completed
- *  send a stop condition or a repeated-start.
+ *  send a stop condition or a repeated-start. \n
+ *  See section R_RI3C_Read() in the application note for details.
  * @note None.
  */
 fsp_err_t R_RI3C_Read(ri3c_ctrl_t *const p_api_ctrl, uint8_t *const p_data, uint32_t length, bool restart)
@@ -1284,7 +1293,7 @@ fsp_err_t R_RI3C_Read(ri3c_ctrl_t *const p_api_ctrl, uint8_t *const p_data, uint
  * @retval FSP_ERR_INVALID_MODE           This function is only called in target mode.
  * @retval FSP_ERR_INVALID_ALIGNMENT      The buffer must be aligned to 4 bytes.
  * @retval FSP_ERR_UNSUPPORTED            Target support is disabled.
- * @details Initiate an IBI write operation.
+ * @details Initiate an IBI write operation. See section R_RI3C_IbiWrite() in the application note for details.
  * @note This function is only used in target mode.
  */
 fsp_err_t R_RI3C_IbiWrite(ri3c_ctrl_t *const p_api_ctrl,
@@ -1481,7 +1490,7 @@ fsp_err_t R_RI3C_IbiRead(ri3c_ctrl_t *const p_api_ctrl, uint8_t *const p_data, u
  * @retval FSP_SUCCESS                    Open successful.
  * @retval FSP_ERR_ASSERTION              An argument was NULL.
  * @retval FSP_ERR_NOT_OPEN               This instance has not been opened yet.
- * @details Close the RI3C instance.
+ * @details Close the RI3C instance. See section R_RI3C_Close() in the application note for details.
  * @note None.
  */
 fsp_err_t R_RI3C_Close(ri3c_ctrl_t *const p_api_ctrl)

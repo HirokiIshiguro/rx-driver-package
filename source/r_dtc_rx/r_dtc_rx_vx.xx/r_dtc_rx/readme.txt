@@ -5,7 +5,7 @@ r_dtc_rx
 
 Version
 -------
-v4.52
+v4.60
 
 Overview
 --------
@@ -27,6 +27,7 @@ Supported MCUs
 * RX113 MCU
 * RX130 MCU
 * RX140 MCU
+* RX14T MCU
 * RX230 MCU
 * RX231 MCU
 * RX23E-A MCU
@@ -214,6 +215,11 @@ r_dtc_rx
         |       r_dtc_rx_target_if.h
         |
         +---rx140
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
+        +---rx14t
         |       r_dtc_rx_target.c
         |       r_dtc_rx_target.h
         |       r_dtc_rx_target_if.h

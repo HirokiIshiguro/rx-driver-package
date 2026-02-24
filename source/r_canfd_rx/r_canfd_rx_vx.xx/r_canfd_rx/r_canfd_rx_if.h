@@ -18,9 +18,9 @@
 *         : 28.06.2024 1.40    Added support for RX261.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 15.03.2025 1.41    Updated disclaimer.
-*         : 23.06.2025 1.50    Removed support for RX26T-32 Pins.
-                               Removed doc folder and updated .rcpc file in FITDemos.
-
+*         : 23.06.2025 1.50    Removed support for RX26T-32 Pins.
+*                              Removed doc folder and updated .rcpc file in FITDemos.
+*         : 26.12.2025 1.51    Modified comment of API function to Doxygen style.
 ***********************************************************************************************************************/
 #ifndef CAN_INTERFACE_HEADER_FILE
 #define CAN_INTERFACE_HEADER_FILE 
@@ -46,7 +46,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CANFD_RX_VERSION_MAJOR           (1)
-#define CANFD_RX_VERSION_MINOR           (50)
+#define CANFD_RX_VERSION_MINOR           (51)
 /* The process of getting the version number is done through the macro below. The version number is encoded where the
    top 2 bytes are the major version number and the bottom 2 bytes are the minor version number. For example,
    Version 4.25 would be returned as 0x00040019. */

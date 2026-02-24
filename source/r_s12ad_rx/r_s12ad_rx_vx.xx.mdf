@@ -131,7 +131,10 @@
         <pin name="PGAVSS0">
           <pinConfiguration config="AUTO"/>
         </pin>
-      </channel>
+         <pin name="PGAOUT0">
+          <pinConfiguration config="AUTO"/>
+        </pin>
+     </channel>
       <channel number="S12AD1" group="RX64M,RX651,RX65N,RX71M,RX66T,RX72T">
         <channelConfiguration>
           <config>API</config>

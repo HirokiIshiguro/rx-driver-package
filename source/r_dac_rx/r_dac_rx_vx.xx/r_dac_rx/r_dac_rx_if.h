@@ -48,6 +48,7 @@
 *           28.06.2024 5.30    Added support for RX260, RX261.
 *           15.03.2025 5.31    Updated disclaimer.
 *           23.06.2025 5.32    Removed doc folder and updated .rcpc file in FITDemos.
+*           30.10.2025 5.40    Added support for RX14T.
 ***********************************************************************************************************************/
 #ifndef DAC_RX_IF_H
 #define DAC_RX_IF_H
@@ -72,7 +73,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define DAC_VERSION_MAJOR  (5)
-#define DAC_VERSION_MINOR  (32)
+#define DAC_VERSION_MINOR  (40)
 
 
 #if defined(BSP_MCU_RX23T) || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23E_B)
@@ -167,7 +168,8 @@ typedef struct st_dac_cfg
     bool        sync_with_adc;
 } dac_cfg_t;
 
-#else /* defined(BSP_MCU_RX130) || defined(BSP_MCU_RX24U) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX260) || defined(BSP_MCU_RX261) */
+#else /* defined(BSP_MCU_RX130) || defined(BSP_MCU_RX24U) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX260) */
+/* || defined(BSP_MCU_RX261) || defined(BSP_MCU_RX14T) */
 typedef struct st_dac_cfg
 {
     bool        fmt_flush_right;
@@ -195,7 +197,8 @@ typedef enum e_dac_cmd
 #if defined(BSP_MCU_RX23E_B)
     DAC_CMD_BUF_ON,             // The output of the buffer amplifier is pulled down.
     DAC_CMD_BUF_OFF,            // The output of the buffer amplifier is not pulled down.
-    DAC_CMD_STB_ON,             // The analog output pin is pulled down by a 1-kΩ resistor while D/A conversion is disabled.
+    DAC_CMD_STB_ON,             // The analog output pin is pulled down by a 1-kΩ resistor
+                                //while D/A conversion is disabled.
     DAC_CMD_STB_OFF,            // The analog output pin is placed in the Hi-Z state while D/A conversion is disabled.
 #endif
     DAC_CMD_END_ENUM
@@ -227,7 +230,7 @@ Public Functions
  * Argument     : p_config
  * Return Value : .
  *********************************************************************************************************************/
-dac_err_t R_DAC_Open (dac_cfg_t *p_config);
+dac_err_t R_DAC_Open (dac_cfg_t * p_config);
                     
 /**********************************************************************************************************************
  * Function Name: R_DAC_Write

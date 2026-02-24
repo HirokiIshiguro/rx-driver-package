@@ -23,7 +23,7 @@
 *         : 15.03.2016 2.10    Added support for RX65N
 *         : 19.12.2016 2.20    Added support for RX24U, RX24T(512KB)
 *         : 21.07.2017 2.30    Added support for the RX65N-2M, RX130-512KB.
-*         : 31.10.2017 2.31    Added the demo for RX65N, RX65N-2M
+*         : 31.10.2017 2.31    Added the demo for RX65N, RX65N-2M
 *         : 28.09.2018 2.40    Added support for RX66T
 *         : 16.11.2018 2.41    Added XML document number
 *         : 01.02.2019 2.50    Added support for RX72T, RX65N-64pin
@@ -54,6 +54,7 @@
 *         : 15.03.2025 5.01    Updated disclaimer.
 *         : 23.06.2025 5.10    Updated dependency module version.
 *                              Removed doc folder and updated .rcpc file in FITDemos.
+*         : 30.10.2025 5.20    Added support for RX14T.
 ***********************************************************************************************************************/
 
 #ifndef MPC_RX_INTERFACE_HEADER_FILE
@@ -77,7 +78,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define MPC_RX_VERSION_MAJOR           (5)
-#define MPC_RX_VERSION_MINOR           (10)
+#define MPC_RX_VERSION_MINOR           (20)
 
 /***********************************************************************************************************************
 Typedef definitions

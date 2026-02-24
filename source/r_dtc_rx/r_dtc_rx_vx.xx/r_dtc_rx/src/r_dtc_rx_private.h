@@ -43,6 +43,7 @@
 *         : 28.06.2024 4.50    Added support for RX260, RX261.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
 *         : 15.03.2025 4.51    Updated disclaimer.
+*         : 30.10.2025 4.60    Added support for RX14T.
 *******************************************************************************/
 #ifndef DTC_RX_PRIVATE_H
 #define DTC_RX_PRIVATE_H
@@ -151,6 +152,15 @@ Includes   <System Includes> , "Project Includes"
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
     #include "./src/targets/rx140/r_dtc_rx_target.h"
+#elif defined(BSP_MCU_RX14T)
+    #include "./src/targets/rx14t/r_dtc_rx_target.h"
+    #if (DTC_CFG_USE_DMAC_FIT_MODULE == DTC_ENABLE)
+        #error "This MCU does not have DMAC module."
+        #error "Change to DTC_CFG_USE_DMAC_FIT_MODULE (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
 #elif defined(BSP_MCU_RX64M)
     #include "./src/targets/rx64m/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)

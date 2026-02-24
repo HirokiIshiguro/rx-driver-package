@@ -63,6 +63,7 @@
  *                                RIIC_CFG_CHi_TEI_INT_PRIORITY (i = 0 to 2).
  *         : 08.08.2024 3.00     Added RX260, RX261 support.
  *         : 15.03.2025 3.01     Updated disclaimer.
+ *         : 30.10.2025 3.10     Added RX14T support.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_CONFIG_H
@@ -82,6 +83,7 @@
 /*  RX113: ch0,    ,     */
 /*  RX130: ch0,    ,     */
 /*  RX140: ch0,    ,     */
+/*  RX14T: ch0,    ,     */
 /*  RX13T: ch0,    ,     */
 /*  RX230: ch0,    ,     */
 /*  RX231: ch0,    ,     */

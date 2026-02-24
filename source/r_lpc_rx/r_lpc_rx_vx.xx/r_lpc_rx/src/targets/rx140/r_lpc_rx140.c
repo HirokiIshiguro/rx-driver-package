@@ -11,6 +11,7 @@
  * History : DD.MM.YYYY Version Description           
  *         : 31.07.2021 1.00    First Release
  *         : 15.03.2025 2.51    Updated disclaimer.
+ *         : 30.10.2025 2.60    Removed \e in Doxygen comment of API function.
  **********************************************************************************************************************/
 
 /*********************************************************************************************************************
@@ -361,7 +362,7 @@ lpc_err_t lpc_return_clock_switch (lpc_clock_switch_t e_clock_source, bool enabl
  * Description  : This function configures the conditions for entering the snooze mode, returning to the software standby mode
  *                or releasing from the snooze mode.
  * Arguments    : snooze_mode -
- *                   snooze_mode  The snooze_mode  for all supported MCUs are specified in enum \e lpc_snooze_mode_t.
+ *                   snooze_mode  The snooze_mode  for all supported MCUs are specified in enum lpc_snooze_mode_t.
  * Return Value : LPC_SUCCESS -
  *                LPC_ERR_ILLEGAL -
  ********************************************************************************************************************/

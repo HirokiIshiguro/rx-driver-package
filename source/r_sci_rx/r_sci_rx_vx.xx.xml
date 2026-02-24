@@ -40,6 +40,7 @@
         <version>8.03.00.202311</version>
         <version>8.03.00.202405</version>
         <version>8.03.00.202411</version>
+        <version>14.02.00.202505</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -52,6 +53,7 @@
         <version>4.20.01</version>
         <version>4.20.03</version>
         <version>5.10.01</version>
+        <version>5.20.01</version>
     </toolchain>
     <!-- only one target entry allowed; multiple sub tags permitted -->
     <target>
@@ -66,6 +68,7 @@
         <group omit_board="true">RX130</group>
         <group omit_board="true">RX13T</group>
         <group omit_board="true">RX140</group>
+        <group omit_board="true">RX14T</group>
         <group omit_board="true">RX230</group>
         <group omit_board="true">RX231</group>
         <group omit_board="true">RX23E-A</group>
@@ -98,11 +101,11 @@
         <zipsource>r_sci_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.60</version>
+            <version>7.70</version>
         </dependency>
         <dependency>
             <module>r_byteq</module>
-            <version>2.12</version>
+            <version>2.20</version>
         </dependency>
         <application>Serial Interface (Clock Sync./Clock Async.)</application>
         <desc>SCI Driver</desc>

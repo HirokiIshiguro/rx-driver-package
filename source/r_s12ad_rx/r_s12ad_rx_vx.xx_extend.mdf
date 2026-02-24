@@ -17,7 +17,7 @@
     <fileTemplate>r_pinset_type2</fileTemplate>
     <resourceInfo>
       <peripheral name="S12AD">
-        <channel number="S12AD0" group="RX110,RX111,RX113,RX130,RX13T,RX140,RX230,RX231,RX23E-A,RX23E-B,RX23T,RX23W,RX24T,RX24U,RX260,RX261,RX26T,RX64M,RX65N,RX651,RX66N,RX66T,RX671,RX71M,RX72T,RX72M,RX72N">
+        <channel number="S12AD0" group="RX110,RX111,RX113,RX130,RX13T,RX14T,RX140,RX230,RX231,RX23E-A,RX23E-B,RX23T,RX23W,RX24T,RX24U,RX260,RX261,RX26T,RX64M,RX65N,RX651,RX66N,RX66T,RX671,RX71M,RX72T,RX72M,RX72N">
           <channelConfiguration>
             <config>API</config>
           </channelConfiguration>
@@ -132,6 +132,9 @@
           <pin name="PGAVSS0">
             <pinConfiguration config="AUTO"/>
           </pin>
+           <pin name="PGAOUT0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
         </channel>
         <channel number="S12AD0" group="RX660">
           <channelConfiguration>
@@ -243,7 +246,7 @@
             <pinConfiguration config="AUTO"/>
           </pin>
         </channel>
-        <channel number="S12AD1" group="RX24T,RX24U,RX26T,RX64M,RX651,RX65N,RX671,RX71M,RX66T,RX72T,RX72M,RX66N,RX72N">
+        <channel number="S12AD1" group="RX14T,RX24T,RX24U,RX26T,RX64M,RX651,RX65N,RX671,RX71M,RX66T,RX72T,RX72M,RX66N,RX72N">
           <channelConfiguration>
             <config>API</config>
           </channelConfiguration>

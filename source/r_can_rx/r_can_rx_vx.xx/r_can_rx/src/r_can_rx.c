@@ -56,6 +56,8 @@
 *                              - Fixed issue cannot receive remote frames with extended ID in FIFO mailbox mode.
 *         : 29.03.2024 5.70    - Added Nested Interrupt support.
 *         : 15.03.2025 5.71    - Updated disclaimer.
+*         : 26.12.2025 5.73    - Added the condition to check if transmit FIFO is not full in R_CAN_Tx().
+*                              - Updated the source code specifies mailbox 28 instead of "mbox_nr" in R_CAN_RxRead().
 ***********************************************************************************************************************/
 /******************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -1046,12 +1048,13 @@ uint32_t R_CAN_TxSetXid(const uint32_t     ch_nr,
 * @param[in] ch_nr - CAN channel to use (0-2 MCU dependent).
 * @param[in] mb_mode - Normal mailbox (0), FIFO mailbox (1).
 * @param[in] mbox_nr - Which CAN mailbox to use (0-31).
-* @retval R_CAN_OK - The mailbox was set to transmit a previously configured mailbox.
-* @retval R_CAN_SW_BAD_MBX - Bad mailbox number.
-* @retval R_CAN_BAD_CH_NR - The channel number does not exist.
-* @retval R_CAN_BAD_MODE - The mode number does not exist.
-* @retval R_CAN_SW_SET_TX_TMO - Waiting for previous transmission to finish timed out.
-* @retval R_CAN_SW_SET_RX_TMO - Waiting for previous reception to complete timed out.
+* @retval R_CAN_OK               The mailbox was set to transmit a previously configured mailbox.
+* @retval R_CAN_SW_BAD_MBX       Bad mailbox number.
+* @retval R_CAN_BAD_CH_NR        The channel number does not exist.
+* @retval R_CAN_BAD_MODE         The mode number does not exist.
+* @retval CAN_ERR_BOX_FULL       Transmit FIFO is full (4 unsent messages).
+* @retval R_CAN_SW_SET_TX_TMO    Waiting for previous transmission to finish timed out.
+* @retval R_CAN_SW_SET_RX_TMO    Waiting for previous reception to complete timed out.
 * @details R_CAN_TxSet must have been called at least once for this mailbox after system start to set up the mailbox
 * content, as this function only tells the mailbox to send its content.
 */
@@ -1087,6 +1090,12 @@ uint32_t R_CAN_Tx(const uint32_t  ch_nr, const uint32_t  mb_mode, const uint32_t
     }
     if ((FIFO_MAILBOX_MODE == mb_mode) && (bit_set[mbox_nr] & 0x0f000000))    /* check normal or fifo mode */
     {
+        /* return if transmit fifo mailbox is full */
+        if (1 == can_block_p->TFCR.BIT.TFFST)
+        {
+            return (CAN_ERR_BOX_FULL);
+        }
+
         /* Write FFh to transmit FIFO pointer control register */
         can_block_p->TFPCR = 0xFF;
     }
@@ -1810,7 +1819,7 @@ uint32_t R_CAN_RxRead(const uint32_t    ch_nr,
         frame_p->dlc = (uint8_t)can_block_p->MB[28].DLC;
 
         /* WAIT_LOOP */
-        for (i = 0; i < can_block_p->MB[mbox_nr].DLC; i++)
+        for (i = 0; i < can_block_p->MB[28].DLC; i++)
         {
             frame_p->data[i] = can_block_p->MB[28].DATA[i];
         }
