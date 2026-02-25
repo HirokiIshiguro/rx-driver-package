@@ -1,4 +1,4 @@
-MODULE_NAME = 	r_nfc_ptx1xxr_rx
+MODULE_NAME = 	r_nfc_ptx_rx
 VERSION = 		1.00
 MDF = V2
 
