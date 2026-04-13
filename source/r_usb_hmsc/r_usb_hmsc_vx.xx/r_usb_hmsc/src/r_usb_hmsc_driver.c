@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_usb_hmsc_driver.c
+ * Version      : 1.44
  * Description  : USB Host MSC BOT driver
  ***********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -31,6 +19,8 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator 
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
+ *         : 01.03.2025 1.44 Change Disclaimer.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -109,6 +99,7 @@ static usb_utr_t gs_usb_hmsc_req_tran_result_msg;  /* Send:usb_hmsc_trans_result
 #endif /* (BSP_CFG_RTOS_USED) */
 
 uint32_t    g_usb_hmsc_cmd_data_length[USB_NUM_USBIP];
+uint32_t    g_usb_hmsc_cmd_data_length_rtos_tmp[USB_NUM_USBIP];
 
 /******************************************************************************
  Exported global variables
@@ -711,7 +702,9 @@ static uint16_t usb_hmsc_data_act (usb_utr_t *mess)
     {
         if (USB_MSG_HMSC_DATA_IN == usb_shmsc_process[mess->ip]) /* DataIn */
         {
+            g_usb_hmsc_cmd_data_length[mess->ip] = 0;
             hmsc_retval = usb_hmsc_get_data(mess, side, pbuff, size);
+            g_usb_hmsc_cmd_data_length[mess->ip] = g_usb_hmsc_cmd_data_length_rtos_tmp[mess->ip];
             if (USB_HMSC_OK != hmsc_retval)
             {
                 USB_PRINTF1("### DataIN : GetData error(drive:%d) \n", side);
@@ -747,6 +740,7 @@ static uint16_t usb_hmsc_data_act (usb_utr_t *mess)
                 g_usb_hmsc_in_pipectr[mess->ip][side] = 0;
                 usb_hmsc_clear_stall(mess, g_usb_hmsc_in_pipe[mess->ip][side], class_trans_result);
                 hmsc_retval = usb_hmsc_get_csw(mess, side);
+                usb_hmsc_csw_err_stall[mess->ip] = USB_OFF;
             break;
             case USB_MSC_CSW_PHASE_ERR:
                 USB_PRINTF1("*** Data : CSW-PhaseError(drive:%d) \n", side);
@@ -777,6 +771,7 @@ static uint16_t usb_hmsc_data_act (usb_utr_t *mess)
     uint16_t result;
     uint8_t *pbuff;
     uint32_t size;
+    static uint8_t hmsc_rs_data[USB_HMSC_REQUEST_SENSE_SIZE]; /* Request Sense Data Buffer */
 
     pbuff = pusb_hmsc_buff[mess->ip];
     size = usb_hmsc_trans_size[mess->ip];
@@ -904,7 +899,7 @@ static uint16_t usb_hmsc_data_act (usb_utr_t *mess)
                     if (USB_MSG_HMSC_STRG_USER_COMMAND != g_usb_hmsc_strg_process[mess->ip])
                     {
                         usb_hmsc_csw_err_loop[mess->ip] = USB_ON;
-                        usb_hmsc_request_sense(mess, side, pbuff);
+                        usb_hmsc_request_sense(mess, side, hmsc_rs_data);
                     }
                     else
                     {
@@ -1472,6 +1467,7 @@ static uint16_t usb_hmsc_get_data (usb_utr_t *ptr, uint16_t side, uint8_t *buff,
     {
         case USB_DATA_SHT: /* Continue */
         case USB_DATA_OK:
+            g_usb_hmsc_cmd_data_length[ptr->ip] = ptr->tranlen;
             g_usb_hmsc_in_pipectr[ptr->ip][side] = hw_usb_read_pipectr(ptr, pipe);
             return USB_HMSC_OK;
         break;
@@ -2261,6 +2257,7 @@ void usb_hmsc_drive_complete (usb_utr_t *ptr, uint16_t addr, uint16_t data2)
 
     ctrl.module = ptr->ip; /* Module number setting */
     ctrl.address = addr;
+    ctrl.type = USB_HMSC;
 
     usb_set_event(USB_STS_CONFIGURED, &ctrl); /* Set Event()  */
 } /* End of function usb_hmsc_drive_complete() */
@@ -2435,6 +2432,7 @@ void usb_hmsc_strg_cmd_complete (usb_utr_t *mess, uint16_t devadr, uint16_t data
     ctrl.pipe = mess->keyword; /* Pipe number setting */
     ctrl.address = usb_hstd_get_devsel(mess, ctrl.pipe) >> 12;
     ctrl.size = 0;
+    ctrl.type = USB_HMSC;
 
     switch (mess->result)
     {
@@ -2575,6 +2573,7 @@ uint16_t usb_hmsc_trans_wait_tmo(uint16_t tmo)
         USB_PRINTF1("### HMSC trcv_msg error (%ld)\n", err);
         return USB_ERROR;
     }
+    g_usb_hmsc_cmd_data_length_rtos_tmp[mess->ip] = mess->tranlen;
 
     return (mess->status);
 } /* End of function usb_hmsc_trans_wait_tmo() */
@@ -3422,10 +3421,10 @@ uint16_t usb_hmsc_ref_drvno (uint16_t devadr)
 /******************************************************************************
  Function Name   : usb_hhub_task
  Description     : HUB task
- Arguments       : usb_vp_int_t stacd          : Start Code of Hub Task
+ Arguments       : rtos_task_arg_t stacd          : Start Code of Hub Task
  Return value    : none
  ******************************************************************************/
-void usb_hhub_task (usb_vp_int_t stacd)
+void usb_hhub_task (rtos_task_arg_t stacd)
 {
     /* None */
 }

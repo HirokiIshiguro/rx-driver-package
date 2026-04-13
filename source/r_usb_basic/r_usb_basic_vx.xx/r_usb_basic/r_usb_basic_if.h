@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_usb_basic_if.h
+ * Version      : 1.44
  * Description  : User macro define file
  *                This file is the macro definition header file which a user can operate.
  ***********************************************************************************************************************/
@@ -31,6 +19,8 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 16.11.2018 1.24 Supporting RTOS Thread safe
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 01.03.2025 1.44 Change Disclaimer.
  ***********************************************************************************************************************/
 #ifndef R_USB_BASIC_IF_H
 #define R_USB_BASIC_IF_H
@@ -50,6 +40,30 @@ Includes   <System Includes> , "Project Includes"
 /******************************************************************************
  Macro definitions
  ******************************************************************************/
+#if defined(USB_CFG_PCDC_2COM_USE)
+#define USB_CFG_PCDC_USE /* USB_CFG_DEVICE_CLASS */
+#endif /* defined(USB_CFG_PHID_USE) */
+
+#if defined(USB_CFG_PCDC_PHID_USE)
+#define USB_CFG_PCDC_USE /* USB_CFG_DEVICE_CLASS */
+#define USB_CFG_PHID_USE /* USB_CFG_DEVICE_CLASS */
+#endif /* defined(USB_CFG_PHID_USE) */
+
+#if defined(USB_CFG_PCDC_PMSC_USE)
+#define USB_CFG_PCDC_USE /* USB_CFG_DEVICE_CLASS */
+#define USB_CFG_PMSC_USE /* USB_CFG_DEVICE_CLASS */
+#endif /* defined(USB_CFG_PMSC_USE) */
+
+#if defined(USB_CFG_PHID_PMSC_USE)
+#define USB_CFG_PHID_USE /* USB_CFG_DEVICE_CLASS */
+#define USB_CFG_PMSC_USE /* USB_CFG_DEVICE_CLASS */
+#endif /* defined(USB_CFG_PMSC_USE) */
+
+#if defined(USB_CFG_PMSC_REQUEST_USE)
+#define USB_CFG_TESTREQUEST_USE /* USB_CFG_DEVICE_CLASS */
+#define USB_CFG_PMSC_USE /* USB_CFG_DEVICE_CLASS */
+#endif /* defined(USB_CFG_PMSC_REQUEST_USE) */
+
 /* USB Request Type Register */
 #define     USB_BREQUEST                        (0xFF00u)   /* b15-8 */
 
@@ -301,7 +315,9 @@ typedef enum usb_status
 /* USB class type */
 typedef enum usb_class
 {
-    USB_PCDC = 0, USB_PCDCC, USB_PHID, USB_PVND,
+    USB_PCDC = 0, USB_PCDCC, USB_PCDC2, USB_PCDCC2, USB_PHID, USB_PVND,
+
+    USB_PCDC_PHID, USB_PCDC_PMSC, USB_PHID_PMSC,
 
     USB_HCDC, USB_HCDCC, USB_HHID, USB_HVND,
 
@@ -331,13 +347,9 @@ typedef enum usb_transfer
 {
     USB_BULK = 0, USB_INT, USB_ISO,
 } usb_transfer_t;
-#if (BSP_CFG_RTOS_USED == 1)        /* FreeRTOS */
-typedef void (usb_callback_t)(usb_ctrl_t *, rtos_task_id_t, uint8_t);
-#elif (BSP_CFG_RTOS_USED == 2)      /* SEGGER embOS */
-#elif (BSP_CFG_RTOS_USED == 3)      /* Micrium MicroC/OS */
-#elif (BSP_CFG_RTOS_USED == 4)      /* Renesas RI600V4 & RI600PX */
-typedef void (usb_callback_t)(usb_ctrl_t *, rtos_task_id_t, uint8_t);
-#endif /* (BSP_CFG_RTOS_USED == 1) */
+#if (BSP_CFG_RTOS_USED != 0)
+typedef void (usb_callback_t)(usb_ctrl_t *, rtos_current_task_id_t, uint8_t);
+#endif /* (BSP_CFG_RTOS_USED != 0) */
 
 /******************************************************************************
  Export global functions

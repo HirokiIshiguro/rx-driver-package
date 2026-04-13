@@ -1,21 +1,9 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2019-2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
+
 /*******************************************************************************************************************//**
  * @file
  * @defgroup timer Timer Library
@@ -42,7 +30,12 @@
 #define BLE_TIMER_NUM_OF_SLOT (10)
 
 /** The invalid timer handle. */
+#if (BSP_CFG_RTOS_USED == 0)
 #define BLE_TIMER_INVALID_HDL (0xFF)
+#else /* (BSP_CFG_RTOS_USED == 0) */
+#define BLE_TIMER_INVALID_HDL ((uint32_t)NULL)
+#define BLE_TIMER_INVALID_INDEX (0xFFFFFFFF)
+#endif /* (BSP_CFG_RTOS_USED == 0) */
 
 /** The timer type. */
 typedef enum {
@@ -66,6 +59,7 @@ typedef void (*ble_timer_cb_t)(uint32_t timer_hdl);
 /******************************************************************************************************************//**
  * @brief Initialize the timer library.
  * @details This function should be called before calling any other timer library function.
+ * @note Because abstraction API uses software timer, call R_BLE_TIMER_Init() before R_BLE_ABS_Init(). 
  **********************************************************************************************************************/
 void R_BLE_TIMER_Init(void);
 
@@ -104,7 +98,7 @@ ble_status_t R_BLE_TIMER_Delete(uint32_t *p_timer_hdl);
  * @brief Start the timer.
  * @details After starting, the timer will be expired at the timeout specified in
  *          @ref R_BLE_TIMER_Create or @ref R_BLE_TIMER_UpdateTimeout
- * @param[in] timer_hdl Timer handle identifying the timer to be deleted.
+ * @param[in] timer_hdl Timer handle identifying the timer to be started.
  * @retval BLE_SUCCESS Success
  * @retval BLE_ERR_INVALID_HDL The timer handle is invalid.
  **********************************************************************************************************************/
@@ -114,7 +108,7 @@ ble_status_t R_BLE_TIMER_Start(uint32_t timer_hdl);
  * @brief   Stop the timer.
  * @details When the timer is stopped, the remaining time is discarded.
  *          The timer can be started by calling @ref R_BLE_TIMER_Start.
- * @param[in] timer_hdl Timer handle identifying the timer to be deleted.
+ * @param[in] timer_hdl Timer handle identifying the timer to be stoped.
  * @retval BLE_SUCCESS Success
  * @retval  BLE_ERR_INVALID_HDL The timer handle is invalid.
  **********************************************************************************************************************/
@@ -123,19 +117,13 @@ ble_status_t R_BLE_TIMER_Stop(uint32_t timer_hdl);
 /******************************************************************************************************************//**
  * @brief Update timeout of the timer.
  * @details If the timer is active, the timer stop and started with new timeout.
- * @param[in] timer_hdl Timer handle identifying the timer to be deleted.
+ * @param[in] timer_hdl Timer handle identifying the timer to be updated.
  * @param[in] timeout_ms The timeout to update in milli seconds.
  * @retval BLE_SUCCESS Success
  * @retval BLE_ERR_INVALID_HDL The timer handle is invalid.
  **********************************************************************************************************************/
 ble_status_t R_BLE_TIMER_UpdateTimeout(uint32_t timer_hdl, uint32_t timeout_ms);
 
-/******************************************************************************************************************//**
- * @brief Check whether the timer is active.
- * @retval true the timer is active (started).
- * @retval  false the timer is inactive (stopped or not created).
- **********************************************************************************************************************/
-bool R_BLE_TIMER_IsActive(void);
 /*@}*/
 
 #endif /* R_BLE_TIMER_H */

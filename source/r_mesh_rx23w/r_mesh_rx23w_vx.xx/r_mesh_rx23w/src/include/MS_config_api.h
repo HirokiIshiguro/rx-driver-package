@@ -21,63 +21,21 @@
 
 
 /* --------------------------------------------- Global Definitions */
-
 /**
- * \defgroup config_module CONFIG (Mesh Configuration Model)
+ * \defgroup config_module Configuration Model (CONFIG)
+ * \ingroup foundation_models
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
- *  Mesh Configuration Model (CONFIG) module to the Application.
+ * \brief This section describes the interfaces & APIs offered by the EtherMind
+ * Mesh Configuration Model (CONFIG) module to the Application.
  */
-
-/**
- * \defgroup config_defines Defines
- * \{
- * Describes defines for the module.
- */
-
-/**
- * \defgroup config_constants Constants
- * \{
- * Describes Constants defined by the module.
- */
-
-/**
- *  \defgroup config_status Status Codes
- *  \{
- *  This section lists the Status Codes applicable at the Configuration Model.
- */
-
-/** \} */
-
-/** \} */
-
-/** \} */
-
-/**
- *  \defgroup config_events Events
- *  \{
- *  This section lists the Asynchronous Events notified to Application by the
- *  Module.
- */
-
-/** \} */
-
-/**
- *  \defgroup config_marcos Utility Macros
- *  \{
- *  This section defines the utility macros for use by the application.
- *
- */
-
-/** \} */
 
 /* --------------------------------------------- Data Types/ Structures */
 
 /**
  *  \defgroup config_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Configuration Model Layer.
  */
 /**
  * Configuration Client application Asynchronous Notification Callback.
@@ -85,14 +43,14 @@
  * Configuration Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_CONFIG_MODEL_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -100,8 +58,17 @@ typedef API_RESULT (* MS_CONFIG_MODEL_CB)
 /** \} */
 
 /**
- *  \defgroup config_structures Structures
- *  \{
+ * \defgroup config_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Configuration Model Layer.
+ */
+
+/**
+ * \defgroup config_structures Structures
+ * \{
+ * \brief This section describes the various Data-Types and Structures in
+ * EtherMind Mesh Configuration Model Layer.
  */
 
 /**
@@ -458,10 +425,15 @@ typedef struct _ACCESS_CONFIG_APPKEY_ADD_PARAM
     UCHAR appkey[MS_ACCESS_APPKEY_SIZE];
 
     /**
-     * Index of the NetKey and index of the AppKey
+     * Index of the NetKey
      * - 24 bits valid
      */
     UINT16 netkey_index;
+
+    /**
+     * Index of the AppKey
+     * - 24 bits valid
+     */
     UINT16 appkey_index;
 
 } ACCESS_CONFIG_APPKEY_ADD_PARAM;
@@ -475,10 +447,15 @@ typedef struct _ACCESS_CONFIG_APPKEY_UPDATE_PARAM
     UCHAR appkey[MS_ACCESS_APPKEY_SIZE];
 
     /**
-     * Index of the NetKey and index of the AppKey
+     * Index of the NetKey
      * - 24 bits valid
      */
     UINT16 netkey_index;
+
+    /**
+     * Index of the AppKey
+     * - 24 bits valid
+     */
     UINT16 appkey_index;
 
 } ACCESS_CONFIG_APPKEY_UPDATE_PARAM;
@@ -489,10 +466,15 @@ typedef struct _ACCESS_CONFIG_APPKEY_UPDATE_PARAM
 typedef struct _ACCESS_CONFIG_APPKEY_DELETE_PARAM
 {
     /**
-     * Index of the NetKey and index of the AppKey
+     * Index of the NetKey
      * - 24 bits valid
-     * */
+     */
     UINT16 netkey_index;
+
+    /**
+     * Index of the AppKey
+     * - 24 bits valid
+     */
     UINT16 appkey_index;
 
 } ACCESS_CONFIG_APPKEY_DELETE_PARAM;
@@ -535,13 +517,13 @@ typedef struct _ACCESS_CONFIG_NODEID_SET_PARAM
  */
 typedef struct _ACCESS_CONFIG_MODEL_APP_BIND_PARAM
 {
-    /** Address of the element */
+    /** Remote Element Address */
     UINT16 element_address;
 
     /** Index of the AppKey */
     UINT16 appkey_index;
 
-    /** SIG Model ID or Vendor Model ID */
+    /** Remote SIG Model ID or Vendor Model ID */
     MS_ACCESS_MODEL_ID model;
 
     /**
@@ -550,6 +532,12 @@ typedef struct _ACCESS_CONFIG_MODEL_APP_BIND_PARAM
      */
     MS_ACCESS_MODEL_ID client_model;
 
+    /**
+     * Local Element Handle where the above Client Model ID
+     * is to be searched.
+     */
+    MS_ACCESS_ELEMENT_HANDLE element_handle;
+
 } ACCESS_CONFIG_MODEL_APP_BIND_PARAM;
 
 /**
@@ -557,13 +545,13 @@ typedef struct _ACCESS_CONFIG_MODEL_APP_BIND_PARAM
  */
 typedef struct _ACCESS_CONFIG_MODEL_APP_UNBIND_PARAM
 {
-    /** Address of the element */
+    /** Remote Element Address */
     UINT16 element_address;
 
     /** Index of the AppKey */
     UINT16 appkey_index;
 
-    /** SIG Model ID or Vendor Model ID */
+    /** Remote SIG Model ID or Vendor Model ID */
     MS_ACCESS_MODEL_ID model;
 
     /**
@@ -571,6 +559,12 @@ typedef struct _ACCESS_CONFIG_MODEL_APP_UNBIND_PARAM
      * Used only for MS_config_client_model_app_unbind().
      */
     MS_ACCESS_MODEL_ID client_model;
+
+    /**
+     * Local Element Handle where the above Client Model ID
+     * is to be searched.
+     */
+    MS_ACCESS_ELEMENT_HANDLE element_handle;
 
 } ACCESS_CONFIG_MODEL_APP_UNBIND_PARAM;
 
@@ -711,26 +705,35 @@ typedef struct _ACCESS_CONFIG_NETWORK_TRANSMIT_SET_PARAM
 
 /** \} */
 
+/** \} */
+
 
 /* --------------------------------------------- Function */
 
 /**
  * \defgroup config_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Config Model APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Configuration Model Layer to the Application.
  */
 
 /**
  * \defgroup config_cli_api_defs Configuration Client API Definitions
  * \{
- * This section describes the Configuration Client APIs.
+ * \brief This section describes the EtherMind Mesh Configuration Client
+ * Model APIs.
+ */
+
+/**
+ * \name Configuration Client Interfaces
+ * \{
  */
 
 /**
  *  \brief API to initialize Configuration Client model
  *
  *  \par Description
- *  This is to initialize Configuration Client model and to register with Acess layer.
+ *  This is to initialize Configuration Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -758,14 +761,12 @@ API_RESULT MS_config_client_init
  *  This is to sets the information about server which is to be configured.
  *
  *  \param [in] server_addr   Address of Configuration Server.
- *  \param [in] dev_key       Device Key of Configuration Server.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
 API_RESULT MS_config_client_set_server
            (
-               /* IN */ MS_NET_ADDR    server_addr,
-               /* IN */ UCHAR        * dev_key
+               /* IN */ MS_NET_ADDR    server_addr
            );
 
 /**
@@ -786,6 +787,29 @@ API_RESULT MS_config_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+
+/** \} */
+
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup config_defines
+ * \{
+ */
+
+/**
+ * \defgroup config_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Configuration Model Layer.
+ */
+
+/**
+ * \name Configuration Client Macros
+ * \{
+ */
 
 /**
  *  \brief API to get the secure network beacon state
@@ -1716,20 +1740,33 @@ API_RESULT MS_config_client_send_reliable_pdu
             (void *)param, \
             MS_ACCESS_CONFIG_NETWORK_TRANSMIT_STATUS_OPCODE \
         )
+/** \} */
+
+/** \} */
 
 /** \} */
 
 /**
- * \defgroup config_svr_api_defs Configuration Server API Definitions
+ * \addtogroup config_api_defs
  * \{
- * This section describes the Configuration Server APIs.
  */
 
+/**
+ * \defgroup config_svr_api_defs Configuration Server API Definitions
+ * \{
+ * \brief This section describes the EtherMind Mesh Configuration Server
+ * Model APIs.
+ */
+
+/**
+ * \name Configuration Server Interfaces
+ * \{
+ */
 /**
  *  \brief API to initialize configuration server model
  *
  *  \par Description
- *  This is to initialize configuration server model and to register with Acess layer.
+ *  This is to initialize configuration server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -1739,13 +1776,17 @@ API_RESULT MS_config_client_send_reliable_pdu
  *                   After power cycle of an already provisioned node, the model handle will have
  *                   valid value and the same will be reused for registration.
  *
+ *  \param [in] appl_cb    Application Callback to be used by the Configuration Client.
+ *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
 API_RESULT MS_config_server_init
            (
                /* IN */    MS_ACCESS_ELEMENT_HANDLE    element_handle,
-               /* INOUT */ MS_ACCESS_MODEL_HANDLE    * model_handle
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE    * model_handle,
+               /* IN */    MS_CONFIG_MODEL_CB          appl_cb
            );
+/** \} */
 
 /** \} */
 

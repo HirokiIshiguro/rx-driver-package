@@ -1,23 +1,10 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2016 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /**********************************************************************************************************************
-* File Name    : r_sci_rx.c
+* File Name    : r_sci_rx230.c
 * Description  : Functions for using SCI on the RX230 device.
 ***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
@@ -26,6 +13,17 @@
 *                              SCI_CMD_EN_TEI was changed to ineffective, because it is meaningless command.
 *           20.05.2019 3.00    Added support for GNUC and ICCRX.
 *           15.08.2019 3.20    Fixed warnings in IAR.
+*           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
+*                              Merged IrDA functionality to SCI FIT.
+*           31.03.2021 3.80    Added support circular buffer in mode asynchronous.
+*           27.12.2022 4.60    Updated macro definition enable and disable nested interrupt for TXI, RXI, ERI, TEI.
+*           31.01.2024 5.10    Added WAIT_LOOP comments.
+*           28.06.2024 5.30    Corrected the typecasting formula in sci_init_bit_rate().
+*           01.11.2024 5.40    Fixed the issue that data cannot be sent when using the SCI_CMD_TX_Q_FLUSH command
+*                              with the R_SCI_Control() function before executing the R_SCI_Send() function.
+*                              Fixed the issue that the DMAC channel will not be closed or keep busy
+*                              if a communication error after executing the R_SCI_Send() or R_SCI_Receive() function.
+*           15.03.2025 5.41    Updated disclaimer
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -131,6 +129,22 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_eri12_isr(void);
 
 #endif
 
+#if (SCI_CFG_IRDA_INCLUDED)
+#if (SCI_CFG_CH5_IRDA_INCLUDED)
+/* Queue buffers*/
+static uint8_t         irda_ch5_tx_buf[SCI_CFG_CH5_TX_BUFSIZ];
+static uint8_t         irda_ch5_rx_buf[SCI_CFG_CH5_RX_BUFSIZ];
+#endif
+/*------- Global functions -------*/
+static sci_err_t      sci_irda_init_queues (uint8_t const  chan);
+static void           sci_irda_clear_io_register (sci_hdl_t const hdl);
+static void           sci_irda_io_setting (uint8_t* port_sel);
+static void           sci_irda_io_mode_setting (uint8_t* port_sel, bool init_or_setting);
+static sci_err_t      sci_irda_init_bit_rate (sci_hdl_t const     hdl,
+                                              uint32_t const      pclk,
+                                              sci_irda_t * const  p_cfg);
+#endif
+
 /*****************************************************************************
 * Function Name: sci_mcu_param_check
 * Description  : This function parameters check on MCU.
@@ -167,6 +181,7 @@ sci_err_t sci_mcu_param_check(uint8_t const chan)
 void sci_init_register(sci_hdl_t const hdl)
 {
     /* SCI transmit enable bit and receive enable bit check & disable */
+    /* WAIT_LOOP */
     while ((0 != hdl->rom->regs->SCR.BIT.TE) || (0 != hdl->rom->regs->SCR.BIT.RE))
     {
         if (0 != hdl->rom->regs->SCR.BIT.TE)
@@ -297,7 +312,9 @@ int32_t sci_init_bit_rate(sci_hdl_t const  hdl,
     /* BRR = (PCLK/(divisor * baud)) - 1 */
     /* BRR = (ratio / divisor) - 1 */
     ratio = pclk/baud;
-    for(i=0; i < num_divisors; i++)
+
+    /* WAIT_LOOP */
+    for (i=0; i < num_divisors; i++)
     {
         if (ratio < (uint32_t)(p_baud_info[i].divisor * 256))
         {
@@ -342,7 +359,7 @@ int32_t sci_init_bit_rate(sci_hdl_t const  hdl,
 
     /* CALCULATE M ASSUMING A 0% ERROR then WRITE REGISTER */
     hdl->rom->regs->BRR = (uint8_t)(tmp-1);
-    float_M = ((float)((baud * divisor) * 256) * tmp) / pclk;
+    float_M = ((((float)baud * divisor) * 256) * tmp) / pclk;
     float_M *= 2;
     int_M = (uint32_t)float_M;
     int_M = (int_M & 0x01) ? ((int_M/2) + 1) : (int_M/2);
@@ -417,7 +434,7 @@ void sci_disable_ints(sci_hdl_t const hdl)
     return;
 } /* End of function sci_disable_ints() */
 
-#if (SCI_CFG_ASYNC_INCLUDED)
+#if ((SCI_CFG_ASYNC_INCLUDED) || (TX_DTC_DMACA_ENABLE | RX_DTC_DMACA_ENABLE) || (SCI_CFG_IRDA_INCLUDED))
 /*****************************************************************************
 * sciN_txiN_isr 
 *  
@@ -427,6 +444,11 @@ void sci_disable_ints(sci_hdl_t const hdl)
 #if SCI_CFG_CH0_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci0_txi0_isr(void)
 {
+#if SCI_CFG_CH0_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     txi_handler(&ch0_ctrl);
 } /* End of function sci0_txi0_isr() */
 
@@ -435,6 +457,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci0_txi0_isr(void)
 #if SCI_CFG_CH1_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_txi1_isr(void)
 {
+#if SCI_CFG_CH1_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     txi_handler(&ch1_ctrl);
 } /* End of function sci1_txi1_isr() */
 
@@ -444,6 +471,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_txi1_isr(void)
 #if SCI_CFG_CH5_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_txi5_isr(void)
 {
+#if SCI_CFG_CH5_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     txi_handler(&ch5_ctrl);
 } /* End of function sci5_txi5_isr() */
 
@@ -452,6 +484,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_txi5_isr(void)
 #if SCI_CFG_CH6_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci6_txi6_isr(void)
 {
+#if SCI_CFG_CH6_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     txi_handler(&ch6_ctrl);
 } /* End of function sci6_txi6_isr() */
 
@@ -460,6 +497,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci6_txi6_isr(void)
 #if SCI_CFG_CH8_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_txi8_isr(void)
 {
+#if SCI_CFG_CH8_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     txi_handler(&ch8_ctrl);
 } /* End of function sci8_txi8_isr() */
 
@@ -468,6 +510,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_txi8_isr(void)
 #if SCI_CFG_CH9_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci9_txi9_isr(void)
 {
+#if SCI_CFG_CH9_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     txi_handler(&ch9_ctrl);
 } /* End of function sci9_txi9_isr() */
 
@@ -476,12 +523,17 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci9_txi9_isr(void)
 #if SCI_CFG_CH12_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_txi12_isr(void)
 {
+#if SCI_CFG_CH12_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     txi_handler(&ch12_ctrl);
 } /* End of function sci12_txi12_isr() */
 
 #endif
 
-#endif
+#endif /* End of ((SCI_CFG_ASYNC_INCLUDED) || (TX_DTC_DMACA_ENABLE | RX_DTC_DMACA_ENABLE) || (SCI_CFG_IRDA_INCLUDED)) */
 
 #if SCI_CFG_TEI_INCLUDED
 /*****************************************************************************
@@ -493,6 +545,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_txi12_isr(void)
 #if SCI_CFG_CH0_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci0_tei0_isr(void)
 {
+#if SCI_CFG_CH0_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     tei_handler(&ch0_ctrl);
 } /* End of function sci0_tei0_isr() */
 
@@ -501,6 +558,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci0_tei0_isr(void)
 #if SCI_CFG_CH1_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_tei1_isr(void)
 {
+#if SCI_CFG_CH1_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     tei_handler(&ch1_ctrl);
 } /* End of function sci1_tei1_isr() */
 
@@ -509,6 +571,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_tei1_isr(void)
 #if SCI_CFG_CH5_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_tei5_isr(void)
 {
+#if SCI_CFG_CH5_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     tei_handler(&ch5_ctrl);
 } /* End of function sci5_tei5_isr() */
 
@@ -517,6 +584,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_tei5_isr(void)
 #if SCI_CFG_CH6_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci6_tei6_isr(void)
 {
+#if SCI_CFG_CH6_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     tei_handler(&ch6_ctrl);
 } /* End of function sci6_tei6_isr() */
 
@@ -525,6 +597,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci6_tei6_isr(void)
 #if SCI_CFG_CH8_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_tei8_isr(void)
 {
+#if SCI_CFG_CH8_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     tei_handler(&ch8_ctrl);
 } /* End of function sci8_tei8_isr() */
 
@@ -533,6 +610,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_tei8_isr(void)
 #if SCI_CFG_CH9_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci9_tei9_isr(void)
 {
+#if SCI_CFG_CH9_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     tei_handler(&ch9_ctrl);
 } /* End of function sci9_tei9_isr() */
 
@@ -541,6 +623,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci9_tei9_isr(void)
 #if SCI_CFG_CH12_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_tei12_isr(void)
 {
+#if SCI_CFG_CH12_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     tei_handler(&ch12_ctrl);
 } /* End of function sci12_tei12_isr() */
 
@@ -557,6 +644,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_tei12_isr(void)
 #if SCI_CFG_CH0_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci0_rxi0_isr(void)
 {
+#if SCI_CFG_CH0_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     rxi_handler(&ch0_ctrl);
 } /* End of function sci0_rxi0_isr() */
 
@@ -565,6 +657,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci0_rxi0_isr(void)
 #if SCI_CFG_CH1_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_rxi1_isr(void)
 {
+#if SCI_CFG_CH1_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     rxi_handler(&ch1_ctrl);
 } /* End of function sci1_rxi1_isr() */
 
@@ -573,6 +670,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_rxi1_isr(void)
 #if SCI_CFG_CH5_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_rxi5_isr(void)
 {
+#if SCI_CFG_CH5_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     rxi_handler(&ch5_ctrl);
 } /* End of function sci5_rxi5_isr() */
 
@@ -581,6 +683,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_rxi5_isr(void)
 #if SCI_CFG_CH6_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci6_rxi6_isr(void)
 {
+#if SCI_CFG_CH6_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     rxi_handler(&ch6_ctrl);
 } /* End of function sci6_rxi6_isr() */
 
@@ -589,6 +696,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci6_rxi6_isr(void)
 #if SCI_CFG_CH8_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_rxi8_isr(void)
 {
+#if SCI_CFG_CH8_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     rxi_handler(&ch8_ctrl);
 } /* End of function sci8_rxi8_isr() */
 
@@ -597,6 +709,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_rxi8_isr(void)
 #if SCI_CFG_CH9_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci9_rxi9_isr(void)
 {
+#if SCI_CFG_CH9_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     rxi_handler(&ch9_ctrl);
 } /* End of function sci9_rxi9_isr() */
 
@@ -605,6 +722,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci9_rxi9_isr(void)
 #if SCI_CFG_CH12_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_rxi12_isr(void)
 {
+#if SCI_CFG_CH12_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     rxi_handler(&ch12_ctrl);
 } /* End of function sci12_rxi12_isr() */
 
@@ -619,6 +741,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_rxi12_isr(void)
 #if SCI_CFG_CH0_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci0_eri0_isr(void)
 {
+#if SCI_CFG_CH0_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     eri_handler(&ch0_ctrl);
 } /* End of function sci0_eri0_isr() */
 
@@ -627,6 +754,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci0_eri0_isr(void)
 #if SCI_CFG_CH1_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_eri1_isr(void)
 {
+#if SCI_CFG_CH1_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     eri_handler(&ch1_ctrl);
 } /* End of function sci1_eri1_isr() */
 
@@ -635,6 +767,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_eri1_isr(void)
 #if SCI_CFG_CH5_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_eri5_isr(void)
 {
+#if SCI_CFG_CH5_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     eri_handler(&ch5_ctrl);
 } /* End of function sci5_eri5_isr() */
 #endif
@@ -642,6 +779,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_eri5_isr(void)
 #if SCI_CFG_CH6_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci6_eri6_isr(void)
 {
+#if SCI_CFG_CH6_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     eri_handler(&ch6_ctrl);
 } /* End of function sci6_eri6_isr() */
 
@@ -650,6 +792,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci6_eri6_isr(void)
 #if SCI_CFG_CH8_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_eri8_isr(void)
 {
+#if SCI_CFG_CH8_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     eri_handler(&ch8_ctrl);
 } /* End of function sci8_eri8_isr() */
 
@@ -658,6 +805,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_eri8_isr(void)
 #if SCI_CFG_CH9_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci9_eri9_isr(void)
 {
+#if SCI_CFG_CH9_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     eri_handler(&ch9_ctrl);
 } /* End of function sci9_eri9_isr() */
 
@@ -666,6 +818,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci9_eri9_isr(void)
 #if SCI_CFG_CH12_INCLUDED
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_eri12_isr(void)
 {
+#if SCI_CFG_CH12_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+    
     eri_handler(&ch12_ctrl);
 } /* End of function sci12_eri12_isr() */
 
@@ -737,18 +894,64 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
     case (SCI_CMD_EN_TEI):  /* SCI_CMD_EN_TEI is obsolete command, but it exists only for compatibility with older version. */
     break;
 #endif
+#if TX_DTC_DMACA_ENABLE
+        case (SCI_CMD_CHECK_TX_DONE):
+        {
+            if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable))
+            {
+                if (false == hdl->tx_idle)
+                {
+                    err = SCI_ERR_XCVR_BUSY;
+                }
+            }
+            break;
+        }
+#endif
 
+#if RX_DTC_DMACA_ENABLE
+        case (SCI_CMD_CHECK_RX_DONE):
+        {
+            if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+            {
+                if (0 != hdl->queue[0].rx_cnt)
+                {
+                    err = SCI_ERR_XCVR_BUSY;
+                }
+            }
+            break;
+        }
+#endif
     case (SCI_CMD_TX_Q_FLUSH):
+    {
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+        R_BYTEQ_Flush(hdl->u_tx_data.que);
+#else
+        /* Disable TXI interrupt */
         DISABLE_TXI_INT;
         R_BYTEQ_Flush(hdl->u_tx_data.que);
         ENABLE_TXI_INT;
+
+        /* Re-enable interrupts */
+        hdl->rom->regs->SCR.BYTE &= (~SCI_EN_XCVR_MASK);
+        SCI_SCR_DUMMY_READ;
+        SCI_IR_TXI_CLEAR;
+        hdl->rom->regs->SCR.BYTE |= SCI_EN_XCVR_MASK;
+#endif
     break;
+    }
 
     case (SCI_CMD_RX_Q_FLUSH):
+    {
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+        R_BYTEQ_Flush(hdl->u_rx_data.que);
+#else
+        /* Disable RXI interrupt */
         DISABLE_RXI_INT;
         R_BYTEQ_Flush(hdl->u_rx_data.que);
         ENABLE_RXI_INT;
+#endif
     break;
+    }
 
     case (SCI_CMD_TX_Q_BYTES_FREE):
         R_BYTEQ_Unused(hdl->u_tx_data.que, (uint16_t *) p_args);
@@ -763,6 +966,39 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
         /* flush transmit queue */
         DISABLE_TXI_INT;
         R_BYTEQ_Flush(hdl->u_tx_data.que);
+#if(TX_DTC_DMACA_ENABLE)
+        if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable))
+        {
+            sci_fifo_ctrl_t        *p_tctrl = &hdl->queue[hdl->qindex_app_rx];
+            p_tctrl->tx_cnt = 0;
+            p_tctrl->tx_fraction = 0;
+#if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+            if(SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable)
+            {
+                dtc_cmd_arg_t           args_dtc;
+                args_dtc.act_src = hdl->rom->dtc_tx_act_src;
+                R_DTC_Control(DTC_CMD_ACT_SRC_DISABLE, NULL, &args_dtc);
+
+            }
+#endif
+#if ((TX_DTC_DMACA_ENABLE & 0x02) || (RX_DTC_DMACA_ENABLE & 0x02))
+            if(SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable)
+            {
+                dmaca_stat_t   stat_dmaca;
+                R_DMACA_Control(hdl->rom->dmaca_tx_channel, DMACA_CMD_DISABLE, &stat_dmaca);
+
+            }
+#endif
+#if SCI_CFG_FIFO_INCLUDED
+            if (true == hdl->fifo_ctrl)
+            {
+
+                /* reset TX FIFO */
+                hdl->rom->regs->FCR.BIT.TFRST = 0x01;
+            }
+#endif
+        }
+#endif
         ENABLE_TXI_INT;
 
         /* NOTE: the following steps will abort anything being sent */
@@ -782,6 +1018,8 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
         {   
             /* transmit "0" and wait for completion */
             SCI_TDR(0);
+
+            /* WAIT_LOOP */
             while (0 == hdl->rom->regs->SSR.BIT.TEND)
             {
                 R_BSP_NOP();
@@ -803,7 +1041,7 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
 
     return err;
 } /* End of function sci_async_cmds() */
-#endif
+#endif /* End of SCI_CFG_ASYNC_INCLUDED */
 
 #if (SCI_CFG_SSPI_INCLUDED || SCI_CFG_SYNC_INCLUDED)
 /*****************************************************************************
@@ -871,7 +1109,35 @@ sci_err_t sci_sync_cmds(sci_hdl_t const hdl,
         /* disable receive interrupts in ICU and peripheral */
         DISABLE_RXI_INT;
         DISABLE_ERI_INT;
+#if(TX_DTC_DMACA_ENABLE)
+        if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable))
+        {
+            sci_fifo_ctrl_t        *p_tctrl = &hdl->queue[hdl->qindex_app_rx];
+            p_tctrl->tx_cnt = 0;
+            p_tctrl->tx_fraction = 0;
+#if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+            if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable) && (SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+            {
+                // Set condition for reset TDFR to generate interrupt in next time
+                hdl->qindex_int_tx = 1;
+                dtc_cmd_arg_t           args_dtc;
+                args_dtc.act_src               = hdl->rom->dtc_tx_act_src;
+                R_DTC_Control(DTC_CMD_ACT_SRC_DISABLE, NULL, &args_dtc);
 
+                args_dtc.act_src               = hdl->rom->dtc_rx_act_src;
+                R_DTC_Control(DTC_CMD_ACT_SRC_DISABLE, NULL, &args_dtc);
+            }
+#endif
+#if ((TX_DTC_DMACA_ENABLE & 0x02) || (RX_DTC_DMACA_ENABLE & 0x02))
+            if((SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable) && (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+            {
+                R_DMACA_Close(hdl->rom->dmaca_tx_channel);
+                R_DMACA_Close(hdl->rom->dmaca_rx_channel);
+            }
+#endif
+
+        }
+#endif
         hdl->rom->regs->SCR.BYTE &= ~(SCI_SCR_REI_MASK | SCI_SCR_RE_MASK | SCI_SCR_TE_MASK);
 
         hdl->tx_cnt = 0;
@@ -887,6 +1153,21 @@ sci_err_t sci_sync_cmds(sci_hdl_t const hdl,
         }
 
         *hdl->rom->ir_rxi = 0;                  /* clear rxi interrupt flag */
+#if SCI_CFG_FIFO_INCLUDED
+#if(TX_DTC_DMACA_ENABLE)
+            if((SCI_DTC_DMACA_DISABLE != hdl->rom->dtc_dmaca_tx_enable) && (true != hdl->fifo_ctrl))
+            {
+                *hdl->rom->ir_txi = 0;
+            }
+#endif
+#else
+#if(TX_DTC_DMACA_ENABLE)
+            if((SCI_DTC_DMACA_DISABLE != hdl->rom->dtc_dmaca_tx_enable))
+            {
+                *hdl->rom->ir_txi = 0;
+            }
+#endif
+#endif
         *hdl->rom->ir_eri = 0;                  /* clear eri interrupt flag */
 
         ENABLE_ERI_INT;                         /* enable rx err interrupts in ICU */
@@ -896,7 +1177,19 @@ sci_err_t sci_sync_cmds(sci_hdl_t const hdl,
         hdl->rom->regs->SCR.BYTE |= SCI_SCR_RE_MASK | SCI_SCR_TE_MASK;
         hdl->rom->regs->SCR.BYTE |= SCI_SCR_REI_MASK;
     break;
-
+#if RX_DTC_DMACA_ENABLE
+        case (SCI_CMD_CHECK_RX_SYNC_DONE):
+        {
+            if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+            {
+                if (0 != hdl->queue[0].rx_cnt)
+                {
+                    err = SCI_ERR_XCVR_BUSY;
+                }
+            }
+            break;
+        }
+#endif
     case (SCI_CMD_CHANGE_SPI_MODE):
 #if SCI_CFG_PARAM_CHECKING_ENABLE
 
@@ -935,5 +1228,442 @@ sci_err_t sci_sync_cmds(sci_hdl_t const hdl,
 
     return err;
 } /* End of function sci_sync_cmds() */
+#endif /* End of SCI_CFG_SSPI_INCLUDED || SCI_CFG_SYNC_INCLUDED */
+
+#if (SCI_CFG_IRDA_INCLUDED)
+/*****************************************************************************
+* Function Name: sci_irda_cmds
+* Description  : This function configures non-standard UART hardware and
+*                performs special software operations.
+*
+* Arguments    : hdl -
+*                    handle for channel (ptr to chan control block)
+*                cmd -
+*                    command to run
+*                p_args -
+*                    pointer argument(s) specific to command
+* Return Value : SCI_SUCCESS -
+*                    Command completed successfully.
+*                SCI_ERR_NULL_PTR -
+*                    p_args is NULL when required for cmd
+*                SCI_ERR_INVALID_ARG -
+*                    The cmd value or p_args contains an invalid value.
+******************************************************************************/
+sci_err_t sci_irda_cmds(sci_hdl_t const hdl,
+                        sci_cmd_t const cmd,
+                        void            *p_args)
+{
+    sci_err_t   err=SCI_SUCCESS;
+
+#if SCI_CFG_PARAM_CHECKING_ENABLE
+    if (((NULL == p_args) || (FIT_NO_PTR == p_args))
+     && ((SCI_CMD_TX_Q_BYTES_FREE == cmd) || (SCI_CMD_RX_Q_BYTES_AVAIL_TO_READ == cmd)))
+    {
+        return SCI_ERR_NULL_PTR;
+    }
 #endif
+
+    /* Command control */
+        switch(cmd)
+        {
+
+        /* flush the Transmit queue */
+        case (SCI_CMD_TX_Q_FLUSH):
+            DISABLE_TXI_INT;
+            R_BYTEQ_Flush(hdl->u_tx_data.que);
+            ENABLE_TXI_INT;
+
+            /* Re-enable interrupts */
+            hdl->rom->regs->SCR.BYTE &= (~SCI_EN_XCVR_MASK);
+            SCI_SCR_DUMMY_READ;
+            SCI_IR_TXI_CLEAR;
+            hdl->rom->regs->SCR.BYTE |= SCI_EN_XCVR_MASK;
+        break;
+
+        /* flush the Receive queue */
+        case (SCI_CMD_RX_Q_FLUSH):
+            DISABLE_RXI_INT;
+            R_BYTEQ_Flush(hdl->u_rx_data.que);
+            ENABLE_RXI_INT;
+        break;
+
+        /* Checks the size of space in the transmit queue. */
+        case (SCI_CMD_TX_Q_BYTES_FREE):
+            R_BYTEQ_Unused(hdl->u_tx_data.que, (uint16_t *) p_args);
+        break;
+
+        /* Checks the size of the data stored in the receive queue. */
+        case (SCI_CMD_RX_Q_BYTES_AVAIL_TO_READ):
+            R_BYTEQ_Used(hdl->u_rx_data.que, (uint16_t *) p_args);
+        break;
+
+        /* other */
+        default:
+            err = SCI_ERR_INVALID_ARG;
+        break;
+        }
+
+        return err;
+} /* End of function sci_irda_cmds() */
+
+/*****************************************************************************
+* Function Name: sci_irda_open
+* Description  : Initialization for using the IRDA
+*
+* NOTE: The associated port must be configured/initialized prior to
+*       calling this function.
+*
+* Arguments    :  sci_ch_ctrl_t -
+*                    handle for channel (pointer to channel control block)
+* Return Value :  SCI_SUCCESS -
+*                    channel opened successfully
+******************************************************************************/
+sci_err_t sci_irda_open(uint8_t const      chan,
+                        sci_irda_t * const p_cfg,
+                        uint8_t * const      p_priority,
+                        sci_hdl_t  const   hdl)
+{
+    sci_err_t  err = SCI_SUCCESS;
+
+    /* Check arguments */
+
+#if SCI_CFG_PARAM_CHECKING_ENABLE
+    /* Check channel has IrDA interface */
+    if (chan != SCI_CH5)
+    {
+        return SCI_ERR_BAD_CHAN;
+    }
+    
+    /* Check argument p_cfg, p_hdl */
+    if (0 == p_cfg->baud_rate)
+    {
+        return SCI_ERR_INVALID_ARG;
+    }
+    if (p_cfg->clk_out_width > SCI_IRDA_OUT_WIDTH_128)
+    {
+        return SCI_ERR_INVALID_ARG;
+    }
+    if ((p_cfg->int_priority < (BSP_MCU_IPL_MIN+1)) || (p_cfg->int_priority > BSP_MCU_IPL_MAX))
+    {
+        return SCI_ERR_INVALID_ARG;
+    }
+
+#endif /* End of SCI_CFG_PARAM_CHECKING_ENABLE */
+
+    /* I/O port setting (Hi-Z -> Set the state it was in when you release the port) */
+    sci_irda_io_setting((uint8_t*)&(hdl->port_rom->irrxd_port_gr));
+    sci_irda_io_setting((uint8_t*)&(hdl->port_rom->irtxd_port_gr));
+
+    /* Initialize transmit status flag */
+    hdl->tx_idle = true;
+
+#if (RX_DTC_DMACA_ENABLE & 0x01 || RX_DTC_DMACA_ENABLE & 0x02)
+    /* Initialize receive flag when using DTC/DMAC */
+    if ((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+    {
+        hdl->rx_idle = true;
+    }
+#endif
+
+    /* Set data polarity and Serial I/O pins are used for IrDA data communication. */
+    hdl->rom->regs_irda->IRCR.BYTE = (uint8_t)(0x80 | (SCI_CFG_CH5_IRDA_IRTXD_INACTIVE_LEVEL << 3) |
+                          (SCI_CFG_CH5_IRDA_IRRXD_INACTIVE_LEVEL <<2 ));
+
+    /* Configure SMR for asynchronous mode, single processor, 8bit , Non-parity, and 2 stop-bit */
+    hdl->rom->regs->SMR.BYTE = (uint8_t)0x08;
+
+    /* Setup clock for Baud-Rate */
+    err = sci_irda_init_bit_rate(hdl, hdl->pclk_speed, p_cfg);
+    if (SCI_SUCCESS != err)
+    {
+        return err;
+    }
+
+#if (TX_DTC_DMACA_ENABLE & 0x01 || TX_DTC_DMACA_ENABLE & 0x02)
+    /* DTC/DMAC don't use the queue */
+    if ((SCI_DTC_ENABLE != g_handles[chan]->rom->dtc_dmaca_tx_enable) && (SCI_DMACA_ENABLE != g_handles[chan]->rom->dtc_dmaca_tx_enable))
+    {
+        /* Configuration and initialization of the queue of the sending and receiving */
+        err = sci_irda_init_queues(chan);
+    }
+#else
+    /* Configuration and initialization of the queue of the sending and receiving */
+    err = sci_irda_init_queues(chan);
+#endif
+    if (SCI_SUCCESS != err)
+    {
+        return err;
+    }
+
+    /* Set IRRXD mode of the I/O port */
+    sci_irda_io_mode_setting((uint8_t*)&(hdl->port_rom->irrxd_port_gr),TARGET_SETTING);
+
+    /* wait over[18 / (16 * bit-rate)] */
+    R_BSP_SoftwareDelay((((1000000/p_cfg->baud_rate) * 18) / 16),BSP_DELAY_MICROSECS);
+
+    hdl->rom->regs_irda->IRCR.BYTE = (uint8_t)(0x80 | (p_cfg->clk_out_width<<4) |
+                     (SCI_CFG_CH5_IRDA_IRTXD_INACTIVE_LEVEL << 3) | (SCI_CFG_CH5_IRDA_IRRXD_INACTIVE_LEVEL <<2 ));
+
+    /* Set IRTXD mode of the I/O port */
+    sci_irda_io_mode_setting((uint8_t*)&(hdl->port_rom->irtxd_port_gr),TARGET_SETTING);
+
+    *p_priority = p_cfg->int_priority;
+    return (err);
+} /* End of function sci_irda_open() */
+
+/*****************************************************************************
+* Function Name: sci_irda_close
+* Description  : Stops the IRDA function. This processing includes the
+*                initialization for SCI chX used.
+* Arguments    : hdl -
+*                    handle for channel (ptr to chan control block)
+* Return Value : None
+******************************************************************************/
+void sci_irda_close(sci_hdl_t const hdl)
+{
+
+    /* I/O port Refresh (Set the state it was in when you release the port) */
+    sci_irda_io_setting((uint8_t*)&(hdl->port_rom->irtxd_port_gr));
+    sci_irda_io_setting((uint8_t*)&(hdl->port_rom->irrxd_port_gr));
+
+    /* Set IN/OUT Port mode of the I/O port */
+    sci_irda_io_mode_setting((uint8_t*)&(hdl->port_rom->irtxd_port_gr),TARGET_STOP);
+
+    /* Initialize IrDA Clock Select*/
+    hdl->rom->regs_irda->IRCR.BYTE &= 0x8F;
+
+    /* Set IN/OUT Port mode of the I/O port */
+    sci_irda_io_mode_setting((uint8_t*)&(hdl->port_rom->irrxd_port_gr),TARGET_STOP);
+
+    /* Initialization of SCI Register */
+    sci_irda_clear_io_register(hdl);
+
+    /* Serial I/O pins are used for SCI. */
+    hdl->rom->regs_irda->IRCR.BYTE = 0x00;
+
+} /* End of function sci_irda_close() */
+
+/*****************************************************************************
+* Outline      : Sets the state when the specified pin is not active state.
+* Function Name: sci_irda_io_setting
+* Description  : Set IRDA_SCI function pin controller.
+* Arguments    : uint8_t* port_sel ; Port select infomation
+* Return Value : None
+******************************************************************************/
+static void sci_irda_io_setting(uint8_t* port_sel)
+{
+    volatile uint8_t R_BSP_EVENACCESS_SFR * const p_pdr  = ((&PORT0.PDR.BYTE) + *(port_sel));
+    volatile uint8_t R_BSP_EVENACCESS_SFR * const p_podr = ((&PORT0.PDR.BYTE) + 0x20 + *(port_sel));
+
+    (*p_podr) |= ((*(port_sel+3) << *(port_sel+1)));        /* Port holds output data. */
+    (*p_pdr)  |= ((*(port_sel+2) << *(port_sel+1)));        /* Port Direction */
+
+} /* End of function sci_irda_io_setting() */
+
+/************************************************************************************
+* Outline      : Switches the specified pin mode.
+* Function Name: sci_irda_io_mode_setting
+* Description  : Set IRDA_SCI function pin controller.
+* Arguments    : uint8_t* port_sel ; Port select information
+*              : init_or_setting   : Specifies the mode for the pin to be selected.
+* Return Value : None
+************************************************************************************/
+static void sci_irda_io_mode_setting(uint8_t* port_sel, bool init_or_setting)
+{
+    volatile uint8_t R_BSP_EVENACCESS_SFR * const p_pmr  = ((&PORT0.PDR.BYTE) + 0x60 + *(port_sel));
+    volatile uint8_t R_BSP_EVENACCESS_SFR * const ppfs = ((((&MPC.PWPR.BYTE) + 0x21 + (*(port_sel) * 8)) + *(port_sel+1)));
+
+    if (TARGET_SETTING == init_or_setting)
+    {
+        /* Select Port Function Control */
+        R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_MPC);  /* Enables the PFS register writing.        */
+        (*ppfs) = *(port_sel+4);
+        R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_MPC);   /* Disables the PFS register writing.       */
+
+        /* Control Port Mode (Functions) */
+        (*p_pmr)  |= ((1U << *(port_sel+1)));
+
+        /*Reads the same I/O register (since the Delay function may be called in next processing).  */
+        if ((*p_pmr & (1U << *(port_sel+1))) == 1)
+        {
+            R_BSP_NOP();
+        }
+    }
+    else
+    {
+        /* Select Port Function Control */
+        R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_MPC);  /* Enables the PFS register writing.        */
+        (*ppfs) = SCI_IRDA_MPC_IRTXD_DISABLE;
+        R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_MPC);   /* Disables the PFS register writing.       */
+
+        /* Control Port Mode (Port) */
+        (*p_pmr)  &= (~(1U << *(port_sel+1)));
+    }
+
+} /* End of function sci_irda_io_mode_setting() */
+
+/************************************************************************************
+* Outline      : Reset SCI I/O register
+* Function Name: sci_irda_clear_io_register
+* Description  : Reset SCI I/O register.
+* Arguments    : sci_hdl_t const hdl     ;   IrDA handler
+* Return Value : None
+************************************************************************************/
+static void sci_irda_clear_io_register(sci_hdl_t const hdl)
+{
+    volatile  struct st_sci12 R_BSP_EVENACCESS_SFR * p_prom = hdl->rom->regs;
+
+    /* Initializes SCI I/O register */
+    p_prom->SMR.BYTE     = SCI_IRDA_SMR_INIT;
+    p_prom->SCR.BYTE     = SCI_IRDA_SCR_INIT;
+    p_prom->SCMR.BYTE    = SCI_IRDA_SCMR_INIT;
+    p_prom->BRR          = SCI_IRDA_BRR_INIT;
+    p_prom->SEMR.BYTE    = SCI_IRDA_SEMR_INIT;
+    p_prom->SNFR.BYTE    = SCI_IRDA_SNFR_INIT;
+    p_prom->SIMR1.BYTE   = SCI_IRDA_SIMR1_INIT;
+    p_prom->SIMR2.BYTE   = SCI_IRDA_SIMR2_INIT;
+    p_prom->SIMR3.BYTE   = SCI_IRDA_SIMR3_INIT;
+    p_prom->SISR.BYTE    = SCI_IRDA_SISR_INIT;
+    p_prom->SPMR.BYTE    = SCI_IRDA_SPMR_INIT;
+} /*End of function sci_irda_clear_io_register */
+
+/*****************************************************************************
+* Function Name: sci_irda_init_queues
+* Description  : Configuration and initialization of the queue of the sending
+*                and receiving
+* Arguments    : chan -
+*                    channel (ptr to chan control block)
+* Return Value : SCI_SUCCESS -
+*                    channel initialized successfully
+*                SCI_ERR_QUEUE_UNAVAILABLE -
+*                    no queue control blocks available
+******************************************************************************/
+static sci_err_t sci_irda_init_queues(uint8_t const  chan)
+{
+    byteq_err_t      ret1 = BYTEQ_ERR_INVALID_ARG;
+    byteq_err_t      ret2 = BYTEQ_ERR_INVALID_ARG;
+    sci_err_t        err  = SCI_SUCCESS;
+
+     /*channel number verified as legal prior to calling this function*/
+    switch (chan)
+    {
+#if SCI_CFG_CH5_IRDA_INCLUDED
+        case (SCI_CH5):
+        {
+            ret1 = R_BYTEQ_Open(irda_ch5_tx_buf, SCI_CFG_CH5_TX_BUFSIZ, &g_handles[SCI_CH5]->u_tx_data.que);
+            ret2 = R_BYTEQ_Open(irda_ch5_rx_buf, SCI_CFG_CH5_RX_BUFSIZ, &g_handles[SCI_CH5]->u_rx_data.que);
+            break;
+        }
+        default:
+        {
+            err = SCI_ERR_QUEUE_UNAVAILABLE;
+            break;
+        }
+#endif
+    }
+
+    if ((BYTEQ_SUCCESS != ret1) || (BYTEQ_SUCCESS != ret2))
+    {
+        err = SCI_ERR_QUEUE_UNAVAILABLE;
+    }
+
+    return err;
+} /* End of function sci_irda_init_queues() */
+
+/*****************************************************************************
+* Function Name: sci_irda_init_bit_rate
+* Description  :Configures settings based on the specified peripheral clock
+*               and communication rate. Verifies if the high pulse width
+*               is within the available range.
+* Arguments    : hdl -
+*                    Handle for channel (ptr to chan control block)
+*                pclk -
+*                    Peripheral clock speed; e.g. 24000000 for 24MHz
+*                baud -
+*                    Baud rate; 19200, 57600, 115200, etc.
+* Return Value : SCI_SUCCESS -
+*                    Baud-Rate was correctly set
+*                SCI_ERR_INVALID_ARG -
+*                    Paramater is Invalid value or The baud rate is not set correctly
+******************************************************************************/
+static sci_err_t sci_irda_init_bit_rate(sci_hdl_t const  hdl,
+                                        uint32_t const pclk,
+                                        sci_irda_t * const  p_cfg)
+{
+    uint32_t i;
+    uint32_t num_divisors = NUM_DIVISORS_IRDA;
+    uint32_t ratio;
+    uint32_t tmp;
+    uint32_t irda_tmp1;
+    uint32_t irda_tmp2;
+    uint32_t baud = p_cfg->baud_rate;
+    sci_err_t  err = SCI_SUCCESS;
+
+    baud_divisor_t const *p_baud_info = irda_async_baud;
+
+#if (SCI_CFG_PARAM_CHECKING_ENABLE == 1)
+    if ((0 == pclk) || (0 == baud))
+    {
+        return (SCI_ERR_INVALID_ARG);
+    }
+#endif
+
+    /* FIND the divisor ; CKS and ABCS Value is associated in the table. */
+    /* BRR must be 255 or less                                */
+    /* the "- 1" is ignored in some steps for approximations  */
+    /* BRR = (PCLK/(divisor * baud)) - 1                      */
+    /* BRR = (ratio / divisor) - 1                            */
+
+    ratio = pclk/baud;
+
+    /* WAIT_LOOP */
+    for (i=0; i < num_divisors; i++)
+    {
+        if (ratio < (uint32_t)(p_baud_info[i].divisor * 256))
+        {
+            break;
+        }
+    }
+    if (i == num_divisors)
+    {
+        return (SCI_ERR_INVALID_ARG);
+    }
+
+
+    /* Adjusts the value set to the BRR register by rounding and carry. */
+    /* divide ratio by only half the divisor and see if odd number */
+    tmp = ratio/((uint32_t)p_baud_info[i].divisor/2);
+
+    /* if odd, "round up" by ignoring -1; divide by 2 again for rest of divisor */
+    if (0x01 == (tmp & 0x01))
+    {
+        tmp = (uint8_t)tmp/2;
+    }
+    else
+    {
+        tmp = (uint8_t)(tmp/2)-1;
+    }
+
+    /* Verifies whether the high pulse width, which is specified with the output pulse width,*/
+    /* is within the available range for communication.                                      */
+    if (SCI_IRDA_OUT_WIDTH_3_16 != p_cfg->clk_out_width)
+    {
+        irda_tmp1 = ((pclk / 1000) / irda_ircks_div[p_cfg->clk_out_width].w_denominator);
+        irda_tmp2 = (uint32_t)(baud / (0.2125 * 1000));
+        if((709 <= irda_tmp1)||(irda_tmp1 <= irda_tmp2))
+        {
+            return (SCI_ERR_INVALID_ARG);
+        }
+    }
+
+    /* Set CSK,ABCS bit and BRR register */
+    hdl->rom->regs->BRR = (uint8_t)tmp;
+    hdl->rom->regs->SEMR.BIT.ABCS = p_baud_info[i].abcs;
+    hdl->rom->regs->SEMR.BIT.BGDM = p_baud_info[i].bgdm;
+    hdl->rom->regs->SMR.BIT.CKS = p_baud_info[i].cks;
+
+    return (err);
+} /* End of function sci_irda_init_bit_rate */
+
+#endif /* End of SCI_CFG_IRDA_INCLUDED */
 

@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2018(2019-2025) Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /*******************************************************************************
 *
 * Device     : RX/RX200/RX23W
@@ -31,10 +18,10 @@
 *            : V1.00B (2019-05-22)  [Hardware Manual Revision : 1.00]
 *            : V1.00C (2019-08-01)  [Hardware Manual Revision : 1.00]
 *            : V1.00D (2019-10-04)  [Hardware Manual Revision : 1.00]
+*            : V1.00E (2023-03-09)  [Hardware Manual Revision : 1.00]
+*            : V1.00F (2025-02-14)  [Hardware Manual Revision : 1.00]
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
-*
-*  Copyright(c) 2019 Renesas Electronics Corporation.
 *
 *********************************************************************************/
 /********************************************************************************/
@@ -1239,7 +1226,8 @@ typedef struct st_ctsu {
 			unsigned short CTSUICOMP:1;
 			unsigned short :7;
 			unsigned short CTSUTSOC:1;
-			unsigned short :3;
+			unsigned short CTSUCLKSEL1:1;
+			unsigned short :2;
 			unsigned short CTSUDRV:1;
 			unsigned short CTSUTSOD:1;
 			unsigned short CTSUSPMD:2;

@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2015 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2015 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx231.c
@@ -24,6 +11,11 @@
 * History : DD.MM.YYYY Version Description
 *         : 22.04.2015 1.00    First Release
 *         : 14.05.2015 1.01    Removed PortJ from the g_gpio_open_drain_n_support list.
+*         : 07.04.2023 2.00    Corrected the values of PORRT7, PORRT8, PORRT9, and PORRTJ
+*                                in the g_gpio_open_drain_n_support structure for RX231,
+*                              Corrected the values of PORRT5 in the g_gpio_pull_up_support and 
+*                                g_gpio_dscr_support structures for RX231.
+*         : 15.03.2025 5.11    Updated disclaimer.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -71,9 +63,9 @@ const uint8_t g_gpio_open_drain_n_support[GPIO_INFO_NUM_PORTS] =
     0x00,     //PORT4   None
     0x17,     //PORT5   P50 to P52, P54
     0x00,     //PORT6   None
-    0xF1,     //PORT7   None
-    0x0F,     //PORT8   None
-    0x0F,     //PORT9   None
+    0x00,     //PORT7   None
+    0x00,     //PORT8   None
+    0x00,     //PORT9   None
     0xFF,     //PORTA   PA0 to PA7
     0xFF,     //PORTB   PB0 to PB7
     0xFF,     //PORTC   PC0 to PC7
@@ -82,7 +74,7 @@ const uint8_t g_gpio_open_drain_n_support[GPIO_INFO_NUM_PORTS] =
     0x00,     //PORTF   None
     0x00,     //PORTG   None
     0x00,     //PORTH   None
-    0x00,     //PORTJ   PJ3
+    0x08,     //PORTJ   PJ3
 };
 
 const uint8_t g_gpio_open_drain_p_support[GPIO_INFO_NUM_PORTS] =
@@ -115,7 +107,7 @@ const uint8_t g_gpio_pull_up_support[GPIO_INFO_NUM_PORTS] =
     0xFF,     //PORT2   P20 to P27
     0xDF,     //PORT3   P30 to P34, P36, P37
     0xFF,     //PORT4   P40 to P47
-    0x7F,     //PORT5   P50 to P56
+    0x3F,     //PORT5   P50 to P55
     0x00,     //PORT6   None
     0x00,     //PORT7   None
     0x00,     //PORT8   None
@@ -138,7 +130,7 @@ const uint8_t g_gpio_dscr_support[GPIO_INFO_NUM_PORTS] =
     0xFF,    // PORT2   P20 to P27
     0x1F,    // PORT3   P30 to P34
     0x00,    // PORT4   None
-    0x7F,    // PORT5   P50 to P56
+    0x3F,    // PORT5   P50 to P55
     0x00,    // PORT6   None
     0x00,    // PORT7   None
     0x00,    // PORT8   None

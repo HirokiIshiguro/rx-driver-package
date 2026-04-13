@@ -1,38 +1,23 @@
-/************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/***********************************************************************************************************************
+* Copyright (c) 2014 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2011(2012-2019) Renesas Electronics Corporation. All rights reserved.
-*************************************************************************************************/
-/************************************************************************************************
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+/***********************************************************************************************************************
 * File Name    : r_flash_spi_dev_port.h
-* Version      : 2.32
+* Version      : 3.51
 * Description  : FLASH SPI driver device port header file
-*************************************************************************************************/
-/************************************************************************************************
+***********************************************************************************************************************/
+/***********************************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 23.07.2014 2.21     Created
 *              : 29.05.2015 2.32     Revised functions of same as Ver.2.32 of EEPROM SPI FIT module.
-*              : 04.04.2019 3.01     Added support for GNUC and ICCRX.
+*              : 20.05.2019 3.01     Added support for GNUC and ICCRX.
 *                                    Fixed coding style.
-*************************************************************************************************/
+*              : 10.12.2020 3.02     Remodeling the target device to the entire RX family.
+*              : 30.06.2022 3.10     Set PORTX as the default port assigned to SS#
+*              : 15.03.2025 3.51     Updated disclaimer.
+***********************************************************************************************************************/
 #ifndef __FLASH_SPI_DEV_PORT_H__
 #define __FLASH_SPI_DEV_PORT_H__
 
@@ -121,8 +106,40 @@ Macro definitions
         #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     F
     #elif (('G' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('g' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
         #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     G
+    #elif (('H' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('h' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     H
+    #elif (('I' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('i' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     I
     #elif (('J' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('j' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
         #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     J
+    #elif (('K' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('k' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     K
+    #elif (('L' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('l' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     L
+    #elif (('M' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('m' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     M
+    #elif (('N' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('n' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     N
+    #elif (('O' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('o' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     O
+    #elif (('P' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('p' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     P
+    #elif (('Q' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('q' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     Q
+    #elif (('R' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('r' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     R
+    #elif (('S' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('s' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     S
+    #elif (('T' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('t' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     T
+    #elif (('U' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('u' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     U
+    #elif (('V' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('v' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     V
+    #elif (('W' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('w' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     W
+    #elif (('X' == FLASH_SPI_CS_DEV0_CFG_PORTNO) || ('x' == FLASH_SPI_CS_DEV0_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV0_CFG_PORTNO_SFR     X
     #endif
 
     #if   ('0' == FLASH_SPI_CS_DEV0_CFG_BITNO)
@@ -205,8 +222,40 @@ Macro definitions
         #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     F
     #elif (('G' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('g' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
         #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     G
+    #elif (('H' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('h' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     H
+    #elif (('I' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('i' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     I
     #elif (('J' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('j' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
         #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     J
+    #elif (('K' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('k' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     K
+    #elif (('L' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('l' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     L
+    #elif (('M' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('m' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     M
+    #elif (('N' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('n' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     N
+    #elif (('O' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('o' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     O
+    #elif (('P' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('p' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     P
+    #elif (('Q' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('q' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     Q
+    #elif (('R' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('r' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     R
+    #elif (('S' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('s' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     S
+    #elif (('T' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('t' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     T
+    #elif (('U' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('u' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     U
+    #elif (('V' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('v' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     V
+    #elif (('W' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('w' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     W
+    #elif (('X' == FLASH_SPI_CS_DEV1_CFG_PORTNO) || ('x' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+        #define FLASH_SPI_CS_DEV1_CFG_PORTNO_SFR     X
     #endif
 
     #if   ('0' == FLASH_SPI_CS_DEV1_CFG_BITNO)
@@ -287,6 +336,11 @@ Macro definitions
  #define FLASH_SPI_PWPR_PFSWE     MPC.PWPR.BIT.PFSWE          /* PFS Register Write Enable (PWPR) */
 #endif  /* #if (FLASH_SPI_CFG_USE_GPIO_MPC_FIT == 0) */
 
+#if ((1 == FLASH_SPI_CFG_DEV0_INCLUDED) && ('X' == FLASH_SPI_CS_DEV0_CFG_PORTNO)) \
+    || ((1 == FLASH_SPI_CFG_DEV1_INCLUDED) && ('X' == FLASH_SPI_CS_DEV1_CFG_PORTNO))
+#define FLASH_SPI_TEMPORARY_DISABLE_DEV_PORT
+#endif /* #if ((1 == FLASH_SPI_CFG_DEV0_INCLUDED) && ('X' == FLASH_SPI_CS_DEV0_CFG_PORTNO)) \
+              || ((1 == FLASH_SPI_CFG_DEV1_INCLUDED) && ('X' == FLASH_SPI_CS_DEV1_CFG_PORTNO)) */
 
 /************************************************************************************************
 Typedef definitions

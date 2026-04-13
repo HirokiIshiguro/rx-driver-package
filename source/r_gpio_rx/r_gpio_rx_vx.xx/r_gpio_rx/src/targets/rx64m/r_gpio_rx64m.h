@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2014 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2015 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx64m.h
@@ -28,6 +15,8 @@
 *         :                    Added DSCR support
 *         : 03.06.2015 1.11    Fixed an error in the definition for GPIO_PRV_BASE_ADDR_DSCR.
 *         : 24.04.2015 1.12    Added the compiler directive: "#if defined(BSP_MCU_RX64M)"
+*         : 07.04.2023 2.00    Removed define PIN MASK is not provided.
+*         : 15.03.2025 5.11    Updated disclaimer.
 ***********************************************************************************************************************/
 #ifndef GPIO_RX64M
 #define GPIO_RX64M
@@ -302,7 +291,6 @@ typedef enum
     GPIO_PORTD_PIN_MASK = 0xFF,    /* Available pins: PD0 to PD7           */
     GPIO_PORTE_PIN_MASK = 0xFF,    /* Available pins: PE0 to PE7           */
     GPIO_PORTF_PIN_MASK = 0x20,    /* Available pins: PF5                  */
-    GPIO_PORTG_PIN_MASK = 0x00,    /* None                                 */
     GPIO_PORTJ_PIN_MASK = 0x28,    /* Available pins: PJ3, PJ5             */
 } gpio_pin_bit_mask_t;
 
@@ -449,17 +437,11 @@ typedef enum
     GPIO_PORT3_PIN_MASK = 0xFF,    /* Available pins: P30 to P37 */
     GPIO_PORT4_PIN_MASK = 0xFF,    /* Available pins: P40 to P47 */
     GPIO_PORT5_PIN_MASK = 0x3F,    /* Available pins: P50 to P55 */
-    GPIO_PORT6_PIN_MASK = 0x00,    /* None                       */
-    GPIO_PORT7_PIN_MASK = 0x00,    /* None                       */
-    GPIO_PORT8_PIN_MASK = 0x00,    /* None                       */
-    GPIO_PORT9_PIN_MASK = 0x00,    /* None                       */
     GPIO_PORTA_PIN_MASK = 0xFF,    /* Available pins: PA0 to PA7 */
     GPIO_PORTB_PIN_MASK = 0xFF,    /* Available pins: PB0 to PB7 */
     GPIO_PORTC_PIN_MASK = 0xFF,    /* Available pins: PC0 to PC7 */
     GPIO_PORTD_PIN_MASK = 0xFF,    /* Available pins: PD0 to PD7 */
     GPIO_PORTE_PIN_MASK = 0xFF,    /* Available pins: PE0 to PE7 */
-    GPIO_PORTF_PIN_MASK = 0x00,    /* None                       */
-    GPIO_PORTG_PIN_MASK = 0x00,    /* None                       */
     GPIO_PORTJ_PIN_MASK = 0x08,    /* Available pins: PJ3        */
 } gpio_pin_bit_mask_t;
 

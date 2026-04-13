@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2019-2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
 * File Name    : r_ble_dataflash.c
@@ -124,12 +111,13 @@ BLE_SECTION_P uint8_t r_dflash_read(uint32_t addr, uint8_t *buff, uint16_t len)
         if (err != FLASH_SUCCESS) break;
 
         /* Directly read data */
+        /* WAIT_LOOP */
         while( len-- )
         {
             *buff++ = *paddr++;
         }
 
-    } while(0);
+    } while(0); /* WAIT_LOOP */
 
     flash_close();
 
@@ -160,6 +148,7 @@ BLE_SECTION_P uint8_t r_dflash_write(uint32_t addr, uint8_t *buff, uint16_t len)
         if (err != FLASH_SUCCESS) break;
 
         /* set write data */
+        /* WAIT_LOOP */
         for( ii = 0; ii < DF_DATA_SIZE_MAX; ii++ )
         {
             if( (ii >= offset) && (ii < (offset + len)) )
@@ -180,7 +169,7 @@ BLE_SECTION_P uint8_t r_dflash_write(uint32_t addr, uint8_t *buff, uint16_t len)
         err = R_FLASH_Write((uint32_t)g_df_block, (uint32_t)block_addr, DF_DATA_SIZE_MAX);
         if (err != FLASH_SUCCESS) break;
 
-    }while(0);
+    }while(0); /* WAIT_LOOP */
 
     flash_close();
 

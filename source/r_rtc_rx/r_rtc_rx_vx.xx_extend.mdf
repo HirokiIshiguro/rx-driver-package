@@ -1,22 +1,9 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
-* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
-* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
-* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
-* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
-* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
-* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
   Purpose: Module Description File (MDF) Example (Schema Version 2.0)
@@ -66,11 +53,28 @@ Used = includes code</description>
             <option id="RTC_CFG_DRIVE_CAPACITY.#define RTC_CFG_DRIVE_CAPACITY_LO       //" display="Low" value="#define RTC_CFG_DRIVE_CAPACITY_LO       //"/>
             <option id="RTC_CFG_DRIVE_CAPACITY.#define RTC_CFG_DRIVE_CAPACITY_MD       //" display="Middle" value="#define RTC_CFG_DRIVE_CAPACITY_MD       //"/>
             <option id="RTC_CFG_DRIVE_CAPACITY.#define RTC_CFG_DRIVE_CAPACITY_HI       //" display="High" value="#define RTC_CFG_DRIVE_CAPACITY_HI       //"/>
+            <constraint display="This setting is disabled for the select device" actionOnFail="disable">"${Device.group}" != "RX140"</constraint>
             <constraint display="Middle is supported by the RX11x only" actionOnFail="error">"${RTC_CFG_DRIVE_CAPACITY}" != "#define RTC_CFG_DRIVE_CAPACITY_MD       //" || "${Device.group}" == "RX110" || "${Device.group}" == "RX111" || "${Device.group}" == "RX113"</constraint>
             <constraint display="High is supported by the RX11x only" actionOnFail="error">"${RTC_CFG_DRIVE_CAPACITY}" != "#define RTC_CFG_DRIVE_CAPACITY_HI       //" || "${Device.group}" == "RX110" || "${Device.group}" == "RX111" || "${Device.group}" == "RX113"</constraint>
             <description>Selects the sub-clock oscillator drive capacity. The setting specified when starting the sub-clock oscillator must be set here.
 Standard, Low, Middle(*), or High(*)
 (*) : Supported by RX11x only</description>
+        </property>
+        <property id="RTC_CFG_ALM_EN_NESTED_INT" display="Use ALM Nested Interrupt" default="0" type="combobox">
+            <option id="RTC_CFG_ALM_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RTC_CFG_ALM_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <description>Specifies whether to include code for Nested Interrupt ALM.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
+        </property>
+        <property id="RTC_CFG_PRD_EN_NESTED_INT" display="Use PRD Nested Interrupt" default="0" type="combobox">
+            <option id="RTC_CFG_PRD_EN_NESTED_INT.0" display="Disable" value="0"/>
+            <option id="RTC_CFG_PRD_EN_NESTED_INT.1" display="Enable" value="1"/>
+            <description>Specifies whether to include code for Nested Interrupt PRD.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
         </property>
     </configuration>
 </module>

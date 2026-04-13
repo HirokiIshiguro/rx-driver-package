@@ -20,20 +20,19 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup generic_location_module GENERIC_LOCATION (Mesh Generic Location Model)
+ * \defgroup generic_location_module Generic Location Model (GENERIC_LOCATION)
+ * \ingroup generics_models
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Generic Location Model (GENERIC_LOCATION) module to the Application.
  */
-
-
 
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup generic_location_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Generic Location Model Layer.
  */
 
 /**
@@ -64,14 +63,14 @@ typedef API_RESULT (* MS_GENERIC_LOCATION_SERVER_CB)
  * Generic Location Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_GENERIC_LOCATION_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -100,10 +99,18 @@ typedef API_RESULT (* MS_GENERIC_LOCATION_SETUP_SERVER_CB)
         ) DECL_REENTRANT;
 /** \} */
 
+/**
+ * \defgroup generic_location_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Generic Location Model Layer.
+ */
 
 /**
  *  \defgroup generic_location_structures Structures
  *  \{
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Generic Location Model Layer.
  */
 
 /**
@@ -222,25 +229,68 @@ typedef struct MS_generic_location_local_struct
 
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup generic_location_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Generic Location Model APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Generic Location Model Layer to the Application.
  */
 /**
  * \defgroup generic_location_ser_api_defs Generic Location Server API Definitions
  * \{
- * This section describes the Generic Location Server APIs.
+ * \brief This section describes the EtherMind Mesh Generic Location Server
+ * Model APIs.
  */
 
+/**
+ * \name Generic Location Server Interfaces
+ * \{
+ */
+
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
 /**
  *  \brief API to initialize Generic_Location Server model
  *
  *  \par Description
- *  This is to initialize Generic_Location Server model and to register with Acess layer.
+ *  This is to initialize Generic_Location Server model and to register with Access layer.
+ *
+ *  \param [in] element_handle
+ *              Element identifier to be associated with the model instance.
+ *
+ *  \param [in, out] location_model_handle
+ *                   Model identifier associated with the Generic Location model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in, out] location_setup_model_handle
+ *                   Model identifier associated with the Generic Location Setup model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in] location_appl_cb          Application Callback to be used by the Generic_Location Server.
+ *
+ *  \param [in] location_setup_appl_cb    Application Callback to be used by the Generic_Location_Setup Server.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_generic_location_server_init_ext
+           (
+               /* IN */    MS_ACCESS_ELEMENT_HANDLE             element_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE             * location_model_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE             * location_setup_model_handle,
+               /* IN */    MS_GENERIC_LOCATION_SERVER_CB        location_appl_cb,
+               /* IN */    MS_GENERIC_LOCATION_SETUP_SERVER_CB  location_setup_appl_cb
+           );
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
+/**
+ *  \brief API to initialize Generic_Location Server model (deprecated)
+ *
+ *  \par Description
+ *  This is to initialize Generic_Location Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -272,6 +322,8 @@ API_RESULT MS_generic_location_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -281,14 +333,16 @@ API_RESULT MS_generic_location_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 
 /**
- *  \brief API to initialize Generic_Location_Setup Server model
+ *  \brief API to initialize Generic_Location_Setup Server model (deprecated)
  *
  *  \par Description
- *  This is to initialize Generic_Location_Setup Server model and to register with Acess layer.
+ *  This is to initialize Generic_Location_Setup Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -320,6 +374,8 @@ API_RESULT MS_generic_location_setup_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -329,21 +385,31 @@ API_RESULT MS_generic_location_setup_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
+/** \} */
+
 /** \} */
 
 /**
  * \defgroup generic_location_cli_api_defs Generic Location Client API Definitions
  * \{
- * This section describes the Generic Location Client APIs.
+ * \brief This section describes the EtherMind Mesh Generic Location Client
+ * Model APIs.
+ */
+
+/**
+ * \name Generic Location Client Interfaces
+ * \{
  */
 
 /**
  *  \brief API to initialize Generic_Location Client model
  *
  *  \par Description
- *  This is to initialize Generic_Location Client model and to register with Acess layer.
+ *  This is to initialize Generic_Location Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -380,6 +446,21 @@ API_RESULT MS_generic_location_client_get_model_handle
            );
 
 /**
+ *  \brief API to set Generic_Location client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Generic_Location client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_generic_location_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
+           );
+
+/**
  *  \brief API to send acknowledged commands
  *
  *  \par Description
@@ -397,6 +478,28 @@ API_RESULT MS_generic_location_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+/** \} */
+
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup generic_location_defines
+ * \{
+ */
+
+/**
+ * \defgroup generic_location_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Generic Location Model Layer.
+ */
+
+/**
+ * \name Generic Location Client Macros
+ * \{
+ */
 
 /**
  *  \brief API to get the selected fields of the Generic Location state of an element.
@@ -424,7 +527,7 @@ API_RESULT MS_generic_location_client_send_reliable_pdu
  *  Generic Location Global Set is an acknowledged message used to set the selected fields of the Generic Location state of an element.
  *  The response to the Generic Location Global Set message is a Generic Location Global Status message.
  *
- *  \param [in] param Generic Location Global Set message
+ *  \param [in] param Generic Location Global Set message parameter \ref MS_GENERIC_LOCATION_GLOBAL_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -442,6 +545,8 @@ API_RESULT MS_generic_location_client_send_reliable_pdu
  *  \par Description
  *  Generic Location Global Set Unacknowledged is an unacknowledged message used to set the selected fields
  *  of the Generic Location state of an element.
+ *
+ *  \param [in] param Generic Location Global Set message parameter \ref MS_GENERIC_LOCATION_GLOBAL_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -480,7 +585,7 @@ API_RESULT MS_generic_location_client_send_reliable_pdu
  *  of the Generic Location state of an element.
  *  The response to the Generic Location Local Set message is a Generic Location Local Status message.
  *
- * \param [in] param Generic Location Local Set message
+ * \param [in] param Generic Location Local Set message parameter \ref MS_GENERIC_LOCATION_LOCAL_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -499,7 +604,7 @@ API_RESULT MS_generic_location_client_send_reliable_pdu
  *  Generic Location Local Set Unacknowledged is an unacknowledged message used to set the selected fields
  *  of the Generic Location state of an element.
  *
- *  \param [in] param Generic Location Local Set message
+ *  \param [in] param Generic Location Local Set message parameter \ref MS_GENERIC_LOCATION_LOCAL_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -511,7 +616,48 @@ API_RESULT MS_generic_location_client_send_reliable_pdu
             0xFFFFFFFF\
         )
 /** \} */
+
+/**
+ * \name Generic Location Server and Generic Location Setup Server Macros
+ * \{
+ */
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
+/**
+ *  \brief API to send reply or to update state change
+ *
+ *  \par Description
+ *  This is to send reply for a request or to inform change in state.
+ *
+ * \param [in] c   Context of the message.
+ * \param [in] cs  Model specific current state parameters.
+ * \param [in] ts  Model specific target state parameters (NULL: to be ignored).
+ * \param [in] rt  Time from current state to target state (0: to be ignored).
+ * \param [in] ex  Additional parameters (NULL: to be ignored).
+ * \param [in] r   If unicast response to be sent
+ * \param [in] p   If state to be published
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+#define MS_generic_location_server_state_update_ext(c,cs,ts,rt,ex,r,p) \
+        MS_generic_location_server_state_update \
+        (\
+            (c),\
+            (cs),\
+            (ts),\
+            (rt),\
+            (ex),\
+            (r),\
+            (p)\
+        )
+
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
 /** \} */
+
+/** \} */
+
+/** \} */
+
 /** \} */
 
 #endif /*_H_MS_GENERIC_LOCATION_API_ */

@@ -1,21 +1,8 @@
 /***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
- * No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
- * applicable laws, including copyright laws. 
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO 
- * THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the 
- * following link:
- * http://www.renesas.com/disclaimer 
- *
- * Copyright (C) 2013(2019) Renesas Electronics Corporation. All rights reserved.
- **********************************************************************************************************************/
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_sci_iic_rx_if.h
  * Description  : Functions for using SCI_IIC on RX devices. 
@@ -43,6 +30,22 @@
  *         : 30.07.2019 2.43     Changed minor version to '43' for RX72M support.
  *         : 30.10.2019 2.44     Changed minor version to '44' for RX13T support.
  *         : 22.11.2019 2.45     Changed minor version to '45' for RX66N and RX72N support.
+ *         : 10.03.2020 2.46     Changed minor version to '46' for RX23E-A support.
+ *         : 30.10.2020 2.47     Changed minor version to '47' for e2studio 2020-10 support.
+ *         : 30.06.2021 2.48     Changed minor version to '48' for RX671 support.
+ *         : 31.07.2021 2.49     Changed minor version to '49' for RX140 support.
+ *         : 31.12.2021 2.50     Changed minor version to '50' for RX660 support.
+ *         : 15.06.2022 2.60     RX26T support added.
+ *                               Updated demo projects.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *         : 29.05.2023 2.70     RX23E-B support added.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *         : 09.10.2023 2.71     Changed version for update of APN.
+ *         : 28.06.2024 2.80     RX260, RX261 support added.
+ *         : 15.03.2025 2.81     Updated disclaimer
+ *         : 23.06.2025 2.82     Removed doc folder and updated .rcpc file in FITDemos.
+ *         : 30.10.2025 2.90     RX14T support added.
+ *                               Updated MDF using Category.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef SCI_IIC_IF_H
@@ -58,19 +61,19 @@ R_BSP_PRAGMA_UNPACK
     #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 
- /* Version Number of API. */
+/* Version Number of API. */
     #define SCI_IIC_VERSION_MAJOR  (2)
-    #define SCI_IIC_VERSION_MINOR  (45)
+    #define SCI_IIC_VERSION_MINOR  (90)
 
 /*----------------------------------------------------------------------------*/
 /*   Define return values and values of channel state flag.                   */
 /*----------------------------------------------------------------------------*/
-    #define SCI_IIC_NO_INIT         ((sci_iic_ch_dev_status_t)(0))
-    #define SCI_IIC_IDLE            ((sci_iic_ch_dev_status_t)(1))
-    #define SCI_IIC_FINISH          ((sci_iic_ch_dev_status_t)(2))
-    #define SCI_IIC_NACK            ((sci_iic_ch_dev_status_t)(3))
-    #define SCI_IIC_COMMUNICATION   ((sci_iic_ch_dev_status_t)(4))
-    #define SCI_IIC_ERROR           ((sci_iic_ch_dev_status_t)(5))
+    #define SCI_IIC_NO_INIT         ((sci_iic_ch_dev_status_t)(0)) /* No initial state*/
+    #define SCI_IIC_IDLE            ((sci_iic_ch_dev_status_t)(1)) /* Idle state*/
+    #define SCI_IIC_FINISH          ((sci_iic_ch_dev_status_t)(2)) /* Finish state*/
+    #define SCI_IIC_NACK            ((sci_iic_ch_dev_status_t)(3)) /* Nack state*/
+    #define SCI_IIC_COMMUNICATION   ((sci_iic_ch_dev_status_t)(4)) /* Communication state*/
+    #define SCI_IIC_ERROR           ((sci_iic_ch_dev_status_t)(5)) /* Error state*/
 
 /*----------------------------------------------------------------------------*/
 /*   Defines the argument of the R_SCI_IIC_Control function.                  */
@@ -104,7 +107,7 @@ typedef enum /* SCI_IIC API error codes */
 /*   Define sci_iic information structure type.                               */
 /*----------------------------------------------------------------------------*/
 /*----- Callback function type. -----*/
-typedef void (*sci_iic_callback) (void); /* Callback function type */
+typedef void (* sci_iic_callback)(void); /* Callback function type */
 
 /*----- Structure type. -----*/
 /* SCI_IIC Information structure. */
@@ -151,12 +154,11 @@ extern volatile sci_iic_ch_dev_status_t g_sci_iic_ChStatus[]; /* Channel state f
 sci_iic_return_t R_SCI_IIC_Open (sci_iic_info_t * p_sci_iic_info);
 sci_iic_return_t R_SCI_IIC_MasterSend (sci_iic_info_t * p_sci_iic_info);
 sci_iic_return_t R_SCI_IIC_MasterReceive (sci_iic_info_t * p_sci_iic_info);
-sci_iic_return_t R_SCI_IIC_GetStatus (sci_iic_info_t *p_sci_iic_info, sci_iic_mcu_status_t *p_sci_iic_status);
+sci_iic_return_t R_SCI_IIC_GetStatus (sci_iic_info_t * p_sci_iic_info, sci_iic_mcu_status_t * p_sci_iic_status);
 sci_iic_return_t R_SCI_IIC_Control (sci_iic_info_t * p_sci_iic_info, sci_iic_ctrl_ptn_t ctrl_ptn);
 sci_iic_return_t R_SCI_IIC_Close (sci_iic_info_t * p_sci_iic_info);
-uint32_t R_SCI_IIC_GetVersion (void);
+uint32_t         R_SCI_IIC_GetVersion (void);
 
 R_BSP_PRAGMA_PACKOPTION
 
 #endif /* SCI_IIC_IF_H */
-

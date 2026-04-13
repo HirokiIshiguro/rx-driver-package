@@ -1,23 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
-* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
-* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
-* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
-* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
-* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
-* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2015 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
+-->
+<!--
 /***********************************************************************************************************************
   Purpose: Module Description File (MDF) Example (Schema Version 2.0)
            This is a description of a sample FIT module configuration file
@@ -26,23 +15,23 @@
 <module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
     <fileVersion>1.00</fileVersion>
     <formatVersion>2.00</formatVersion>
-
     <fileTemplate></fileTemplate>
     <configuration>
-        <property id="VBATT_CFG_PARAM_CHECKING_ENABLE" display="Parameter checking" default="1" type="combobox">
+        <property id="VBATT_CFG_PARAM_CHECKING_ENABLE" display="Parameter checking" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
             <option id="VBATT_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
             <option id="VBATT_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0"/>
             <option id="VBATT_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled" value="1"/>
             <description>Selects whether to include parameter checking in the code.
-System default = BSP_CFG_PARAM_CHECKING_ENABLE
-Disabled = compiles out parameter checking
-Enabled = includes parameter checking</description>
+BSP_CFG_PARAM_CHECKING_ENABLE = System default.
+0 = compile out parameter checking.
+1 = includes parameter checking.</description>
         </property>
         <property id="VBATT_CFG_DETECT_FUNCTION" display="VBATT Detection, Interrupt" default="VBATT_DTCT_DISABLE" type="combobox">
             <option id="VBATT_CFG_DETECT_FUNCTION.VBATT_DTCT_DISABLE" display="Disable detection,  Disable interrupt" value="VBATT_DTCT_DISABLE"/>
             <option id="VBATT_CFG_DETECT_FUNCTION.VBATT_DTCT_ENABLE_INT_DISABLE" display="Enable detection,  Disable interrupt" value="VBATT_DTCT_ENABLE_INT_DISABLE"/>
             <option id="VBATT_CFG_DETECT_FUNCTION.VBATT_DTCT_ENABLE_NMI_ENABLE" display="Enable detection,  Enable non-maskable interrupt" value="VBATT_DTCT_ENABLE_NMI_ENABLE"/>
             <option id="VBATT_CFG_DETECT_FUNCTION.VBATT_DTCT_ENABLE_INT_ENABLE" display="Enable detection,  Enable maskable interrupt" value="VBATT_DTCT_ENABLE_INT_ENABLE"/>
+            <constraint display="Only RX230, RX231 and RX23W supported" actionOnFail="disable">"${Device.group}" == "RX230" || "${Device.group}" == "RX231" || "${Device.group}" == "RX23W"</constraint>
             <description>Setting to 
     VBATT pin voltage drop detection (VBATTCR.VBTLVDEN).
     VBATT pin voltage drop detection interrupt (VBTLVDICR.VBTLVDIE).
@@ -51,8 +40,171 @@ Enabled = includes parameter checking</description>
         <property id="VBATT_CFG_DETECT_LEVEL" display="VBATT Voltage level" default="VBATT_DTCT_LEVEL_2_20_V" type="combobox">
             <option id="VBATT_CFG_DETECT_LEVEL.VBATT_DTCT_LEVEL_2_20_V" display="2.20V" value="VBATT_DTCT_LEVEL_2_20_V"/>
             <option id="VBATT_CFG_DETECT_LEVEL.VBATT_DTCT_LEVEL_2_00_V" display="2.00V" value="VBATT_DTCT_LEVEL_2_00_V"/>
+            <constraint display="Only RX230, RX231 and RX23W supported" actionOnFail="disable">"${Device.group}" == "RX230" || "${Device.group}" == "RX231" || "${Device.group}" == "RX23W"</constraint>
             <description>Setting to 
     VBATT pin voltage drop detection level (VBATTCR.VBTLVDLVL).</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CH0" display="Channel 0 Input" default="VBATT_TAMPER_DISABLE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CH0.VBATT_TAMPER_DISABLE" display="The TAMPI0/RTCIC0 signal input is disabled." value="VBATT_TAMPER_DISABLE"/>
+            <option id="VBATT_CFG_TAMPER_CH0.VBATT_TAMPER_ENABLE" display="The TAMPI0/RTCIC0 signal input is enabled." value="VBATT_TAMPER_ENABLE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Channel 0 Input 
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_DISABLE = The TAMPI0/RTCIC0 signal input is disabled.
+    VBATT_TAMPER_ENABLE = The TAMPI0/RTCIC0 signal input is enabled.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CH1" display="Channel 1 Input" default="VBATT_TAMPER_DISABLE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CH1.VBATT_TAMPER_DISABLE" display="The TAMPI1/RTCIC1 signal input is disabled." value="VBATT_TAMPER_DISABLE"/>
+            <option id="VBATT_CFG_TAMPER_CH1.VBATT_TAMPER_ENABLE" display="The TAMPI1/RTCIC1 signal input is enabled." value="VBATT_TAMPER_ENABLE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Channel 1 Input 
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_DISABLE = The TAMPI1/RTCIC1 signal input is disabled.
+    VBATT_TAMPER_ENABLE = The TAMPI1/RTCIC1 signal input is enabled.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CH2" display="Channel 2 Input" default="VBATT_TAMPER_DISABLE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CH2.VBATT_TAMPER_DISABLE" display="The TAMPI2/RTCIC2 signal input is disabled." value="VBATT_TAMPER_DISABLE"/>
+            <option id="VBATT_CFG_TAMPER_CH2.VBATT_TAMPER_ENABLE" display="The TAMPI2/RTCIC2 signal input is enabled." value="VBATT_TAMPER_ENABLE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Channel 2 Input 
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_DISABLE = The TAMPI2/RTCIC2 signal input is disabled.
+    VBATT_TAMPER_ENABLE = The TAMPI2/RTCIC2 signal input is enabled.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CH0_DETECT_INT" display="Tamper 0 Detection Interrupt Enable" default="VBATT_TAMPER_DETECT_INT_DISABLE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CH0_DETECT_INT.VBATT_TAMPER_DETECT_INT_DISABLE" display="Tamper 0 detection interrupt is disabled." value="VBATT_TAMPER_DETECT_INT_DISABLE"/>
+            <option id="VBATT_CFG_TAMPER_CH0_DETECT_INT.VBATT_TAMPER_DETECT_INT_ENABLE" display="Tamper 0 detection interrupt is enabled." value="VBATT_TAMPER_DETECT_INT_ENABLE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Tamper 0 Detection Interrupt Enable
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_DETECT_INT_DISABLE = Tamper 0 detection interrupt is disabled.
+    VBATT_TAMPER_DETECT_INT_ENABLE = Tamper 0 detection interrupt is enabled.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CH0_ERASE" display="Tamper 0 Erase Enable" default="VBATT_TAMPER_ERASE_DISABLE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CH0_ERASE.VBATT_TAMPER_ERASE_DISABLE" display="Backup registers are not erased in response to a tamper 0 event." value="VBATT_TAMPER_ERASE_DISABLE"/>
+            <option id="VBATT_CFG_TAMPER_CH0_ERASE.VBATT_TAMPER_ERASE_ENABLE" display="Backup registers are erased in response to a tamper 0 event." value="VBATT_TAMPER_ERASE_ENABLE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Tamper 0 Erase Enable
+   Please choose from macro definition of the following.
+    VBATT_TAMPER__ERASE_DISABLE = Backup registers are not erased in response to a tamper 0 event.
+    VBATT_TAMPER__ERASE_ENABLE = Backup registers are erased in response to a tamper 0 event.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_TCE_CH0_SELECT" display="Time Capture Event 0 Source Select" default="VBATT_TAMPER_TCE_RTCIC_PIN" type="combobox">
+            <option id="VBATT_CFG_TAMPER_TCE_CH0_SELECT.VBATT_TAMPER_TCE_RTCIC_PIN" display="Input signal from the RTCIC0 pin." value="VBATT_TAMPER_TCE_RTCIC_PIN"/>
+            <option id="VBATT_CFG_TAMPER_TCE_CH0_SELECT.VBATT_TAMPER_TCE_TAMPER_EVENT" display="Tamper 0 event." value="VBATT_TAMPER_TCE_TAMPER_EVENT"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Time Capture Event 0 Source Select
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_TCCU_S_RTCIC_PIN = Input signal from the RTCIC0 pin.
+    VBATT_TAMPER_TCCU_S_TAMPER_EVENT = Tamper 0 event.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CHEN_CH0_NOISE_FILTER" display="Channel 0 Noise Filter Enable" default="VBATT_TAMPER_CHEN_NOISE_FILTER_DISABLE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CHEN_CH0_NOISE_FILTER.VBATT_TAMPER_CHEN_NOISE_FILTER_DISABLE" display="Noise filter for the TAMPI0/RTCIC0 pin is disabled." value="VBATT_TAMPER_CHEN_NOISE_FILTER_DISABLE"/>
+            <option id="VBATT_CFG_TAMPER_CHEN_CH0_NOISE_FILTER.VBATT_TAMPER_CHEN_NOISE_FILTER_ENABLE" display="Noise filter for the TAMPI0/RTCIC0 pin is enabled." value="VBATT_TAMPER_CHEN_NOISE_FILTER_ENABLE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Channel 0 Noise Filter Enable
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_CHEN_NOISE_FILTER_DISABLE = Noise filter for the TAMPI0/RTCIC0 pin is disabled.
+    VBATT_TAMPER_CHEN_NOISE_FILTER_ENABLE = Noise filter for the TAMPI0/RTCIC0 pin is enabled.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CHEN_CH0_EDGE" display="Channel 0 Trigger Select" default="VBATT_TAMPER_CHEN_RISING_EDGE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CHEN_CH0_EDGE.VBATT_TAMPER_CHEN_FALLING_EDGE" display="A falling edge of the input on the TAMPI0 pin." value="VBATT_TAMPER_CHEN_FALLING_EDGE"/>
+            <option id="VBATT_CFG_TAMPER_CHEN_CH0_EDGE.VBATT_TAMPER_CHEN_RISING_EDGE" display="A rising edge of the input on the TAMPI0 pin." value="VBATT_TAMPER_CHEN_RISING_EDGE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Channel 0 Trigger Select
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_CHEN_FALLING_EDGE = A falling edge of the input on the TAMPI0 pin.
+    VBATT_TAMPER_CHEN_RISING_EDGE = A rising edge of the input on the TAMPI0 pin.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CH1_DETECT_INT" display="Tamper 1 Detection Interrupt Enable" default="VBATT_TAMPER_DETECT_INT_DISABLE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CH1_DETECT_INT.VBATT_TAMPER_DETECT_INT_DISABLE" display="Tamper 1 detection interrupt is disabled." value="VBATT_TAMPER_DETECT_INT_DISABLE"/>
+            <option id="VBATT_CFG_TAMPER_CH1_DETECT_INT.VBATT_TAMPER_DETECT_INT_ENABLE" display="Tamper 1 detection interrupt is enabled." value="VBATT_TAMPER_DETECT_INT_ENABLE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Tamper 1 Detection Interrupt Enable
+   Please choose from macro definition of the following.
+   VBATT_TAMPER_DETECT_INT_DISABLE = Tamper 1 detection interrupt is disabled.
+    VBATT_TAMPER_DETECT_INT_ENABLE = Tamper 1 detection interrupt is enabled.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CH1_ERASE" display="Tamper 1 Erase Enable" default="VBATT_TAMPER_ERASE_DISABLE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CH1_ERASE.VBATT_TAMPER_ERASE_DISABLE" display="Backup registers are not erased in response to a tamper 1 event." value="VBATT_TAMPER_ERASE_DISABLE"/>
+            <option id="VBATT_CFG_TAMPER_CH1_ERASE.VBATT_TAMPER_ERASE_ENABLE" display="Backup registers are erased in response to a tamper 1 event." value="VBATT_TAMPER_ERASE_ENABLE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Tamper 1 Erase Enable
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_ERASE_DISABLE = Backup registers are not erased in response to a tamper 1 event.
+    VBATT_TAMPER_ERASE_ENABLE = Backup registers are erased in response to a tamper 1 event.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_TCE_CH1_SELECT" display="Time Capture Event 1 Source Select" default="VBATT_TAMPER_TCE_RTCIC_PIN" type="combobox">
+            <option id="VBATT_CFG_TAMPER_TCE_CH1_SELECT.VBATT_TAMPER_TCE_RTCIC_PIN" display="Input signal from the RTCIC1 pin." value="VBATT_TAMPER_TCE_RTCIC_PIN"/>
+            <option id="VBATT_CFG_TAMPER_TCE_CH1_SELECT.VBATT_TAMPER_TCE_TAMPER_EVENT" display="Tamper 1 event." value="VBATT_TAMPER_TCE_TAMPER_EVENT"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Time Capture Event 1 Source Select
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_TCCU_S_RTCIC_PIN = Input signal from the RTCIC1 pin.
+    VBATT_TAMPER_TCCU_S_TAMPER_EVENT = Tamper 1 event.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CHEN_CH1_NOISE_FILTER" display="Channel 1 Noise Filter Enable" default="VBATT_TAMPER_CHEN_NOISE_FILTER_DISABLE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CHEN_CH1_NOISE_FILTER.VBATT_TAMPER_CHEN_NOISE_FILTER_DISABLE" display="Noise filter for the TAMPI1/RTCIC1 pin is disabled." value="VBATT_TAMPER_CHEN_NOISE_FILTER_DISABLE"/>
+            <option id="VBATT_CFG_TAMPER_CHEN_CH1_NOISE_FILTER.VBATT_TAMPER_CHEN_NOISE_FILTER_ENABLE" display="Noise filter for the TAMPI1/RTCIC1 pin is enabled." value="VBATT_TAMPER_CHEN_NOISE_FILTER_ENABLE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Channel 1 Noise Filter Enable
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_CHEN_NOISE_FILTER_DISABLE = Noise filter for the TAMPI1/RTCIC1 pin is disabled.
+    VBATT_TAMPER_CHEN_NOISE_FILTER_ENABLE = Noise filter for the TAMPI1/RTCIC1 pin is enabled.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CHEN_CH1_EDGE" display="Channel 1 Trigger Select" default="VBATT_TAMPER_CHEN_RISING_EDGE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CHEN_CH1_EDGE.VBATT_TAMPER_CHEN_FALLING_EDGE" display="A falling edge of the input on the TAMPI1 pin." value="VBATT_TAMPER_CHEN_FALLING_EDGE"/>
+            <option id="VBATT_CFG_TAMPER_CHEN_CH1_EDGE.VBATT_TAMPER_CHEN_RISING_EDGE" display="A rising edge of the input on the TAMPI1 pin." value="VBATT_TAMPER_CHEN_RISING_EDGE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Channel 1 Trigger Select
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_CHEN_FALLING_EDGE = A falling edge of the input on the TAMPI1 pin.
+    VBATT_TAMPER_CHEN_RISING_EDGE = A rising edge of the input on the TAMPI1 pin.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CH2_DETECT_INT" display="Tamper 2 Detection Interrupt Enable" default="VBATT_TAMPER_DETECT_INT_DISABLE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CH2_DETECT_INT.VBATT_TAMPER_DETECT_INT_DISABLE" display="Tamper 2 detection interrupt is disabled." value="VBATT_TAMPER_DETECT_INT_DISABLE"/>
+            <option id="VBATT_CFG_TAMPER_CH2_DETECT_INT.VBATT_TAMPER_DETECT_INT_ENABLE" display="Tamper 2 detection interrupt is enabled." value="VBATT_TAMPER_DETECT_INT_ENABLE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Tamper 2 Detection Interrupt Enable
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_DETECT_INT_DISABLE = Tamper 2 detection interrupt is disabled.
+    VBATT_TAMPER_DETECT_INT_ENABLE = Tamper 2 detection interrupt is enabled.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CH2_ERASE" display="Tamper 2 Erase Enable" default="VBATT_TAMPER_ERASE_DISABLE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CH2_ERASE.VBATT_TAMPER_ERASE_DISABLE" display="Backup registers are not erased in response to a tamper 2 event." value="VBATT_TAMPER_ERASE_DISABLE"/>
+            <option id="VBATT_CFG_TAMPER_CH2_ERASE.VBATT_TAMPER_ERASE_ENABLE" display="Backup registers are erased in response to a tamper 2 event." value="VBATT_TAMPER_ERASE_ENABLE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Tamper 2 Erase Enable
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_ERASE_DISABLE = Backup registers are not erased in response to a tamper 2 event.
+    VBATT_TAMPER_ERASE_ENABLE = Backup registers are erased in response to a tamper 2 event.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_TCE_CH2_SELECT" display="Time Capture Event 2 Source Select" default="VBATT_TAMPER_TCE_RTCIC_PIN" type="combobox">
+            <option id="VBATT_CFG_TAMPER_TCE_CH2_SELECT.VBATT_TAMPER_TCE_RTCIC_PIN" display="Input signal from the RTCIC2 pin." value="VBATT_TAMPER_TCE_RTCIC_PIN"/>
+            <option id="VBATT_CFG_TAMPER_TCE_CH2_SELECT.VBATT_TAMPER_TCE_TAMPER_EVENT" display="Tamper 2 event." value="VBATT_TAMPER_TCE_TAMPER_EVENT"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Time Capture Event 2 Source Select
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_TCCU_S_RTCIC_PIN = Input signal from the RTCIC2 pin.
+    VBATT_TAMPER_TCCU_S_TAMPER_EVENT = Tamper 2 event.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CHEN_CH2_NOISE_FILTER" display="Channel 2 Noise Filter Enable" default="VBATT_TAMPER_CHEN_NOISE_FILTER_DISABLE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CHEN_CH2_NOISE_FILTER.VBATT_TAMPER_CHEN_NOISE_FILTER_DISABLE" display="Noise filter for the TAMPI2/RTCIC2 pin is disabled." value="VBATT_TAMPER_CHEN_NOISE_FILTER_DISABLE"/>
+            <option id="VBATT_CFG_TAMPER_CHEN_CH2_NOISE_FILTER.VBATT_TAMPER_CHEN_NOISE_FILTER_ENABLE" display="Noise filter for the TAMPI2/RTCIC2 pin is enabled." value="VBATT_TAMPER_CHEN_NOISE_FILTER_ENABLE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Channel 2 Noise Filter Enable
+   Please choose from macro definition of the following.
+    VBATT_TAMPER_CHEN_NOISE_FILTER_DISABLE = Noise filter for the TAMPI2/RTCIC2 pin is disabled.
+    VBATT_TAMPER_CHEN_NOISE_FILTER_ENABLE = Noise filter for the TAMPI2/RTCIC2 pin is enabled.</description>
+        </property>
+        <property id="VBATT_CFG_TAMPER_CHEN_CH2_EDGE" display="Channel 2 Trigger Select" default="VBATT_TAMPER_CHEN_RISING_EDGE" type="combobox">
+            <option id="VBATT_CFG_TAMPER_CHEN_CH2_EDGE.VBATT_TAMPER_CHEN_FALLING_EDGE" display="A falling edge of the input on the TAMPI2 pin." value="VBATT_TAMPER_CHEN_FALLING_EDGE"/>
+            <option id="VBATT_CFG_TAMPER_CHEN_CH2_EDGE.VBATT_TAMPER_CHEN_RISING_EDGE" display="A rising edge of the input on the TAMPI2 pin." value="VBATT_TAMPER_CHEN_RISING_EDGE"/>
+            <constraint display="Only RX671 supported" actionOnFail="disable">"${Device.group}" == "RX671"</constraint>
+            <description>Setting to Channel 2 Trigger Select
+   Please choose from macro definition of the following.
+   VBATT_TAMPER_CHEN_FALLING_EDGE = A falling edge of the input on the TAMPI2 pin.
+    VBATT_TAMPER_CHEN_RISING_EDGE = A rising edge of the input on the TAMPI2 pin.</description>
         </property>
         <property id="VBATT_CFG_INT_PRIORITY" display="VBATT Interrupt priority level" default="5" type="combobox">
             <option id="VBATT_CFG_INT_PRIORITY.1" display="Level 1 (lowest)" value="1"/>
@@ -70,9 +222,15 @@ Enabled = includes parameter checking</description>
             <option id="VBATT_CFG_INT_PRIORITY.13" display="Level 13" value="13"/>
             <option id="VBATT_CFG_INT_PRIORITY.14" display="Level 14" value="14"/>
             <option id="VBATT_CFG_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
-            <constraint display="This setting becomes valid when VBATT maskable interrupt is enabled." actionOnFail="disable">"${VBATT_CFG_DETECT_FUNCTION}" == "VBATT_DTCT_ENABLE_INT_ENABLE"</constraint>
+            <constraint display="This setting becomes valid when VBATT maskable interrupt is enabled." actionOnFail="disable">"${VBATT_CFG_DETECT_FUNCTION}" == "VBATT_DTCT_ENABLE_INT_ENABLE" || "${VBATT_CFG_TAMPER_CH0_DETECT_INT}"=="VBATT_TAMPER_DETECT_INT_ENABLE" || "${VBATT_CFG_TAMPER_CH1_DETECT_INT}"=="VBATT_TAMPER_DETECT_INT_ENABLE" || "${VBATT_CFG_TAMPER_CH2_DETECT_INT}"=="VBATT_TAMPER_DETECT_INT_ENABLE"</constraint>
             <description>Set value must be in the range 1 (lowest) to 15 (highest).
 This setting becomes valid when "VBATT Detection, Interrupt" is "Enable detection,  Enable maskable interrupt".</description>
+        </property>
+        <property id="VBATT_CFG_EN_NESTED_INT" display="Using VBATT nested interrupt" default="0" type="combobox">
+            <option id="VBATT_CFG_EN_NESTED_INT.0" display="Do not use VBATT nested interrupt" value="0"/>
+            <option id="VBATT_CFG_EN_NESTED_INT.1" display="Use VBATT nested interrupt" value="1"/>
+            <description>Set to 0 if not using the VBATT nested interrupts.
+Set to 1 to use the VBATT nested interrupts.</description>
         </property>
     </configuration>
 </module>

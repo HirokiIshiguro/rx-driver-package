@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2013 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /**********************************************************************************************************************
 * File Name    : r_s12ad_rx_if.h
@@ -44,6 +31,22 @@
 *           22.11.2019 4.40    Added RX66N and RX72N support.
 *           31.01.2020 4.41    Added support for RX13T with IAR Compiler.
 *           28.02.2020 4.50    Added RX23E-A support.
+*           10.06.2020 4.60    Added RX23T and RX24T and RX24U support.
+*           30.11.2020 4.61    Changed minor version for e2studio 2020-10 support.
+*           01.03.2021 4.70    Added RX72M 144pins and 100pins support.
+*                              Added RX23W 83pins support.
+*           31.05.2021 4.80    Added RX671 support.
+*           30.07.2021 4.90    Added RX140 support.
+*           01.11.2021 4.91    Fixed MDF file.
+*           19.11.2021 4.92    Added RX140 80pins support.
+*           30.11.2021 4.93    Added RX66T 48pins support.
+*           29.12.2021 5.00    Added RX660 support.
+*           01.08.2022 5.10    Added RX26T support.
+*           14.10.2022 5.20    Added RX23E-B support.
+*           03.04.2023 5.30    Added RX26T 48k support.
+*           13.02.2024 5.40    Added RX260 and RX261 support.
+*           20.03.2025 5.41    Changed the disclaimer in program sources.
+*           20.07.2025 5.50    Added RX14T support.
 ***********************************************************************************************************************/
 
 #ifndef S12AD_PRV_IF_H
@@ -66,22 +69,30 @@ Includes   <System Includes> , "Project Includes"
 #include "./src/targets/rx130/r_s12ad_rx130_if.h"
 #elif defined(BSP_MCU_RX13T)
 #include "./src/targets/rx13T/r_s12ad_rx13t_if.h"
+#elif defined(BSP_MCU_RX140)
+#include "./src/targets/rx140/r_s12ad_rx140_if.h"
 #elif defined(BSP_MCU_RX230)
 #include "./src/targets/rx230/r_s12ad_rx230_if.h"
 #elif defined(BSP_MCU_RX231)
 #include "./src/targets/rx231/r_s12ad_rx231_if.h"
 #elif defined(BSP_MCU_RX23E_A)
 #include "./src/targets/rx23e-a/r_s12ad_rx23e-a_if.h"
+#elif defined(BSP_MCU_RX23E_B)
+#include "./src/targets/rx23e-b/r_s12ad_rx23e-b_if.h"
 #elif defined(BSP_MCU_RX23W)
 #include "./src/targets/rx23w/r_s12ad_rx23w_if.h"
 #elif defined(BSP_MCU_RX64M)
 #include "./src/targets/rx64m/r_s12ad_rx64m_if.h"
 #elif defined(BSP_MCU_RX65_ALL)
 #include "./src/targets/rx65n/r_s12ad_rx65n_if.h"
+#elif defined(BSP_MCU_RX660)
+#include "./src/targets/rx660/r_s12ad_rx660_if.h"
 #elif defined(BSP_MCU_RX66N)
 #include "./src/targets/rx66n/r_s12ad_rx66n_if.h"
 #elif defined(BSP_MCU_RX66T)
 #include "./src/targets/rx66t/r_s12ad_rx66t_if.h"
+#elif defined(BSP_MCU_RX671)
+#include "./src/targets/rx671/r_s12ad_rx671_if.h"
 #elif defined(BSP_MCU_RX71M)
 #include "./src/targets/rx71m/r_s12ad_rx71m_if.h"
 #elif defined(BSP_MCU_RX72T)
@@ -90,13 +101,27 @@ Includes   <System Includes> , "Project Includes"
 #include "./src/targets/rx72m/r_s12ad_rx72m_if.h"
 #elif defined(BSP_MCU_RX72N)
 #include "./src/targets/rx72n/r_s12ad_rx72n_if.h"
+#elif defined(BSP_MCU_RX23T)
+#include "./src/targets/rx23t/r_s12ad_rx23t_if.h"
+#elif defined(BSP_MCU_RX24T)
+#include "./src/targets/rx24t/r_s12ad_rx24t_if.h"
+#elif defined(BSP_MCU_RX24U)
+#include "./src/targets/rx24u/r_s12ad_rx24u_if.h"
+#elif defined(BSP_MCU_RX26T)
+#include "./src/targets/rx26t/r_s12ad_rx26t_if.h"
+#elif defined(BSP_MCU_RX260)
+#include "./src/targets/rx260/r_s12ad_rx260_if.h"
+#elif defined(BSP_MCU_RX261)
+#include "./src/targets/rx261/r_s12ad_rx261_if.h"
+#elif defined(BSP_MCU_RX14T)
+#include "./src/targets/rx14T/r_s12ad_rx14t_if.h"
 #endif
 
 /******************************************************************************
 Macro definitions
 *******************************************************************************/
 /* Version Number of API. */
-#define ADC_VERSION_MAJOR       (4)
+#define ADC_VERSION_MAJOR       (5)
 #define ADC_VERSION_MINOR       (50)
 
 /*****************************************************************************
@@ -126,17 +151,21 @@ typedef enum e_adc_cb_evt           // callback function events
     ADC_EVT_SCAN_COMPLETE,          // normal/Group A scan complete
     ADC_EVT_SCAN_COMPLETE_GROUPB,   // Group B scan complete
 #if (defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) \
-    || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX66N) \
-    || defined(BSP_MCU_RX72N))
+    || defined(BSP_MCU_RX72M)  || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX66N) \
+    || defined(BSP_MCU_RX72N)  || defined(BSP_MCU_RX24T) || defined(BSP_MCU_RX24U) \
+    || defined(BSP_MCU_RX671)  || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T) \
+    || defined(BSP_MCU_RX14T))
     ADC_EVT_SCAN_COMPLETE_GROUPC,   // Group C scan complete
 #endif    
 #if (defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) \
     || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) \
-    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N))
+    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX671) \
+    || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T))
     ADC_EVT_CONDITION_MET,          // chans/sensors met comparator condition
 #endif
 #if (defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) \
-    || defined(BSP_MCU_RX72M) || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N))
+    || defined(BSP_MCU_RX72M)  || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) \
+    || defined(BSP_MCU_RX671)  || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T))
     ADC_EVT_CONDITION_METB          // chans/sensors met comparator condition
 #endif
 } adc_cb_evt_t;
@@ -146,12 +175,20 @@ typedef struct st_adc_cb_args       // callback arguments
     adc_cb_evt_t   event;
 #if (defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) \
     || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) \
-    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N))
+    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX671) \
+    || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T))
     uint32_t       compare_flags;   // valid only for compare event in Window A
+#endif
 #if (defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) || defined(BSP_MCU_RX72T) \
-    || defined(BSP_MCU_RX72M)  || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N))
+    || defined(BSP_MCU_RX72M)  || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) \
+    || defined(BSP_MCU_RX671)  || defined(BSP_MCU_RX660) || defined(BSP_MCU_RX26T))
     uint32_t       compare_flagsb;  // valid only for compare event in Window B
 #endif
+#if (defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65_ALL) || defined(BSP_MCU_RX66T) \
+    || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T) || defined(BSP_MCU_RX72M) \
+    || defined(BSP_MCU_RX66N) || defined(BSP_MCU_RX72N) || defined(BSP_MCU_RX24T) \
+    || defined(BSP_MCU_RX14T) \
+    || defined(BSP_MCU_RX24U) || defined(BSP_MCU_RX671) || defined(BSP_MCU_RX26T))
     uint8_t        unit;
 #endif
 } adc_cb_args_t;

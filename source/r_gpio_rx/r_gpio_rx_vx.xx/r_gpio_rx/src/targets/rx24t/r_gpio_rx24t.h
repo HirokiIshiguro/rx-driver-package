@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2015 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2015-2016 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx24t.h
@@ -24,6 +11,9 @@
 * History : DD.MM.YYYY Version Description
 *         : 01.12.2015 1.00    First Release
 *         : 19.12.2016 1.10    Added support for 64pin-Package.
+*         : 07.04.2023 2.00    Corrected PIN MASK value of PORT4 for RX24T 64-pin,
+*                              Corrected the "Total of pins".
+*         : 15.03.2025 5.11    Updated disclaimer.
 ***********************************************************************************************************************/
 #ifndef GPIO_RX24T
 #define GPIO_RX24T
@@ -45,11 +35,11 @@ Macro definitions
 #define GPIO_INFO_NUM_PORTS                 (15)    /* Includes PORTE for proper indexing */
 
 #if (BSP_PACKAGE_PINS == 100)
-    #define GPIO_INFO_NUM_PINS              (79)
+    #define GPIO_INFO_NUM_PINS              (81)
 #elif (BSP_PACKAGE_PINS == 80)
-    #define GPIO_INFO_NUM_PINS              (59)
+    #define GPIO_INFO_NUM_PINS              (61)
 #elif (BSP_PACKAGE_PINS == 64)
-    #define GPIO_INFO_NUM_PINS              (47)
+    #define GPIO_INFO_NUM_PINS              (49)
 #else
     #error "r_gpio_rx does not have information about this RX24T package. Please update r_gpio_rx24t.h"
 #endif
@@ -326,7 +316,7 @@ typedef enum
     GPIO_PORT1_PIN_MASK = 0x02,    /* Available pins: P11 */
     GPIO_PORT2_PIN_MASK = 0x1E,    /* Available pins: P21 to P24 */
     GPIO_PORT3_PIN_MASK = 0xC3,    /* Available pins: P30, P31, P36, P37 */
-    GPIO_PORT4_PIN_MASK = 0xF7,    /* Available pins: P40 to P42, P44 to P47 */
+    GPIO_PORT4_PIN_MASK = 0x77,    /* Available pins: P40 to P42, P44 to P46 */
     GPIO_PORT5_PIN_MASK = 0x1F,    /* Available pins: P50 to P54 */
     GPIO_PORT7_PIN_MASK = 0x7F,    /* Available pins: P70 to P76 */
     GPIO_PORT9_PIN_MASK = 0x7F,    /* Available pins: P90 to P96 */

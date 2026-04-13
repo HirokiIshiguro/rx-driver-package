@@ -5,13 +5,13 @@ r_vbatt_rx
 
 Document Number
 ---------------
-R01AN2796JJ0104
-R01AN2796EJ0104
+R01AN2796JJ0232
+R01AN2796EJ0232
 
 
 Version
 -------
-v1.04
+v2.32
 
 
 Overview
@@ -20,9 +20,7 @@ This module detects drop for the battery backup power and voltage of VBATT pin.
 So, the user can detect whether RTC count value is valid or not by this module.
 
 The driver can be reducedin size by removing code used for parameter checking or for unused channels. 
-These configuration options can be found in "r_config\r_vbatt_rx_config.h". 
-An original copy of the configuration file is stored in 
-"r_vbatt_rx\ref\r_vbatt_rx_config_reference.h".
+These configuration options can be found in "r_config\r_vbatt_rx_config.h".
 
 
 Features
@@ -41,6 +39,7 @@ Supported MCUs
 * RX230 Group
 * RX231 Group
 * RX23W Group
+* RX671 Group
 
 
 Boards Tested On
@@ -48,6 +47,7 @@ Boards Tested On
 * RSKRX230
 * RSKRX231
 * RSSKRX23W
+* RSSKRX671
 
 
 Technical Update of applying
@@ -69,7 +69,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v5.20
+* r_bsp     v7.60
 
 
 How to add to your project
@@ -112,14 +112,14 @@ and support functions. The r_bsp package is easily configured through the platfo
 which is located in the r_bsp folder. To configure the r_bsppackage, open up platform.h 
 and uncomment the #include for the board you are using.
 For example, to run the demo on a RSKRX231 board, the user would uncomment the #include for 
-Åe./board/rskrx231/r_bsp.hÅf macro and make sure all other board #includes are commented out.
+'./board/rskrx231/r_bsp.h' macro and make sure all other board #includes are commented out.
 
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.01.00
-* GCC for Renesas RX 4.8.4.201801
-* IAR C/C++ Compiler for Renesas RX version 4.10.1
+* Renesas RX v3.07.00
+* GCC for Renesas RX 8.03.00.202411
+* IAR C/C++ Compiler for Renesas RX version 5.10.01
 
 
 File Structure
@@ -130,35 +130,34 @@ r_vbatt_rx
 |
 +---doc
 |   +---en
-|   |   r01an2796ej0104-rx-vbatt.pdf
+|   |   r01an2796ej0232-rx-vbatt.pdf
 |   |
 |   +---ja
-|       r01an2796jj0104-rx-vbatt.pdf
-|
-+---ref
-|       r_vbatt_config_reference.h
+|       r01an2796jj0232-rx-vbatt.pdf
 |
 +---src
     |
     +---targets
         |
+        +---rx23w
+        |       r_vbatt_rx23w.c
+        |       r_vbatt_rx23w_private.h
         |
-        +---vbatt
-            |   r_vbatt_rx.c
-            |   r_vbatt_rx_platform.h
-            |   r_vbatt_rx_private.h
-            |
-            +---rx23w
-            |       r_vbatt_rx23w.c
-            |       r_vbatt_rx23w_private.h
-            |
-            +---rx230
-            |       r_vbatt_rx230.c
-            |       r_vbatt_rx230_private.h
-            |
-            +---rx231
-                    r_vbatt_rx231.c
-                    r_vbatt_rx231_private.h
+        +---rx230
+        |       r_vbatt_rx230.c
+        |       r_vbatt_rx230_private.h
+        |
+        +---rx231
+        |       r_vbatt_rx231.c
+        |       r_vbatt_rx231_private.h
+        |
+        +---rx671
+                r_vbatt_rx671.c
+                r_vbatt_rx671_private.h
+    |
+    |   r_vbatt_rx.c
+    |   r_vbatt_rx_platform.h
+    |   r_vbatt_rx_private.h
 
 r_config
     r_vbatt_rx_config.h

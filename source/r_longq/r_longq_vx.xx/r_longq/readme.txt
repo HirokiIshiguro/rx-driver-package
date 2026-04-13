@@ -15,8 +15,6 @@ flush a queue.
 
 The queue control blocks can be allocated at compile time or dynamically at run
 time. A configuration option for this exists in "r_config\r_longq_config.h".
-An original copy of the configuration file is stored in "r_longq\ref\
-r_longq_config_reference.h".
 
 
 Features
@@ -32,13 +30,10 @@ r_longq
 |
 +---doc
 |    +---en
-|    |      r01an1889ej{VERSION_NUMBER}-rx.pdf
+|    |      r01an1889ej{VERSION_NUMBER}-rx-apl.pdf
 |    |
 |    +---ja
-|           r01an1889jj{VERSION_NUMBER}-rx.pdf
-|
-+---ref
-|       r_longq_config_reference.h
+|           r01an1889jj{VERSION_NUMBER}-rx-apl.pdf
 |
 +---src
         r_longq.c

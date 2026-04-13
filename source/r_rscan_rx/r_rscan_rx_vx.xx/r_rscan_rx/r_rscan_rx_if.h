@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2015 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2015 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rscan_rx_if.h
@@ -31,6 +18,27 @@
 *           28.05.2019 2.10    Added support for RX23W.
 *           15.10.2019 2.20    Added support for RX23E-A
 *                              Fixed warning in IAR
+*           31.03.2020 2.21    Changed Minor version to 2.21.
+*           30.06.2020 2.30    Changed Minor version to 2.30.
+*           30.10.2020 2.31    Changed Minor version to 2.31.
+*           13.09.2021 2.32    Changed Minor version to 2.32.
+*           11.11.2021 2.40    Added support for RX140 (products with 128-Kbyte or larger ROM).
+*           30.06.2022 2.41    Changed the default value of CAN clock source to PCLK.
+*           29.07.2022 2.50    Updated demo projects
+*                              Fixed RXMBX enum error
+*           21.03.2023 2.60    Added new demo project
+*           29.05.2023 2.70    Added support for RX23E-B.
+*                              Fixed fifo threshold enum error.
+*                              Updated according to GSCE Code Checker 6.50.
+*           17.11.2023 2.80    Added CAN_ERR_TIME_OUT return to while loop in R_CAN_Open, R_CAN_Control, and
+*                              R_CAN_SendMsg function.
+*                              Added WAIT_LOOP comments.
+*           06.09.2024 2.90    Added support Nested Interrupt.
+*                              Added description of supported RX231.
+*                              Modified code to support only RX24T chip version B.
+*                              Removed support for RX230.
+*           15.03.2025 2.91    Updated disclaimer.
+*           23.06.2025 2.92    Removed doc folder and updated .rcpc file in FITDemos.
 ***********************************************************************************************************************/
 
 #ifndef CAN_INTERFACE_HEADER_FILE
@@ -41,23 +49,23 @@ Includes   <System Includes> , "Project Includes"
 ***********************************************************************************************************************/
 #include "platform.h"
 
-
 /***********************************************************************************************************************
 Macro definitions
 ***********************************************************************************************************************/
-
 #if R_BSP_VERSION_MAJOR < 5
     #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 
+#if ((BSP_MCU_RX24T == 1) && (BSP_RAM_SIZE_BYTES < 32768))
+    #error  "ERROR - Only RX24T Version B Products support RSCAN Module."
+#endif
+
 /* Version Number of API. */
 #define CAN_VERSION_MAJOR           (2)
-#define CAN_VERSION_MINOR           (20)
-
+#define CAN_VERSION_MINOR           (92)
 
 /* Channel numbers */
 #define CAN_CH0                     (0)
-
 
 /* R_CAN_GetStatus() Masks */
 
@@ -102,7 +110,6 @@ Macro definitions
 #define CAN_MASK_ERR_DOMINANT_BIT   (0x2000)
 #define CAN_MASK_ERR_ACK_DELIMITER  (0x4000)
 
-
 #define TRUE        (1)
 #define FALSE       (0)
 #define CAN_UNUSED  (0)
@@ -110,17 +117,14 @@ Macro definitions
 /***********************************************************************************************************************
 Typedef definitions
 ***********************************************************************************************************************/
-
-
 /* Mailbox and FIFO box IDs */
-
 #define CAN_FLG_TXMBX           (0x80000000)
 #define CAN_FLG_RXMBX           (0x40000000)
 #define CAN_FLG_FIFO            (0x20000000)
 
 typedef enum e_can_box
 {
-    CAN_BOX_NONE              = 0,  /* unused parameter value*/
+    CAN_BOX_NONE              = 0,  /* unused parameter value */
 
     CAN_BOX_TXMBX_0           = (CAN_FLG_TXMBX | 0),
     CAN_BOX_TXMBX_1           = (CAN_FLG_TXMBX | 1),
@@ -129,8 +133,8 @@ typedef enum e_can_box
 
     CAN_BOX_RXMBX_0           = (CAN_FLG_RXMBX | 0),
     CAN_BOX_RXMBX_1           = (CAN_FLG_RXMBX | 1),
-    CAN_BOX_RXMBX_2           = (CAN_FLG_RXMBX | 3),
-    CAN_BOX_RXMBX_4           = (CAN_FLG_RXMBX | 4),
+    CAN_BOX_RXMBX_2           = (CAN_FLG_RXMBX | 2),
+    CAN_BOX_RXMBX_3           = (CAN_FLG_RXMBX | 3),
 
     CAN_BOX_RXFIFO_0          = (CAN_FLG_FIFO | CAN_MASK_RXFIFO_0),
     CAN_BOX_RXFIFO_1          = (CAN_FLG_FIFO | CAN_MASK_RXFIFO_1),
@@ -139,23 +143,19 @@ typedef enum e_can_box
     CAN_BOX_HIST_FIFO         = (CAN_FLG_FIFO | CAN_MASK_HIST_FIFO)
 } can_box_t;
 
-
 /* Callback Function Events */
-
-typedef enum e_can_cb_evt           /* callback function events*/
+typedef enum e_can_cb_evt           /* callback function events */
 {
-    /* Main Callback Events*/
-    CAN_EVT_RXFIFO_THRESHOLD,       /* RX FIFO threshold*/
-    CAN_EVT_GLOBAL_ERR,             /* RX or History FIFO overflow, or DLC error*/
+    /* Main Callback Events */
+    CAN_EVT_RXFIFO_THRESHOLD,       /* RX FIFO threshold */
+    CAN_EVT_GLOBAL_ERR,             /* RX or History FIFO overflow, or DLC error */
 
-    /* Channel Callback Events*/
-    CAN_EVT_TRANSMIT,               /* mbx tx complete or aborted, tx or history FIFO threshold*/
+    /* Channel Callback Events */
+    CAN_EVT_TRANSMIT,               /* mbx tx complete or aborted, tx or history FIFO threshold */
     CAN_EVT_CHANNEL_ERR,
 } can_cb_evt_t;
 
-
 /* API Error Codes */
-
 typedef enum e_can_err          // CAN API error codes
 {
     CAN_SUCCESS=0,
@@ -168,12 +168,11 @@ typedef enum e_can_err          // CAN API error codes
     CAN_ERR_MAX_RULES,          // 16 rules already present
     CAN_ERR_BOX_FULL,           // Transmit mailbox or FIFO is full
     CAN_ERR_BOX_EMPTY,          // Receive mailbox or FIFO is full
-    CAN_ERR_ILLEGAL_MODE        // Not in proper mode for request
+    CAN_ERR_ILLEGAL_MODE,       // Not in proper mode for request
+    CAN_ERR_TIME_OUT            // Time Out error
 } can_err_t;
 
-
 /* R_CAN_Open() */
-
 typedef enum e_can_timestamp_src
 {
     CAN_TIMESTAMP_SRC_HALF_PCLK = 0,
@@ -210,7 +209,6 @@ typedef struct st_can_cfg
 
 
 /* R_CAN_InitChan() */
-
 typedef struct st_can_bitrate
 {
     uint16_t    prescaler;  // 1-1024
@@ -230,7 +228,7 @@ typedef struct st_can_bitrate
 #define CAN_RSK_32MHZ_PCLKB_500KBPS_TSEG2       (4)
 #define CAN_RSK_32MHZ_PCLKB_500KBPS_SJW         (4)
 
-/* RSKRX231/RSKRX23W/RSKRX23E-A has an 8MHz XTAL clock                      alternate settings*/
+/* RSKRX231/RSKRX23W/RSKRX23E-A has an 8MHz XTAL clock alternate settings*/
 #define CAN_RSK_8MHZ_XTAL_500KBPS_PRESCALER     (1)       /* 2 */
 #define CAN_RSK_8MHZ_XTAL_500KBPS_TSEG1         (10)      /* 5 */
 #define CAN_RSK_8MHZ_XTAL_500KBPS_TSEG2         (5)       /* 2 */
@@ -242,22 +240,18 @@ typedef struct st_can_bitrate
 #define CAN_RSK_20MHZ_XTAL_500KBPS_TSEG2        (4)
 #define CAN_RSK_20MHZ_XTAL_500KBPS_SJW          (1)
 
-
 /* R_CAN_ConfigFIFO() */
-
 typedef enum e_can_fifo_threshold       /* NOTE: History FIFO (8 deep) can only have a threshold of 1 or 6 */
 {
+    CAN_FIFO_THRESHOLD_1    = 1,        // every message
     CAN_FIFO_THRESHOLD_2    = 3,        // 4/8 of 4
     CAN_FIFO_THRESHOLD_3    = 5,        // 6/8 of 4
     CAN_FIFO_THRESHOLD_6    = 6,        // History FIFO Only!
     CAN_FIFO_THRESHOLD_FULL = 7,        // 8/8 of 4
-    CAN_FIFO_THRESHOLD_1    = 8,        // every message
     CAN_FIFO_THRESHOLD_END_ENUM
 } can_fifo_threshold_t;
 
-
 /* R_CAN_AddRxRule() */
-
 typedef struct st_can_filter
 {
     uint8_t     check_ide:1;
@@ -272,7 +266,6 @@ typedef struct st_can_filter
 
 
 /* R_CAN_SendMsg() */
-
 typedef struct st_can_txmsg
 {
     uint8_t     ide;
@@ -285,9 +278,7 @@ typedef struct st_can_txmsg
     uint8_t     label;          // 8-bit label for History FIFO
 } can_txmsg_t;
 
-
 /* R_CAN_GetMsg() */
-
 typedef struct st_can_rxmsg
 {
     uint8_t     ide;
@@ -299,18 +290,14 @@ typedef struct st_can_rxmsg
     uint16_t    timestamp;
 } can_rxmsg_t;
 
-
 /* R_CAN_GetHistoryEntry() */
-
 typedef struct st_can_history
 {
     can_box_t   box_id;         // box which sent message
     uint8_t     label;          // associated 8-bit label
 } can_history_t;
 
-
 /* R_CAN_GetStatusMask() (masks defined at top of file) */
-
 typedef enum e_can_stat
 {
     CAN_STAT_FIFO_EMPTY,
@@ -326,7 +313,6 @@ typedef enum e_can_stat
 
 
 /* R_CAN_GetCountErr() */
-
 typedef enum e_can_count
 {
     CAN_COUNT_RX_ERR,
@@ -334,9 +320,7 @@ typedef enum e_can_count
     CAN_COUNT_END_ENUM
 } can_count_t;
 
-
 /* R_CAN_Control() */
-
 typedef enum e_can_cmd
 {
     CAN_CMD_ABORT_TX,                       // argument: transmit mailbox id
@@ -349,52 +333,91 @@ typedef enum e_can_cmd
     CAN_CMD_END_ENUM
 } can_cmd_t;
 
-
-
 /*****************************************************************************
 Public functions
 ******************************************************************************/
+/******************************************************************************
+* Function Name: R_CAN_Open
+*******************************************************************************/
 can_err_t R_CAN_Open(can_cfg_t  *p_cfg,
                      void       (* const p_callback)(can_cb_evt_t   event,
                                                      void           *p_args));
+
+/******************************************************************************
+* Function Name: R_CAN_InitChan
+*******************************************************************************/
 can_err_t R_CAN_InitChan(uint8_t        chan,
                          can_bitrate_t  *p_baud,
                          void           (* const p_chcallback)(uint8_t      chan,
                                                                can_cb_evt_t event,
                                                                void         *p_args));
+
+/******************************************************************************
+* Function Name: R_CAN_ConfigFIFO
+*******************************************************************************/
 can_err_t R_CAN_ConfigFIFO(can_box_t            fifo_id,
                            can_fifo_threshold_t threshold,
                            can_box_t            txmbx_id);
 
+/******************************************************************************
+* Function Name: R_CAN_AddRxRule
+*******************************************************************************/
 can_err_t R_CAN_AddRxRule(uint8_t       chan,
                           can_filter_t  *p_filter,
                           can_box_t     dst_box);
 
+/******************************************************************************
+* Function Name: R_CAN_Control
+*******************************************************************************/
 can_err_t R_CAN_Control(can_cmd_t   cmd,
                         uint32_t    arg1);
 
+/******************************************************************************
+* Function Name: R_CAN_SendMsg
+*******************************************************************************/
 can_err_t R_CAN_SendMsg(can_box_t   box_id,
                         can_txmsg_t *p_txmsg);
 
+/******************************************************************************
+* Function Name: R_CAN_GetMsg
+*******************************************************************************/
 can_err_t R_CAN_GetMsg(can_box_t    box_id,
                        can_rxmsg_t  *p_rxmsg);
 
+/******************************************************************************
+* Function Name: R_CAN_GetHistoryEntry
+*******************************************************************************/
 can_err_t R_CAN_GetHistoryEntry(can_box_t       box_id,
                                 can_history_t   *p_entry);
 
+/******************************************************************************
+* Function Name: R_CAN_GetStatusMask
+*******************************************************************************/
 uint32_t  R_CAN_GetStatusMask(can_stat_t    stat_type,
                               uint8_t       chan,
                               can_err_t     *p_err);
 
+/******************************************************************************
+* Function Name: R_CAN_GetCountFIFO
+*******************************************************************************/
 uint32_t  R_CAN_GetCountFIFO(can_box_t  box_id,
                              can_err_t  *p_err);
 
+/******************************************************************************
+* Function Name: R_CAN_GetCountErr
+*******************************************************************************/
 uint32_t  R_CAN_GetCountErr(can_count_t  count_type,
                             uint8_t      chan,
                             can_err_t    *p_err);
 
+/******************************************************************************
+* Function Name: R_CAN_Close
+*******************************************************************************/
 void      R_CAN_Close(void);
-uint32_t  R_CAN_GetVersion(void);
 
+/******************************************************************************
+* Function Name: R_CAN_GetVersion
+*******************************************************************************/
+uint32_t  R_CAN_GetVersion(void);
 
 #endif /* CAN_INTERFACE_HEADER_FILE*/

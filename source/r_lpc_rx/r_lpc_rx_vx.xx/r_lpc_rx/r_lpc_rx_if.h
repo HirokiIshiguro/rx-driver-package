@@ -1,21 +1,8 @@
 /***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
- * applicable laws, including copyright laws. 
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the 
- * following link:
- * http://www.renesas.com/disclaimer 
- *
- * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+* Copyright (c) 2016 - 2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_lpc_rx_if.h
  * Description  : The LPC module configures the MCU for the different operating and low power modes.
@@ -28,6 +15,29 @@
  *         : 01.04.2019 1.41    Changed Minor version to 1.41.
  *         : 01.07.2019 1.42    Changed Minor version to 1.42.
  *         : 14.11.2019 2.00    Changed version to 2.00.
+ *         : 10.06.2020 2.01    Changed version to 2.01.
+ *         : 05.03.2021 2.02    Changed version to 2.02.
+ *         : 31.07.2021 2.03    Changed version to 2.03.
+ *         : 31.12.2021 2.04    Changed version to 2.04.
+ *         : 28.06.2022 2.10    Added new demo projects.
+ *         : 15.08.2022 2.20    Changed version to 2.20.
+ *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *         : 29.05.2023 2.30    Added support for RX23E-B.
+ *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *         : 28.06.2024 2.40    Added support for RX260, RX261.
+ *                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *                              Removed duplicate macros (LPC_CLOCK_ACTIVE and LPC_CLOCK_INACTIVE) for all devices.
+ *                              Modified comment of API R_LPC_OperatingModeSet (), R_LPC_ReturnClockSwitch (),
+ *                              and R_LPC_LowPowerModeActivate () functions.
+ *         : 01.11.2024 2.50    Moved the restrictions of PLL, PLL2 and main clock oscillator in middle-speed operation 
+ *                              mode and middle-speed operation mode 2 to lpc_freq_range_check() and 
+ *                              lpc_lowpower_activate_check() functions for RX260, RX261.
+ *         : 15.03.2025 2.51    Updated disclaimer.
+ *         : 23.06.2025 2.52    Removed doc folder and updated .rcpc file in FITDemos.
+ *         : 30.10.2025 2.60    Added support for RX14T.
+ *                              Fixed to comply with GSCE Coding Standards Rev.6.6.0.
+ *                              Removed \e in Doxygen comment of API function.
+ *                              Modified comment of API function to Doxygen style.
  ***********************************************************************************************************************/
 
 #ifndef R_LPC_RX_IF_H
@@ -52,7 +62,7 @@
 
 /* Version Number of API. */
     #define LPC_RX_VERSION_MAJOR           (2)
-    #define LPC_RX_VERSION_MINOR           (0)
+    #define LPC_RX_VERSION_MINOR           (60)
 
 /***********************************************************************************************************************
  Typedef definitions
@@ -71,8 +81,14 @@ typedef enum lpc_err
     LPC_ERR_ILLEGAL               // Illegal setting
 } lpc_err_t;
 
-typedef void (*lpc_callback_set_t) (void *pdata); /* Callback function type */
- 
+/**********************************************************************************************************************
+ * Function Name: lpc_callback_set_t
+ * Description  : .
+ * Argument     : pdata
+ * Return Value : .
+ *********************************************************************************************************************/
+typedef void (*lpc_callback_set_t)(void * pdata); /* Callback function type */
+
 /***********************************************************************************************************************
  Exported global variables
  ***********************************************************************************************************************/
@@ -80,11 +96,57 @@ typedef void (*lpc_callback_set_t) (void *pdata); /* Callback function type */
 /***********************************************************************************************************************
  Exported global functions (to be accessed by other files)
  ***********************************************************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: R_LPC_GetVersion
+ * Description  : .
+ * Return Value : .
+ *********************************************************************************************************************/
 uint32_t R_LPC_GetVersion (void);
+#ifndef LPC_INVALID_OPERATING_MODE
+/**********************************************************************************************************************
+ * Function Name: R_LPC_OperatingModeSet
+ * Description  : .
+ * Argument     : e_mode
+ * Return Value : .
+ *********************************************************************************************************************/
 lpc_err_t R_LPC_OperatingModeSet (lpc_operating_mode_t e_mode);
+#endif
+/**********************************************************************************************************************
+ * Function Name: R_LPC_LowPowerModeConfigure
+ * Description  : .
+ * Argument     : e_mode
+ * Return Value : .
+ *********************************************************************************************************************/
 lpc_err_t R_LPC_LowPowerModeConfigure (lpc_low_power_mode_t e_mode);
-lpc_err_t R_LPC_LowPowerModeActivate (void (*pcallback) (void* pdata));
+
+/**********************************************************************************************************************
+ * Function Name: R_LPC_LowPowerModeActivate
+ * Description  : .
+ * Argument     : pdata
+ * Return Value : .
+ *********************************************************************************************************************/
+lpc_err_t R_LPC_LowPowerModeActivate (void (*pcallback)(void* pdata));
+
+#ifndef BSP_MCU_RX14T
+/**********************************************************************************************************************
+ * Function Name: R_LPC_ReturnClockSwitch
+ * Description  : .
+ * Arguments    : e_clock_source
+ *              : enable
+ * Return Value : .
+ *********************************************************************************************************************/
 lpc_err_t R_LPC_ReturnClockSwitch (lpc_clock_switch_t e_clock_source, bool enable);
+#endif /* BSP_MCU_RX14T */
+
+#ifdef LPC_VALID_SNOOZE_MODE
+/**********************************************************************************************************************
+ * Function Name: R_LPC_SnoozeModeConfigure
+ * Description  : .
+ * Argument     : snooze_mode
+ * Return Value : .
+ *********************************************************************************************************************/
+lpc_err_t R_LPC_SnoozeModeConfigure (lpc_snooze_mode_t * snooze_mode);
+#endif
 
 #endif /* R_LPC_RX_IF_H */
 

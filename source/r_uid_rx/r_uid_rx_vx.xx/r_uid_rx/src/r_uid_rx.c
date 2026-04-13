@@ -1,25 +1,7 @@
 /*******************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2014 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 *******************************************************************************/
 /*******************************************************************************
  * File Name    : r_uid_rx.c
@@ -34,6 +16,8 @@
  *                               Added comments "WAIT_LOOP"
  *                               Deleted the inline expansion of the 
  *                               R_UID_GetVersion function.
+ *         : 10.06.2020 1.14     Modified comment of API function to Doxygen style.
+ *         : 20.03.2025 1.15     Changed the disclaimer in program sources.
  ******************************************************************************/
 
 /*******************************************************************************
@@ -56,17 +40,16 @@ static uid_status_t g_uid_state = UID_UNINITIALIZED;
 static BSP_CFG_USER_LOCKING_TYPE g_uid_lock;
 
 
-/*******************************************************************************
+/**********************************************************************************************************************
  * Function Name: R_UID_Open
- * Description  : Function will initialize the unique ID read peripheral.
- * Arguments    : none
- * Return Value : UID_SUCCESS -
- *              :    API initialized successfully.
- *              : UID_ERR_LOCK_FUNC -
- *              :    API another operation is ongoing.
- *              : UID_ERR_FAILURE -
- *              :    API has already been initialized.
- ******************************************************************************/
+ *****************************************************************************************************************/ /**
+ * @brief This function transfers the program to read the unique ID from the ROM to the RAM for using this module.
+ * @retval    UID_SUCCESS       R_UID_Open executed successfully.
+ * @retval    UID_ERR_LOCK_FUNC R_UID_Open or R_UID_Read executed while either R_UID_Open or R_UID_Read is executed.
+ * @retval    UID_ERR_FAILURE   R_UID_Open executed twice or more.
+ * @details   Prepares to read the unique ID. The program to read the unique ID is transferred from the ROM to the RAM.
+ * @note      None
+ */
 uid_err_t R_UID_Open(void)
 {
     /* Allow Initialization if not initialized or
@@ -95,20 +78,22 @@ uid_err_t R_UID_Open(void)
     return UID_SUCCESS;
 }
 
-/*******************************************************************************
+/**********************************************************************************************************************
  * Function Name: R_UID_Read
- * Description  : Reads the unique ID from the extra area.
- * Arguments    : dest_addr - Pointer to store the unique ID read.
- *
- * Return Value : UID_SUCCESS -
- *              :    unique ID read successfully.
- *              : UID_ERR_UNINITIALIZED -
- *              :    API has not been initialized yet.
- *              : UID_ERR_LOCK_FUNC -
- *              :    API another operation is ongoing.
- *              : UID_ERR_FAILURE -
- *              :    unique ID read failed.
- ******************************************************************************/
+ *****************************************************************************************************************/ /**
+ * @brief This function reads the unique ID from the extra area.
+ * @param[in,out] pdest_addr Specify the pointer to store the unique ID.\n
+              32-byte of the unique ID data is stored in the area specified with the pointer. \n
+              The size of the area specified with the pointer must be 32 bytes or more.
+ * @retval    UID_SUCCESS           Unique ID read successfully with R_UID_Read.
+ * @retval    UID_ERR_UNINITIALIZED R_UID_Read executed before executing R_UID_Open.
+ * @retval    UID_ERR_LOCK_FUNC     R_UID_Open or R_UID_Read executed while either R_UID_Open or R_UID_Read is executed.
+ * @retval    UID_ERR_FAILURE       Failed to read the unique id with R_UID_Read.
+ * @details   Reads the unique ID from the extra area and stores it in the specified area.
+ * @note      Before executing this function, disable generating interrupt requests, or allocate the vector table and 
+              the program for interrupt handler in the RAM, and change the value in the interrupt table register (INTB).
+              Also do not generate a non-maskable interrupt request.
+ */
 uid_err_t R_UID_Read(uint8_t *pdest_addr)
 {
     uid_err_t err = UID_SUCCESS;
@@ -134,15 +119,14 @@ uid_err_t R_UID_Read(uint8_t *pdest_addr)
     return err;
 }
 
-/*******************************************************************************
+/**********************************************************************************************************************
  * Function Name: R_UID_GetVersion
- * Description  : Returns the current version of this module. The version number
- *              : is encoded where the top 2 bytes are the major version number
- *              : and the bottom 2 bytes are the minor version number.
- *              : For example, Version 4.25 would be returned as 0x00040025.
- * Arguments    : none
- * Return Value : Version of this module.
- ******************************************************************************/
+ *****************************************************************************************************************/ /**
+ * @brief This function returns the API version.
+ * @return Version number
+ * @details Returns the API version number.
+ * @note None
+ */
 uint32_t R_UID_GetVersion(void)
 {
     /* These version macros are defined in r_flash_if.h. */

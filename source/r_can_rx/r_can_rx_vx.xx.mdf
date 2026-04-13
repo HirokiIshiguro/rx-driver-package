@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
 /***********************************************************************************************************************
+* Copyright (c) 2015 - 2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+/***********************************************************************************************************************
   Purpose: Module Description File (MDF) Example (Schema Version 2.0)
            This is a description of a sample FIT module configuration file
 ***********************************************************************************************************************/
@@ -8,23 +13,24 @@
 <module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
     <fileVersion>1.00</fileVersion>
     <formatVersion>2.00</formatVersion>
+
     <fileTemplate>r_pinset_type2</fileTemplate>
     <resourceInfo>
       <peripheral name="CAN">
-        <channel number="CAN0" >
-        <constraint display="Channel only valid for Supported"  actionOnFail="disable">${CAN_USE_CAN0} == ${CAN_USE_CAN0.1}</constraint>
+        <channel number="CAN0">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${CAN_USE_CAN0} == ${CAN_USE_CAN0.1}</constraint>
           <channelConfiguration>
             <config>API</config>
           </channelConfiguration>
           <pin name="CRX0">
             <pinConfiguration config="AUTO"/>
           </pin>
-          <pin name="CTX0" >
+          <pin name="CTX0">
             <pinConfiguration config="AUTO"/>
           </pin>
         </channel>
-        <channel number="CAN1" >
-        <constraint display="Channel only valid for Supported"   actionOnFail="disable">${CAN_USE_CAN1} == ${CAN_USE_CAN1.1}</constraint>
+        <channel number="CAN1">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${CAN_USE_CAN1} == ${CAN_USE_CAN1.1}</constraint>
           <channelConfiguration>
             <config>API</config>
           </channelConfiguration>
@@ -36,7 +42,7 @@
           </pin>
         </channel>
         <channel number="CAN2">
-        <constraint display="Channel only valid for Supported"  actionOnFail="disable">${CAN_USE_CAN2} == ${CAN_USE_CAN2.1}</constraint>
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${CAN_USE_CAN2} == ${CAN_USE_CAN2.1}</constraint>
           <channelConfiguration>
             <config>API</config>
           </channelConfiguration>
@@ -56,6 +62,18 @@
             <description>Set to 0 to use the CAN interrupts.
 Set to 1 if you want to poll CAN mailboxes for messages sent and received.</description>
         </property>
+        <property id="CAN_CFG_TXFIFO_INT_GEN_TIMING" display="Transmit FIFO Interrupt Generation Timing Control" default="0" type="combobox">
+            <option id="CAN_CFG_TXFIFO_INT_GEN_TIMING.0" display="Every time transmission" value="0"/>
+            <option id="CAN_CFG_TXFIFO_INT_GEN_TIMING.1" display="Transmit FIFO becomes empty" value="1"/>
+            <description>Set to 0 to generate Interrupt when every time transmission is completed.
+Set to 1 if you want to generate Interrupt when the transmit FIFO becomes empty due to completion of transmission.</description>
+        </property>
+        <property id="CAN_CFG_RXFIFO_INT_GEN_TIMING" display="Receive FIFO Interrupt Generation Timing Control" default="0" type="combobox">
+            <option id="CAN_CFG_RXFIFO_INT_GEN_TIMING.0" display="Every time reception" value="0"/>
+            <option id="CAN_CFG_RXFIFO_INT_GEN_TIMING.1" display="Receive FIFO becomes buffer warning" value="1"/>
+            <description>Set to 0 to generate Interrupt when every time reception is completed.
+Set to 1 if you want to generate Interrupt when the receive FIFO becomes buffer warning by completion of reception.</description>
+        </property>
         <property id="CAN0_INT_LVL" display="The CAN0 interrupt level" default="2" type="textbox">
             <constraint display="Only valid for CAN0 enabled" actionOnFail="disable">${CAN_USE_CAN0} == ${CAN_USE_CAN0.1}</constraint>
             <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CAN0_INT_LVL}")</constraint>
@@ -74,11 +92,20 @@ Set to 1 if you want to poll CAN mailboxes for messages sent and received.</desc
             <constraint display="Value must be in the range 1 ~ 15" actionOnFail="error">("${CAN2_INT_LVL}" &gt;= 1) &amp;&amp; ("${CAN2_INT_LVL}" &lt;= 15)</constraint>
             <description>CAN2 Interrupt Settings</description>
         </property>
+        <property id="CAN_CFG_EN_NESTED_INT" display="Using CAN nested interrupt" default="0" type="combobox">
+            <option id="CAN_CFG_EN_NESTED_INT.0" display="Do not use CAN nested interrupt" value="0"/>
+            <option id="CAN_CFG_EN_NESTED_INT.1" display="Use CAN nested interrupt" value="1"/>
+            <description>Set to 0 if not using the CAN nested interrupts.
+Set to 1 to use the CAN nested interrupts.</description>
+        </property>
         <property id="FRAME_ID_MODE" display="Select CAN ID-type" default="STD_ID_MODE" type="combobox">
             <option id="FRAME_ID_MODE.STD_ID_MODE" display="Standard 11-bit CAN ID" value="STD_ID_MODE"/>
             <option id="FRAME_ID_MODE.EXT_ID_MODE" display="Extended 29-bit CAN ID" value="EXT_ID_MODE"/>
             <option id="FRAME_ID_MODE.MIXED_ID_MODE" display="Mixed ID mode" value="MIXED_ID_MODE"/>
-            <description>Select CAN ID-type for the driver.</description>
+            <description>Select CAN ID-type for the driver.
+STD_ID_MODE      All mailboxes (including FIFO mailboxes) handle only standard IDs.
+EXT_ID_MODE      All mailboxes (including FIFO mailboxes) handle only extended IDs.
+MIXED_ID_MODE    All mailboxes (including FIFO mailboxes) handle both standard IDs and extended IDs.</description>
         </property>
         <property id="CAN_USE_CAN0" display="Using CAN Channel 0" default="1" type="combobox">
             <option id="CAN_USE_CAN0.0" display="Do not use the CAN0 channel" value="0"/>
@@ -86,38 +113,12 @@ Set to 1 if you want to poll CAN mailboxes for messages sent and received.</desc
             <description>Set to 1 to use the CAN0 channel
 Set to 0 if not using the CAN0 channel</description>
         </property>
-        <property id="CAN0_RX_PORT" display="Configure the CAN0 RX pin to be used." default="P33" type="combobox">
-            <option id="CAN0_RX_PORT.P33" display="RX64M, RX65N, RX71M, RX72M, RX72N, RX66N: P33" value="P33"/>
-            <option id="CAN0_RX_PORT.PD2" display="RX64M, RX65N, RX71M, RX72M, RX72N, RX66N: PD2" value="PD2"/>
-            <option id="CAN0_RX_PORT.P22" display="RX72T, RX66T: P22" value="P22"/>
-            <option id="CAN0_RX_PORT.PA1" display="RX72T, RX66T: PA1" value="PA1"/>
-            <option id="CAN0_RX_PORT.PA7" display="RX72T, RX66T: PA7" value="PA7"/>
-            <option id="CAN0_RX_PORT.PB6" display="RX72T, RX66T: PB6" value="PB6"/>
-            <option id="CAN0_RX_PORT.PC6" display="RX72T, RX66T: PC6" value="PC6"/>
-            <option id="CAN0_RX_PORT.PE0" display="RX72T, RX66T: PE0" value="PE0"/>
-            <option id="CAN0_RX_PORT.PF3" display="RX72T, RX66T: PF3" value="PF3"/>
-            <constraint display="Only valid for CAN0 enabled" actionOnFail="disable">${CAN_USE_CAN0} == ${CAN_USE_CAN0.1}</constraint>
-            <description>Configure the CAN0 Receive pin.</description>
-        </property>
-        <property id="CAN0_TX_PORT" display="Configure the CAN0 TX pin to be used." default="P32" type="combobox">
-            <option id="CAN0_TX_PORT.P32" display="RX64M, RX65N, RX71M, RX72M, RX72N, RX66N: P32" value="P32"/>
-            <option id="CAN0_TX_PORT.PD1" display="RX64M, RX65N, RX71M, RX72M, RX72N, RX66N: PD1" value="PD1"/>
-            <option id="CAN0_TX_PORT.P23" display="RX72T, RX66T: P23" value="P23"/>
-            <option id="CAN0_TX_PORT.PA0" display="RX72T, RX66T: PA0" value="PA0"/>
-            <option id="CAN0_TX_PORT.PA6" display="RX72T, RX66T: PA6" value="PA6"/>
-            <option id="CAN0_TX_PORT.PB5" display="RX72T, RX66T: PB5" value="PB5"/>
-            <option id="CAN0_TX_PORT.PC5" display="RX72T, RX66T: PC5" value="PC5"/>
-            <option id="CAN0_TX_PORT.PD7" display="RX72T, RX66T: PD7" value="PD7"/>
-            <option id="CAN0_TX_PORT.PF2" display="RX72T, RX66T: PF2" value="PF2"/>
-            <constraint display="Only valid for CAN0 enabled" actionOnFail="disable">${CAN_USE_CAN0} == ${CAN_USE_CAN0.1}</constraint>
-            <description>Configure the CAN0 Transmit pin.</description>
-        </property>
         <property id="CAN_USE_CAN0_STANDBY_ENABLE_PINS" display="Using CAN0 Enable and Standby control pins" default="0" type="combobox">
-            <option id="CAN_USE_CAN0_STANDBY_ENABLE_PINS.0" display="No transciever control pins" value="0"/>
-            <option id="CAN_USE_CAN0_STANDBY_ENABLE_PINS.1" display="Use transciever control pins" value="1"/>
+            <option id="CAN_USE_CAN0_STANDBY_ENABLE_PINS.0" display="No transceiver control pins" value="0"/>
+            <option id="CAN_USE_CAN0_STANDBY_ENABLE_PINS.1" display="Use transceiver control pins" value="1"/>
             <constraint display="Only valid for CAN0 enabled" actionOnFail="disable">${CAN_USE_CAN0} == ${CAN_USE_CAN0.1}</constraint>
             <description>Map the CAN0 transceiver control pins here.
-Transceivers vary in the control pins present and these may need I/O ports assigned to them. </description>
+Transceivers vary in the control pins present and these may need I/O ports assigned to them.</description>
         </property>
         <property id="CAN0_TRX_STB_PORT" display="Configure CAN0 TRX STB port" default="0" type="combobox">
             <option id="CAN0_TRX_STB_PORT.0" display="PORT0" value="0"/>
@@ -143,14 +144,19 @@ Transceivers vary in the control pins present and these may need I/O ports assig
             <option id="CAN0_TRX_STB_PORT.K" display="PORTK" value="K"/>
             <constraint display="Only valid for CAN0 enabled" actionOnFail="disable">${CAN_USE_CAN0} == ${CAN_USE_CAN0.1}</constraint>
             <constraint display="Use Transceiver pins must be enabled" actionOnFail="disable">${CAN_USE_CAN0_STANDBY_ENABLE_PINS} == ${CAN_USE_CAN0_STANDBY_ENABLE_PINS.1}</constraint>
-            <description>Configure CAN0 Transceiver Standby pin</description>
+            <description>Configure CAN0 Transceiver Standby pin.
+Transceivers vary in the control pins present and these may need I/O ports assigned to them.
+The I/O ports to be only used for Standby pin. Do not use this pin for other purpose.
+</description>
         </property>
         <property id="CAN0_TRX_STB_PIN" display="Configure CAN0 TRX STB port bit" default="0" type="textbox">
             <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CAN0_TRX_STB_PIN}")</constraint>
             <constraint display="Value must be in the range 0 ~ 7" actionOnFail="error">("${CAN0_TRX_STB_PIN}" &gt;= 0) &amp;&amp; ("${CAN0_TRX_STB_PIN}" &lt;= 7)</constraint>
             <constraint display="Only valid for CAN0 enabled" actionOnFail="disable">${CAN_USE_CAN0} == ${CAN_USE_CAN0.1}</constraint>
             <constraint display="Use Transceiver pins must be enabled" actionOnFail="disable">${CAN_USE_CAN0_STANDBY_ENABLE_PINS} == ${CAN_USE_CAN0_STANDBY_ENABLE_PINS.1}</constraint>
-            <description>Configure CAN0 Transceiver Standby pin</description>
+            <description>Configure CAN0 Transceiver Standby pin.
+Transceivers vary in the control pins present and these may need I/O ports assigned to them.
+The I/O ports to be only used for Standby pin. Do not use this pin for other purpose.</description>
         </property>
         <property id="CAN0_TRX_STB_LVL" display="Configure CAN0 STB Level" default="0" type="combobox">
             <option id="CAN0_TRX_STB_LVL.0" display="Low to enable" value="0"/>
@@ -183,14 +189,18 @@ Transceivers vary in the control pins present and these may need I/O ports assig
             <option id="CAN0_TRX_ENABLE_PORT.K" display="PORTK" value="K"/>
             <constraint display="Only valid for CAN0 enabled" actionOnFail="disable">${CAN_USE_CAN0} == ${CAN_USE_CAN0.1}</constraint>
             <constraint display="Use Transceiver pins must be enabled" actionOnFail="disable">${CAN_USE_CAN0_STANDBY_ENABLE_PINS} == ${CAN_USE_CAN0_STANDBY_ENABLE_PINS.1}</constraint>
-            <description>Configure CAN0 Transceiver Enable pin</description>
+            <description>Configure CAN0 Transceiver Enable pin.
+Transceivers vary in the control pins present and these may need I/O ports assigned to them.
+The I/O ports to be only used for Enable pin. Do not use this pin for other purpose.</description>
         </property>
         <property id="CAN0_TRX_ENABLE_PIN" display="Configure CAN0 TRX Enable port bit" default="0" type="textbox">
             <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CAN0_TRX_ENABLE_PIN}")</constraint>
             <constraint display="Value must be in the range 0 ~ 7" actionOnFail="error">("${CAN0_TRX_ENABLE_PIN}" &gt;= 0) &amp;&amp; ("${CAN0_TRX_ENABLE_PIN}" &lt;= 7)</constraint>
             <constraint display="Only valid for CAN0 enabled" actionOnFail="disable">${CAN_USE_CAN0} == ${CAN_USE_CAN0.1}</constraint>
             <constraint display="Use Transceiver pins must be enabled" actionOnFail="disable">${CAN_USE_CAN0_STANDBY_ENABLE_PINS} == ${CAN_USE_CAN0_STANDBY_ENABLE_PINS.1}</constraint>
-            <description>Configure CAN1 Transceiver Enable pin</description>
+            <description>Configure CAN0 Transceiver Enable pin
+Transceivers vary in the control pins present and these may need I/O ports assigned to them.
+The I/O ports to be only used for Enable pin. Do not use this pin for other purpose.</description>
         </property>
         <property id="CAN0_TRX_ENABLE_LVL" display="Configure CAN0 Enable logic level" default="0" type="combobox">
             <option id="CAN0_TRX_ENABLE_LVL.0" display="Low to enable" value="0"/>
@@ -202,21 +212,9 @@ Transceivers vary in the control pins present and these may need I/O ports assig
         <property id="CAN_USE_CAN1" display="Using CAN Channel 1" default="0" type="combobox">
             <option id="CAN_USE_CAN1.0" display="Do not use the CAN1 channel" value="0"/>
             <option id="CAN_USE_CAN1.1" display="Use the CAN1 channel" value="1"/>
-            <constraint display="Only RX64M, RX65N, RX71M, RX72M, RX72N and RX66N supported" actionOnFail="disable">"${Device.group}" == "RX64M" || "${Device.group}" == "RX65N" || "${Device.group}" == "RX71M" || "${Device.group}" == "RX72M"|| "${Device.group}" == "RX72N"|| "${Device.group}" == "RX66N"</constraint>
+            <constraint display="Only RX64M, RX65N, RX651, RX671, RX71M, RX72M, RX72N and RX66N supported" actionOnFail="disable">"${Device.group}" == "RX64M" || "${Device.group}" == "RX65N" || "${Device.group}" == "RX651" || "${Device.group}" == "RX671" || "${Device.group}" == "RX71M" || "${Device.group}" == "RX72M"|| "${Device.group}" == "RX72N"|| "${Device.group}" == "RX66N"</constraint>
             <description>Set to 1 to use the CAN1 channel
 Set to 0 if not using the CAN1 channel</description>
-        </property>
-        <property id="CAN1_RX_PORT" display="Configure the CAN1 RX pin to be used." default="P15" type="combobox">
-            <option id="CAN1_RX_PORT.P15" display="P15" value="P15"/>
-            <option id="CAN1_RX_PORT.P55" display="P55" value="P55"/>
-            <constraint display="Only valid for CAN1 enabled" actionOnFail="disable">${CAN_USE_CAN1} == ${CAN_USE_CAN1.1}</constraint>
-            <description>Configure the CAN1 Receive pin.</description>
-        </property>
-        <property id="CAN1_TX_PORT" display="Configure the CAN1 TX pin to be used." default="P14" type="combobox">
-            <option id="CAN1_TX_PORT.P14" display="P14" value="P14"/>
-            <option id="CAN1_TX_PORT.P54" display="P54" value="P54"/>
-            <constraint display="Only valid for CAN1 enabled" actionOnFail="disable">${CAN_USE_CAN1} == ${CAN_USE_CAN1.1}</constraint>
-            <description>Configure the CAN1 Transmit pin.</description>
         </property>
         <property id="CAN_USE_CAN1_STANDBY_ENABLE_PINS" display="Using CAN1 Enable and Standby control pins" default="0" type="combobox">
             <option id="CAN_USE_CAN1_STANDBY_ENABLE_PINS.0" display="No transciever control pins" value="0"/>
@@ -249,14 +247,18 @@ Transceivers vary in the control pins present and these may need I/O ports assig
             <option id="CAN1_TRX_STB_PORT.K" display="PORTK" value="K"/>
             <constraint display="Only valid for CAN1 enabled" actionOnFail="disable">${CAN_USE_CAN1} == ${CAN_USE_CAN1.1}</constraint>
             <constraint display="Use Transceiver pins must be enabled" actionOnFail="disable">${CAN_USE_CAN1_STANDBY_ENABLE_PINS} == ${CAN_USE_CAN1_STANDBY_ENABLE_PINS.1}</constraint>
-            <description>Configure CAN1 Transceiver Standby pin</description>
+            <description>Configure CAN1 Transceiver Standby pin.
+Transceivers vary in the control pins present and these may need I/O ports assigned to them.
+The I/O ports to be only used for Standby pin. Do not use this pin for other purpose.</description>
         </property>
         <property id="CAN1_TRX_STB_PIN" display="Configure CAN1 TRX STB port bit" default="0" type="textbox">
             <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CAN1_TRX_STB_PIN}")</constraint>
             <constraint display="Value must be in the range 0 ~ 7" actionOnFail="error">("${CAN1_TRX_STB_PIN}" &gt;= 0) &amp;&amp; ("${CAN1_TRX_STB_PIN}" &lt;= 7)</constraint>
             <constraint display="Only valid for CAN1 enabled" actionOnFail="disable">${CAN_USE_CAN1} == ${CAN_USE_CAN1.1}</constraint>
             <constraint display="Use Transceiver pins must be enabled" actionOnFail="disable">${CAN_USE_CAN1_STANDBY_ENABLE_PINS} == ${CAN_USE_CAN1_STANDBY_ENABLE_PINS.1}</constraint>
-            <description>Configure CAN1 Transceiver Standby pin</description>
+            <description>Configure CAN1 Transceiver Standby pin.
+Transceivers vary in the control pins present and these may need I/O ports assigned to them.
+The I/O ports to be only used for Standby pin. Do not use this pin for other purpose.</description>
         </property>
         <property id="CAN1_TRX_STB_LVL" display="Configure CAN1 STB Level" default="0" type="combobox">
             <option id="CAN1_TRX_STB_LVL.0" display="Low to enable" value="0"/>
@@ -289,14 +291,18 @@ Transceivers vary in the control pins present and these may need I/O ports assig
             <option id="CAN1_TRX_ENABLE_PORT.K" display="PORTK" value="K"/>
             <constraint display="Only valid for CAN1 enabled" actionOnFail="disable">${CAN_USE_CAN1} == ${CAN_USE_CAN1.1}</constraint>
             <constraint display="Use Transceiver pins must be enabled" actionOnFail="disable">${CAN_USE_CAN1_STANDBY_ENABLE_PINS} == ${CAN_USE_CAN1_STANDBY_ENABLE_PINS.1}</constraint>
-            <description>Configure CAN1 Transceiver Enable pin</description>
+            <description>Configure CAN1 Transceiver Enable pin
+Transceivers vary in the control pins present and these may need I/O ports assigned to them.
+The I/O ports to be only used for Enable pin. Do not use this pin for other purpose.</description>
         </property>
         <property id="CAN1_TRX_ENABLE_PIN" display="Configure CAN1 TRX Enable port bit" default="0" type="textbox">
             <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CAN1_TRX_ENABLE_PIN}")</constraint>
             <constraint display="Value must be in the range 0 ~ 7" actionOnFail="error">("${CAN1_TRX_ENABLE_PIN}" &gt;= 0) &amp;&amp; ("${CAN1_TRX_ENABLE_PIN}" &lt;= 7)</constraint>
             <constraint display="Only valid for CAN1 enabled" actionOnFail="disable">${CAN_USE_CAN1} == ${CAN_USE_CAN1.1}</constraint>
             <constraint display="Use Transceiver pins must be enabled" actionOnFail="disable">${CAN_USE_CAN1_STANDBY_ENABLE_PINS} == ${CAN_USE_CAN1_STANDBY_ENABLE_PINS.1}</constraint>
-            <description>Configure CAN1 Transceiver Enable pin</description>
+            <description>Configure CAN1 Transceiver Enable pin
+Transceivers vary in the control pins present and these may need I/O ports assigned to them.
+The I/O ports to be only used for Enable pin. Do not use this pin for other purpose.</description>
         </property>
         <property id="CAN1_TRX_ENABLE_LVL" display="Configure CAN1 Enable logic level" default="0" type="combobox">
             <option id="CAN1_TRX_ENABLE_LVL.0" display="Low to enable" value="0"/>
@@ -311,16 +317,6 @@ Transceivers vary in the control pins present and these may need I/O ports assig
             <constraint display="Only RX64M, RX71M, RX72M, RX72N and RX66N supported" actionOnFail="disable">"${Device.group}" == "RX64M" || "${Device.group}" == "RX71M" || "${Device.group}" == "RX72M"|| "${Device.group}" == "RX72N"|| "${Device.group}" == "RX66N"</constraint>
             <description>Set to 1 to use the CAN2 channel
 Set to 0 if not using the CAN2 channel</description>
-        </property>
-        <property id="CAN2_RX_PORT" display="Configure the CAN2 RX pin to be used." default="P67" type="combobox">
-            <option id="CAN2_RX_PORT.P67" display="P67" value="P67"/>
-            <constraint display="Only valid for CAN2 enabled" actionOnFail="disable">${CAN_USE_CAN2} == ${CAN_USE_CAN2.1}</constraint>
-            <description>Configure the CAN2 Receive pin.</description>
-        </property>
-        <property id="CAN2_TX_PORT" display="Configure the CAN2 TX pin to be used." default="P66" type="combobox">
-            <option id="CAN2_TX_PORT.P66" display="P66" value="P66"/>
-            <constraint display="Only valid for CAN2 enabled" actionOnFail="disable">${CAN_USE_CAN2} == ${CAN_USE_CAN2.1}</constraint>
-            <description>Configure the CAN2 Transmit pin.</description>
         </property>
         <property id="CAN_USE_CAN2_STANDBY_ENABLE_PINS" display="Using CAN2 Enable and Standby control pins" default="0" type="combobox">
             <option id="CAN_USE_CAN2_STANDBY_ENABLE_PINS.0" display="No transciever control pins" value="0"/>
@@ -353,14 +349,18 @@ Transceivers vary in the control pins present and these may need I/O ports assig
             <option id="CAN2_TRX_STB_PORT.K" display="PORTK" value="K"/>
             <constraint display="Only valid for CAN2 enabled" actionOnFail="disable">${CAN_USE_CAN2} == ${CAN_USE_CAN2.1}</constraint>
             <constraint display="Use Transceiver pins must be enabled" actionOnFail="disable">${CAN_USE_CAN2_STANDBY_ENABLE_PINS} == ${CAN_USE_CAN2_STANDBY_ENABLE_PINS.1}</constraint>
-            <description>Configure CAN2 Transceiver Standby pin</description>
+            <description>Configure CAN2 Transceiver Standby pin.
+Transceivers vary in the control pins present and these may need I/O ports assigned to them.
+The I/O ports to be only used for Standby pin. Do not use this pin for other purpose.</description>
         </property>
         <property id="CAN2_TRX_STB_PIN" display="Configure CAN2 TRX STB port bit" default="0" type="textbox">
             <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CAN2_TRX_STB_PIN}")</constraint>
             <constraint display="Value must be in the range 0 ~ 7" actionOnFail="error">("${CAN2_TRX_STB_PIN}" &gt;= 0) &amp;&amp; ("${CAN2_TRX_STB_PIN}" &lt;= 7)</constraint>
             <constraint display="Only valid for CAN2 enabled" actionOnFail="disable">${CAN_USE_CAN2} == ${CAN_USE_CAN2.1}</constraint>
             <constraint display="Use Transceiver pins must be enabled" actionOnFail="disable">${CAN_USE_CAN2_STANDBY_ENABLE_PINS} == ${CAN_USE_CAN2_STANDBY_ENABLE_PINS.1}</constraint>
-            <description>Configure CAN2 Transceiver Standby pin</description>
+            <description>Configure CAN2 Transceiver Standby pin.
+Transceivers vary in the control pins present and these may need I/O ports assigned to them.
+The I/O ports to be only used for Standby pin. Do not use this pin for other purpose.</description>
         </property>
         <property id="CAN2_TRX_STB_LVL" display="Configure CAN2 STB Level" default="0" type="combobox">
             <option id="CAN2_TRX_STB_LVL.0" display="Low to enable" value="0"/>
@@ -393,14 +393,18 @@ Transceivers vary in the control pins present and these may need I/O ports assig
             <option id="CAN2_TRX_ENABLE_PORT.K" display="PORTK" value="K"/>
             <constraint display="Only valid for CAN2 enabled" actionOnFail="disable">${CAN_USE_CAN2} == ${CAN_USE_CAN2.1}</constraint>
             <constraint display="Use Transceiver pins must be enabled" actionOnFail="disable">${CAN_USE_CAN2_STANDBY_ENABLE_PINS} == ${CAN_USE_CAN2_STANDBY_ENABLE_PINS.1}</constraint>
-            <description>Configure CAN2 Transceiver Enable pin</description>
+            <description>Configure CAN2 Transceiver Enable pin
+Transceivers vary in the control pins present and these may need I/O ports assigned to them.
+The I/O ports to be only used for Enable pin. Do not use this pin for other purpose.</description>
         </property>
         <property id="CAN2_TRX_ENABLE_PIN" display="Configure CAN2 TRX Enable port bit" default="0" type="textbox">
             <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CAN2_TRX_ENABLE_PIN}")</constraint>
             <constraint display="Value must be in the range 0 ~ 7" actionOnFail="error">("${CAN2_TRX_ENABLE_PIN}" &gt;= 0) &amp;&amp; ("${CAN2_TRX_ENABLE_PIN}" &lt;= 7)</constraint>
             <constraint display="Only valid for CAN2 enabled" actionOnFail="disable">${CAN_USE_CAN2} == ${CAN_USE_CAN2.1}</constraint>
             <constraint display="Use Transceiver pins must be enabled" actionOnFail="disable">${CAN_USE_CAN2_STANDBY_ENABLE_PINS} == ${CAN_USE_CAN2_STANDBY_ENABLE_PINS.1}</constraint>
-            <description>Configure CAN2 Transceiver Enable pin</description>
+            <description>Configure CAN2 Transceiver Enable pin
+Transceivers vary in the control pins present and these may need I/O ports assigned to them.
+The I/O ports to be only used for Enable pin. Do not use this pin for other purpose.</description>
         </property>
         <property id="CAN2_TRX_ENABLE_LVL" display="Configure CAN2 Enable logic level" default="0" type="combobox">
             <option id="CAN2_TRX_ENABLE_LVL.0" display="Low to enable" value="0"/>
@@ -408,37 +412,6 @@ Transceivers vary in the control pins present and these may need I/O ports assig
             <constraint display="Only valid for CAN2 enabled" actionOnFail="disable">${CAN_USE_CAN2} == ${CAN_USE_CAN2.1}</constraint>
             <constraint display="Use Transceiver pins must be enabled" actionOnFail="disable">${CAN_USE_CAN2_STANDBY_ENABLE_PINS} == ${CAN_USE_CAN2_STANDBY_ENABLE_PINS.1}</constraint>
             <description>Configure CAN2 Transceiver Enable pin active logic level</description>
-        </property>
-        <property id="BITRATE" display="Bit Rate" default="500000" type="textbox">
-            <constraint display="Value must be an integer">testInteger("${BITRATE}")</constraint>
-            <constraint display="Value must be in the range 0 ~ 1000000">("${BITRATE}" &gt;= 0) &amp;&amp; ("${BITRATE}" &lt;= 1000000)</constraint>
-            <description>Bit Rate</description>
-        </property>
-        <property id="CAN_BRP" display="Baudrate prescale math value." default="5" type="textbox">
-            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CAN_BRP}")</constraint>
-            <constraint display="Value must be in the range 0 ~ 1023" actionOnFail="error">("${CAN_BRP}" &gt;= 0) &amp;&amp; ("${CAN_BRP}" &lt;= 1023)</constraint>
-            <description>Baudrate prescale math value.
-Recommended value for RSKRX64M, 65N, 66N, 71M, 72M, 72N, 72T = 5
-Recommended value for RSKRX66T = 4</description>
-        </property>
-        <property id="CAN_TSEG1" display="Time Segment 1 Control" default="15" type="textbox">
-            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CAN_TSEG1}")</constraint>
-            <constraint display="Value must be in the range 4 ~ 15" actionOnFail="error">("${CAN_TSEG1}" &gt;= 4) &amp;&amp; ("${CAN_TSEG1}" &lt;= 15)</constraint>
-            <description>Time Segment 1 Control 
-Recommended value for RSKRX64M, 65N, 66N, 71M, 72M, 72N = 15
-Recommended value for RSKRX72T, 66T = 11</description>
-        </property>
-        <property id="CAN_TSEG2" display="Time Segment 2 Control" default="8" type="textbox">
-            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CAN_TSEG2}")</constraint>
-            <constraint display="Value must be in the range 2 ~ 8" actionOnFail="error">("${CAN_TSEG2}" &gt;= 2) &amp;&amp; ("${CAN_TSEG2}" &lt;= 8)</constraint>
-            <description>Time Segment 2 Control
-Default value = 8</description>
-        </property>
-        <property id="CAN_SJW" display="Resynchronization Jump Width Control" default="2" type="textbox">
-            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CAN_SJW}")</constraint>
-            <constraint display="Value must be in the range 1 ~ 4" actionOnFail="error">("${CAN_SJW}" &gt;= 1) &amp;&amp; ("${CAN_SJW}" &lt;= 4)</constraint>
-            <description>Resynchronization Jump Width Control 
-Default value = 2.</description>
         </property>
         <property id="MAX_CANREG_POLLCYCLES" display="Max Register Poll Time" default="5" type="textbox">
             <constraint display="Value must be an integer" actionOnFail="error">testInteger("${MAX_CANREG_POLLCYCLES}")</constraint>

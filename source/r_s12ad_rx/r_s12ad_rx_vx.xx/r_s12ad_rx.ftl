@@ -1,10 +1,9 @@
 <#--
-  Copyright(C) 2016 Renesas Electronics Corporation
-  RENESAS ELECTRONICS CONFIDENTIAL AND PROPRIETARY
-  This program must be used solely for the purpose for which it was furnished 
-  by Renesas Electronics Corporation. No part of this program may be reproduced
-  or disclosed to others, in any form, without the prior written permission of 
-  Renesas Electronics Corporation.
+/***********************************************************************************************************************
+* Copyright (c) 2016 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 -->
 <#-- = DECLARE FUNCTION INFORMATION HERE =================== -->
 <#assign Function_Base_Name = "R_ADC_PinSet">
@@ -101,6 +100,14 @@ void ${Function_Name}()
     </#if>
     <#if headerInfo.device?contains("R5F513T")>
         <#if pin.portNum != "4">
+    PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 0U;
+                </#if>
+    <#elseif headerInfo.device?contains("R5F523T")>
+        <#if pin.portNum != "4">
+    PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 0U;
+                </#if>
+    <#elseif headerInfo.device?contains("R5F524T") || headerInfo.device?contains("R5F524U")>
+        <#if pin.portNum != "4" && pin.portNum != "5" && pin.portNum != "6">
     PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 0U;
                 </#if>
     <#else>    

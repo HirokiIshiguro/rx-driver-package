@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_iwdt_rx.c
@@ -34,9 +21,13 @@
 *                              Bug fix: R_WDT_Open(), R_IWDT_Open() invalidated if either module is in auto-start mode.
 *           20.05.2019 3.00    Added support for GNUC and ICCRX.
 *           15.08.2019 3.20    Fixed warnings in IAR.
-*         : 25.11.2019 3.30    Added support for RX13T.
+*           25.11.2019 3.30    Added support for RX13T.
 *                              Modified comment of API function to Doxygen style.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
+*           15.08.2022 4.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0
+*           29.05.2023 4.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0
+*           28.06.2024 4.50    Added support for RX260, RX261.
+*           15.03.2025 4.51    Updated disclaimer
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -63,14 +54,14 @@ Private global variables and functions
 static bool s_already_opened = false;
 
 /* Internal functions. */
-static iwdt_err_t iwdt_init_register_start_mode(iwdt_config_t *p_cfg);
+static iwdt_err_t iwdt_init_register_start_mode (iwdt_config_t * p_cfg);
 #if (1 == IWDT_CFG_PARAM_CHECKING_ENABLE)
-static bool iwdt_parameter_check(iwdt_config_t *p_cfg);
+static bool iwdt_parameter_check (iwdt_config_t * p_cfg);
 #endif /* IWDT_CFG_PARAM_CHECKING_ENABLE */
 #endif /* BSP_CFG_OFS0_REG_VALUE */
 
-static inline bool acquire_hw_lock(void);
-static inline void release_hw_lock(void);
+static inline bool acquire_hw_lock (void);
+static inline void release_hw_lock (void);
 
 /***********************************************************************************************************************
 * Function Name: R_IWDT_Open
@@ -90,7 +81,7 @@ static inline void release_hw_lock(void);
 * See Section 3 in the application note for details.
 */
 #if ((BSP_CFG_OFS0_REG_VALUE & OFS0_IWDT_DISABLED) == OFS0_IWDT_DISABLED) /* Register start mode */
-iwdt_err_t R_IWDT_Open (void * const p_cfg)
+iwdt_err_t R_IWDT_Open(void * const p_cfg)
 {
     iwdt_err_t   err;
     bool         ret;
@@ -193,27 +184,27 @@ static bool iwdt_parameter_check(iwdt_config_t *p_cfg)
     }
 
     if (((IWDT_CLOCK_DIV_1   != p_cfg->iwdtclk_div)  && \
-         (IWDT_CLOCK_DIV_16  != p_cfg->iwdtclk_div)) && \
-       (((IWDT_CLOCK_DIV_32  != p_cfg->iwdtclk_div)  && \
-         (IWDT_CLOCK_DIV_64  != p_cfg->iwdtclk_div)) && \
+        (IWDT_CLOCK_DIV_16  != p_cfg->iwdtclk_div)) && \
+        (((IWDT_CLOCK_DIV_32  != p_cfg->iwdtclk_div)  && \
+        (IWDT_CLOCK_DIV_64  != p_cfg->iwdtclk_div)) && \
         ((IWDT_CLOCK_DIV_128 != p_cfg->iwdtclk_div)  && \
-         (IWDT_CLOCK_DIV_256 != p_cfg->iwdtclk_div))))
+        (IWDT_CLOCK_DIV_256 != p_cfg->iwdtclk_div))))
     {
         ret = false;
     }
 
     if (((IWDT_WINDOW_END_75 != p_cfg->window_end)  && \
-         (IWDT_WINDOW_END_50 != p_cfg->window_end)) && \
+        (IWDT_WINDOW_END_50 != p_cfg->window_end)) && \
         ((IWDT_WINDOW_END_25 != p_cfg->window_end)  && \
-         (IWDT_WINDOW_END_0  != p_cfg->window_end)))
+        (IWDT_WINDOW_END_0  != p_cfg->window_end)))
     {
         ret = false;
     }
 
     if (((IWDT_WINDOW_START_25  != p_cfg->window_start)  && \
-         (IWDT_WINDOW_START_50  != p_cfg->window_start)) && \
+        (IWDT_WINDOW_START_50  != p_cfg->window_start)) && \
         ((IWDT_WINDOW_START_75  != p_cfg->window_start)  && \
-         (IWDT_WINDOW_START_100 != p_cfg->window_start)))
+        (IWDT_WINDOW_START_100 != p_cfg->window_start)))
     {
         ret = false;
     }
@@ -235,8 +226,8 @@ static bool iwdt_parameter_check(iwdt_config_t *p_cfg)
 /******************************************************************************
 End of function iwdt_parameter_check
 ******************************************************************************/
-#endif /* IWDT_CFG_PARAM_CHECKING_ENABLE */
-#endif /* BSP_CFG_OFS0_REG_VALUE */
+#endif /* 1 == IWDT_CFG_PARAM_CHECKING_ENABLE */
+#endif /* BSP_CFG_OFS0_REG_VALUE & OFS0_IWDT_DISABLED == OFS0_IWDT_DISABLED */
 
 
 /***********************************************************************************************************************
@@ -336,7 +327,7 @@ End of function R_IWDT_Control
 * version number and the bottom 2 bytes are the minor version number.
 * @note None.
 */
-uint32_t  R_IWDT_GetVersion (void)
+uint32_t  R_IWDT_GetVersion(void)
 {
     uint32_t  version = (IWDT_RX_VERSION_MAJOR << 16) | IWDT_RX_VERSION_MINOR;
 

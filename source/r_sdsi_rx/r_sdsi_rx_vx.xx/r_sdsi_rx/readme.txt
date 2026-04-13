@@ -5,12 +5,12 @@ r_sdsi_rx (SD Mode SDSI Driver)
 
 Document Number 
 ---------------
-R01AN3238EJ0202
-R01AN3238JJ0202
+R01AN3238EJ0206
+R01AN3238JJ0206
 
 Version
 -------
-v2.02
+v2.06
 
 Overview
 --------
@@ -27,7 +27,7 @@ Features
 * Supports FBR (Function Basic Register)-based operation
 * Supports access to CIS (Card Information Structure) 108 bytes
 * Supports access to Function1 register (Function Unique register space)
-* Supports direct transfer to MCUÅfs internal RAM
+* Supports direct transfer to MCUfs internal RAM
 * Can call callback function when detecting SDSI interrupt
 
 Supported MCUs
@@ -49,37 +49,34 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp    v5.20
+* r_bsp    v7.60
 
 How to add to your project
 --------------------------
 This module must be added to each project in which it is used.
-Renesas recommends using "Smart Configurator" described in (1) or (3).
+Renesas recommends using "Smart Configurator" described in (1) or (2).
 However, "Smart Configurator" only supports some RX devices.
-Please use the methods of (2) or (4) for unsupported RX devices.
+Please use the methods of (3) for unsupported RX devices.
 
 (1)	Adding the FIT module to your project using "Smart Configurator" in e2 studio
 By using the "Smart Configurator" in e2 studio, 
 the FIT module is automatically added to your project.
 Refer to "Renesas e2 studio Smart Configurator User Guide (R20AN0451)" for details.
 
-(2)	Adding the FIT module to your project using "FIT Configurator" in e2 studio
-By using the "FIT Configurator" in e2 studio,
-the FIT module is automatically added to your project.
-Refer to "Adding Firmware Integration Technology Modules to Projects (R01AN1723)" for details.
-
-(3)	Adding the FIT module to your project using "Smart Configurator" on CS+
+(2)	Adding the FIT module to your project using "Smart Configurator" on CS+
 By using the "Smart Configurator Standalone version" in CS+,
 the FIT module is automatically added to your project.
 Refer to "Renesas e2 studio Smart Configurator User Guide (R20AN0451)" for details.
 
-(4)	Adding the FIT module to your project in CS+
+(3)	Adding the FIT module to your project in CS+
 In CS+, please manually add the FIT module to your project.
 Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1826)" for details.
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.01 release 00
+* Renesas RX v3.07.00
+* GCC for Renesas RX v14.02.00.202505
+* IAR C/C++ Compiler for Renesas RX v5.20.01
 
 File Structure
 --------------
@@ -90,12 +87,9 @@ r_sdsi_rx
 +---doc
 |   |
 |   +---en
-|   |       r01an3238ej0202-rx-communication.pdf
+|   |       r01an3238ej0206-rx-communication.pdf
 |   +---ja
-|           r01an3238jj0202-rx-communication.pdf
-|
-+---ref
-|       r_sdsi_rx_config_reference.h
+|           r01an3238jj0206-rx-communication.pdf
 |
 +---src
     |   r_sdsi_rx.c

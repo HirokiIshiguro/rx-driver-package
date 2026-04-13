@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+/*
+* Copyright (C) 2017-2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2017-2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : r_flash_targets.h
 * Description  : This is a private header file used internally by the FLASH module. It should not be modified or
@@ -32,6 +19,14 @@
 *           09.09.2019 4.30    Added RX13T
 *           27.09.2019 4.40    Added RX23E-A
 *           18.11.2019 4.50    Added RX66N, and RX72N.
+*           23.10.2020 4.70    Added RX671.
+*           23.04.2021 4.80    Added RX140.
+*           23.12.2021 4.90    Added RX660.
+*           24.01.2023 5.00    Added RX26T.
+*           28.02.2023 5.10    Added RX23E-B.
+*           30.07.2024 5.20    Added RX260, and RX261.
+*           20.03.2025 5.22    Changed the disclaimer in program sources
+*           31.07.2025 5.30    Added RX14T.
 ***********************************************************************************************************************/
 
 #ifndef FLASH_TARGETS_HEADER_FILE
@@ -66,6 +61,12 @@ Macro definitions
 #elif defined(BSP_MCU_RX13T)
     #define MCU_RX13T
     #define MCU_RX13_ALL
+#elif defined(BSP_MCU_RX140)
+    #define MCU_RX140
+    #define MCU_RX14_ALL
+#elif defined(BSP_MCU_RX14T)
+    #define MCU_RX14T
+    #define MCU_RX14_ALL
 #elif defined(BSP_MCU_RX231)
     #define MCU_RX231
     #define MCU_RX23_ALL
@@ -74,6 +75,9 @@ Macro definitions
     #define MCU_RX23_ALL
 #elif defined(BSP_MCU_RX23E_A)
     #define MCU_RX23E_A
+    #define MCU_RX23_ALL
+#elif defined(BSP_MCU_RX23E_B)
+    #define MCU_RX23E_B
     #define MCU_RX23_ALL
 #elif defined(BSP_MCU_RX23T)
     #define MCU_RX23T
@@ -87,6 +91,12 @@ Macro definitions
 #elif defined(BSP_MCU_RX24U)
     #define MCU_RX24U
     #define MCU_RX24_ALL
+#elif defined(BSP_MCU_RX260)
+    #define MCU_RX260
+#elif defined(BSP_MCU_RX261)
+    #define MCU_RX261
+#elif defined(BSP_MCU_RX26T)
+    #define MCU_RX26T
 #elif defined(BSP_MCU_RX64M)
     #define MCU_RX64M
     #define MCU_RX64_ALL
@@ -94,12 +104,18 @@ Macro definitions
     #define MCU_RX651
     #define MCU_RX65N
     #define MCU_RX65_ALL
+#elif defined(BSP_MCU_RX660)
+    #define MCU_RX660
+    #define MCU_RX66_ALL
 #elif defined(BSP_MCU_RX66T)
     #define MCU_RX66T
     #define MCU_RX66_ALL
 #elif defined(BSP_MCU_RX66N)
     #define MCU_RX66N
     #define MCU_RX66_ALL
+#elif defined(BSP_MCU_RX671)
+    #define MCU_RX671
+    #define MCU_RX67_ALL
 #elif defined(BSP_MCU_RX71M)
     #define MCU_RX71M
     #define MCU_RX71_ALL

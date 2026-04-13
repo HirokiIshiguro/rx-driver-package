@@ -2,7 +2,7 @@
  * \file MS_health_server_api.h
  *
  * \brief This file defines the Mesh Health Model Application Interface
- * - includes Data Structures and Methods for both Server and Client.
+ * - includes Data Structures and Methods for both Server.
  */
 
 /*
@@ -13,19 +13,29 @@
 #ifndef _H_MS_HEALTH_SERVER_API_
 #define _H_MS_HEALTH_SERVER_API_
 
-
 /* --------------------------------------------- Header File Inclusion */
 #include "MS_access_api.h"
 
-
 /* --------------------------------------------- Global Definitions */
+
 /**
- *  \defgroup health_fault_values Fault Values
- *  \{
- *  This section lists the Fault Values defined for Health Model.
+ * \addtogroup health_defines
+ * \{
  */
 
-/** Health Model - Fault Values */
+
+/**
+ * \defgroup health_constants Constants
+ * \{
+ * \brief This section describes the various Constants in EtherMind
+ * Mesh Health Model Layer.
+ */
+
+/**
+ * \name Health Model Fault Values
+ * This section lists the Fault Values defined for EtherMind Mesh Health Model.
+ * \{
+ */
 /** No Fault */
 #define MS_HEALTH_FAULT_NO_FAULT                                0x00
 /** Battery Low Warning */
@@ -134,12 +144,19 @@
 
 /** \} */
 
-/**
-*  \defgroup health_server_events Health Server Events
-*  \{
-*  This section lists the Application Events defined for Health Server Model.
-*/
+/** \} */
 
+/**
+ *  \defgroup health_server_events Events
+ *  \{
+ *  \brief This section lists the Asynchronous Events notified to Application
+ *  by EtherMind Mesh Health Model Layer.
+ */
+
+/**
+ * \name Health Model Events
+ * \{
+ */
 /** Attention Start */
 #define MS_HEALTH_SERVER_ATTENTION_START                       0x01
 
@@ -148,11 +165,17 @@
 
 /** Attention Stop */
 #define MS_HEALTH_SERVER_ATTENTION_STOP                        0x03
+/** \} */
 
 /** \} */
 
+/** \} */
 
 /* --------------------------------------------- Data Types/ Structures */
+/**
+ * \addtogroup health_cb
+ * \{
+ */
 /**
  * \brief Health Server application Asynchronous Notification Callback.
  *
@@ -173,15 +196,26 @@ typedef API_RESULT (* MS_HEALTH_SERVER_CB)
             UINT16                   param_len
         ) DECL_REENTRANT;
 
-
 /**
  * Health Server Self Test Function.
  */
 /* TODO: Add context of the Health Server, so that associated current/registered fault can be updated */
 typedef void (* MS_HEALTH_SERVER_SELF_TEST_FN)(UINT8 test_id, UINT16 company_id);
 
+/** \} */
+
 /**
- * Health Server Self Test Funtion Structure.
+ * \addtogroup health_defines
+ * \{
+ */
+
+/**
+ * \addtogroup health_structures
+ * \{
+ */
+
+/**
+ * Health Server Self Test Function Structure.
  */
 typedef struct _MS_HEALTH_SERVER_SELF_TEST
 {
@@ -193,16 +227,34 @@ typedef struct _MS_HEALTH_SERVER_SELF_TEST
 
 }MS_HEALTH_SERVER_SELF_TEST;
 
+/** \} */
+
+/** \} */
 
 /* --------------------------------------------- Function */
+/**
+ * \addtogroup health_api_defs
+ * \{
+ */
+
+/**
+ * \defgroup health_ser_api_defs Health Server API Definitions
+ * \{
+ * \brief This section describes the EtherMind Health Server Model APIs.
+ */
+
+/**
+ * \name Health Server Interfaces
+ * \{
+ */
 /**
  *  \brief API to initialize Health Server model
  *
  *  \par Description
- *  This is to initialize Health Server model and to register with Acess layer.
+ *  This is to initialize Health Server model and to register with Access layer.
  *
- *  \param [in] element_handle
- *              Element identifier to be associated with the model instance.
+ *  \param [in]      element_handle
+ *                   Element identifier to be associated with the model instance.
  *
  *  \param [in, out] model_handle
  *                   Model identifier associated with the model instance on successful initialization.
@@ -218,7 +270,8 @@ typedef struct _MS_HEALTH_SERVER_SELF_TEST
  *  \param [in]      num_self_tests
  *                   Number of Self Tests in the list.
  *
- *  \param [in] appl_cb    Application Callback to be used by the Health Server.
+ *  \param [in]      appl_cb
+ *                   Application Callback to be used by the Health Server.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -231,6 +284,19 @@ API_RESULT MS_health_server_init
                /* IN */    UINT32                       num_self_tests,
                /* IN */    MS_HEALTH_SERVER_CB          appl_cb
            );
+
+/**
+ *  \brief API to De-initialize Health Server Model
+ *
+ *  \par Description
+ *  This routine is a de-initialize interface for Health Server Model.
+ *  This needs to be invoked by the upper layer prior to invoking other core
+ *  Shutdown related interfaces. This interface will move the Health Server
+ *  Module back to its uninitialized state.
+ *
+ *  \return None
+ */
+void MS_health_server_deinit(void);
 
 /**
  *  \brief API to report self-test fault
@@ -261,9 +327,25 @@ API_RESULT MS_health_server_report_fault
            );
 
 /**
- * \cond ignore_this Ignore this fundtion while generating doxygen document
+ * \cond ignore_this Ignore this function while generating Doxygen document
  */
 
+/**
+ *  \brief Temporary API to publish health server current status.
+ *
+ *  \par Description
+ *  This is to publish health server current status.
+ *
+ *  \param [in]      status
+ *                   Health Server Current Status to be published.
+ *
+ *  \param [in]      length
+ *                   Length of the Health Server Current Status.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ *
+ *  \todo To be made obsolete.
+ */
 API_RESULT MS_health_server_publish_current_status
            (
                UCHAR    * status,
@@ -272,5 +354,11 @@ API_RESULT MS_health_server_publish_current_status
 /**
  * \endcond
  */
+
+/** \} */
+
+/** \} */
+
+/** \} */
 
 #endif /*_H_MS_HEALTH_SERVER_API_ */

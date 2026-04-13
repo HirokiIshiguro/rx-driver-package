@@ -1,26 +1,8 @@
-/*******************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/***********************************************************************************************************************
+* Copyright (c) 2014 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
-*******************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /*******************************************************************************
 * File Name    : r_dmaca_rx_private.h
 * Description  : Specific file for DMACA driver
@@ -41,6 +23,15 @@
 *         : 15.08.2019 2.20    Supported RX72M.
 *         : 30.12.2019 2.30    Added support RX66N, RX72N.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
+*         : 31.03.2020 2.40    Added support RX23E-A.
+*         : 31.03.2021 2.60    Added support RX671.
+*         : 31.03.2022 2.90    Added support RX660.
+*         : 15.08.2022 3.10    Added support RX26T
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023 3.20    Added support RX23E-B
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 3.30    Added support RX260, RX261.
+*         : 15.03.2025 3.41    Updated disclaimer.
 *******************************************************************************/
 #ifndef DMACA_RX_PRIVATE_H
 #define DMACA_RX_PRIVATE_H
@@ -59,6 +50,10 @@ Includes   <System Includes>, "Project Includes"
     #include "./src/targets/rx66n/r_dmaca_rx_target.h"
 #elif defined(BSP_MCU_RX66T)
     #include "./src/targets/rx66t/r_dmaca_rx_target.h"
+#elif defined(BSP_MCU_RX660)
+    #include "./src/targets/rx660/r_dmaca_rx_target.h"
+#elif defined(BSP_MCU_RX671)
+    #include "./src/targets/rx671/r_dmaca_rx_target.h"
 #elif defined(BSP_MCU_RX71M)
     #include "./src/targets/rx71m/r_dmaca_rx_target.h"
 #elif defined(BSP_MCU_RX72T)
@@ -71,8 +66,18 @@ Includes   <System Includes>, "Project Includes"
     #include "./src/targets/rx230/r_dmaca_rx_target.h"
 #elif defined(BSP_MCU_RX231)
     #include "./src/targets/rx231/r_dmaca_rx_target.h"
+#elif defined(BSP_MCU_RX23E_A)
+    #include "./src/targets/rx23e-a/r_dmaca_rx_target.h"
+#elif defined(BSP_MCU_RX23E_B)
+    #include "./src/targets/rx23e-b/r_dmaca_rx_target.h"
 #elif defined(BSP_MCU_RX23W)
     #include "./src/targets/rx23w/r_dmaca_rx_target.h"
+#elif defined(BSP_MCU_RX260)
+    #include "./src/targets/rx260/r_dmaca_rx_target.h"
+#elif defined(BSP_MCU_RX261)
+    #include "./src/targets/rx261/r_dmaca_rx_target.h"
+#elif defined(BSP_MCU_RX26T)
+    #include "./src/targets/rx26t/r_dmaca_rx_target.h"
 #else
     #error "This MCU is not supported by the current DMACA driver."
 #endif
@@ -90,7 +95,7 @@ typedef enum e_dmaca_chk_locking_sw
     DMACA_ALL_CH_UNLOCKED_AND_DTC_UNLOCKED = 0,             /* All DMAC channels and DTC are unlocked. */
     DMACA_ALL_CH_UNLOCKED_BUT_DTC_LOCKED,                   /* All DMAC channels are unlocked, but DTC is locked. */
     DMACA_LOCKED_CH_EXIST                                   /* Other DMAC channels are locked. */
- } dmaca_chk_locking_sw_t;
+} dmaca_chk_locking_sw_t;
 
 /* DMCNT.DTE(b0) : Configurable options for DMA Transfer Enable control for corresponding channel */
 typedef enum e_dmaca_transfer_enable
@@ -131,15 +136,15 @@ extern void *g_pdmaci_handlers[];
 extern volatile uint8_t R_BSP_EVENACCESS_SFR *g_icu_dmrsr[];
 extern uint8_t                       g_locking_sw[DMACA_NUM_CHANNELS];
 
-bool           r_dmaca_channel_valid_check(uint8_t channel);
-void           r_dmaca_module_enable(void);
-void           r_dmaca_module_disable(void);
-dmaca_return_t r_dmaca_int_enable(uint8_t channel, uint8_t priority);
-dmaca_return_t r_dmaca_int_disable(uint8_t channel);
+bool           r_dmaca_channel_valid_check (uint8_t channel);
+void           r_dmaca_module_enable (void);
+void           r_dmaca_module_disable (void);
+dmaca_return_t r_dmaca_int_enable (uint8_t channel, uint8_t priority);
+dmaca_return_t r_dmaca_int_disable (uint8_t channel);
 #if ((0 == BSP_CFG_USER_LOCKING_ENABLED) && (bsp_lock_t == BSP_CFG_USER_LOCKING_TYPE))
-  #if (1 != DMACA_CFG_USE_DTC_FIT_MODULE)
-    dmaca_chk_locking_sw_t r_dmaca_check_dtc_locking_byuser(void);
-  #endif
+    #if (1 != DMACA_CFG_USE_DTC_FIT_MODULE)
+    dmaca_chk_locking_sw_t r_dmaca_check_dtc_locking_byuser (void);
+    #endif
 #else
     dmaca_chk_locking_sw_t r_dmaca_check_DMACA_DTC_locking_byUSER(void);
 #endif

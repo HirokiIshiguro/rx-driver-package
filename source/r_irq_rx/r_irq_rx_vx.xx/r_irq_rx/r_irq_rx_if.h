@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /******************************************************************************
 * File Name    : r_irq_rx_if.h
@@ -30,10 +17,12 @@
 *         : 30.09.2015 1.70    Using the definition of VECT_ICU_IRQ7  to check the number of IRQs.
 *         : 08.09.2016 2.10    Applied the coding rules of Renesas.
 *         : 20.05.2019 3.00    Added support for GNUC and ICCRX.
+*         : 15.04.2021 3.80    Added R_IRQ_IRClear() function to clear IR flag.
+*         : 15.08.2022 4.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023 4.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 4.50    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 15.03.2025 4.71    Updated disclaimer.
 ******************************************************************************/
-#ifndef IRQ_RX_IF_H /* Multiple inclusion protection. */
-#define IRQ_RX_IF_H
-
 
 /******************************************************************************
 Includes   <System Includes> , "Project Includes"
@@ -41,6 +30,9 @@ Includes   <System Includes> , "Project Includes"
 /* BSP includes */
 #include "platform.h"
 
+/* Multiple inclusion protection. */
+#ifndef IRQ_RX_IF_H
+#define IRQ_RX_IF_H
 
 /******************************************************************************
 Macro definitions
@@ -149,32 +141,76 @@ typedef enum _irq_err
 /******************************************************************************
 Functions Prototypes
 ******************************************************************************/
-/*  Initializes the IRQ registers, enables interrupts, provides handle for other API functions. */
+
+/**********************************************************************************************************************
+ * Function Name: R_IRQ_Open
+ * Description  : Initializes the IRQ registers, enables interrupts, provides handle for other API functions.
+ * Arguments    : irq_number
+ *              : trigger
+ *              : priority
+ *              : phandle
+ *              : pargs
+ * Return Value : .
+ *********************************************************************************************************************/
 irq_err_t   R_IRQ_Open (irq_number_t     irq_number,
                         irq_trigger_t    trigger,
                         irq_prio_t       priority,
                         irq_handle_t    *phandle,
                         void     (*const pcallback)(void *pargs));
 
-/* Handles special hardware or software operations for the IRQ. */
-irq_err_t   R_IRQ_Control(irq_handle_t  const handle,
-                          irq_cmd_t     const cmd,
-                          void               *pcmd_data);
+/**********************************************************************************************************************
+ * Function Name: R_IRQ_Control
+ * Description  : Handles special hardware or software operations for the IRQ.
+ * Arguments    : handle
+ *              : cmd
+ *              : pcmd_data
+ * Return Value : .
+ *********************************************************************************************************************/
+irq_err_t   R_IRQ_Control (irq_handle_t  const handle,
+                           irq_cmd_t     const cmd,
+                                         void *pcmd_data);
 
-/* Fully disables the IRQ designated by the handle. */
-irq_err_t   R_IRQ_Close(irq_handle_t handle);
+/**********************************************************************************************************************
+ * Function Name: R_IRQ_Close
+ * Description  : Fully disables the IRQ designated by the handle.
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
+irq_err_t   R_IRQ_Close (irq_handle_t handle);
 
-/* Reads the current level of the pin assigned to the specified IRQ. */
-irq_err_t   R_IRQ_ReadInput(irq_handle_t  const handle,
+/**********************************************************************************************************************
+ * Function Name: R_IRQ_ReadInput
+ * Description  : Reads the current level of the pin assigned to the specified IRQ.
+ * Arguments    : handle
+ *              : plevel
+ * Return Value : .
+ *********************************************************************************************************************/
+irq_err_t   R_IRQ_ReadInput (irq_handle_t  const handle,
                             uint8_t            *plevel);
 
+/**********************************************************************************************************************
+ * Function Name: R_IRQ_InterruptEnable
+ * Description  : Enables or disables the ICU interrupt for the specified IRQ.
+ * Arguments    : handle
+ *              : enable
+ * Return Value : .
+ *********************************************************************************************************************/
+irq_err_t   R_IRQ_InterruptEnable (irq_handle_t const handle, bool enable);
 
-/* Enables or disables the ICU interrupt for the specified IRQ. */
-irq_err_t   R_IRQ_InterruptEnable (irq_handle_t  const handle,
-                                   bool                enable);
+/**********************************************************************************************************************
+ * Function Name: R_IRQ_GetVersion
+ * Description  : Returns the version number of the module.
+ * Return Value : .
+ *********************************************************************************************************************/
+uint32_t  R_IRQ_GetVersion (void);
 
-/* Returns the version number of the module. */
-uint32_t  R_IRQ_GetVersion(void);
+/**********************************************************************************************************************
+ * Function Name: R_IRQ_IRClear
+ * Description  : Clears IR Flag.
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
+irq_err_t   R_IRQ_IRClear (irq_handle_t  const handle);
 
 #endif /* IRQ_RX_IF_H    */
 

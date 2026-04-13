@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_usb_reg_access.h
+ * Version      : 1.44
  * Description  : USB IP Register control code
  ***********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -31,6 +19,8 @@
  *         : 20.12.2017 1.23 Delete support for Host 2port.
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 31.05.2021 1.31 RX671 USB1 is added.
+ *         : 01.03.2025 1.44 Change Disclaimer.
  ***********************************************************************************************************************/
 #ifndef HW_USB_REG_ACCESS_H
 #define HW_USB_REG_ACCESS_H
@@ -78,14 +68,14 @@
 
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
 
-#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)
+#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
 #define USB1_CFIFO8     (USB_M1.CFIFO.BYTE.L)
 #define USB1_D0FIFO8    (USB_M1.D0FIFO.BYTE.L)
 #define USB1_D1FIFO8    (USB_M1.D1FIFO.BYTE.L)
 #define USB1_CFIFO16    (USB_M1.CFIFO.WORD)
 #define USB1_D0FIFO16   (USB_M1.D0FIFO.WORD)
 #define USB1_D1FIFO16   (USB_M1.D1FIFO.WORD)
-#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) */
+#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671) */
 
 /****************/
 /*  INITIARIZE  */

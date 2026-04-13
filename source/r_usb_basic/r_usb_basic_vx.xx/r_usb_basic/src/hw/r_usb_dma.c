@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : r_usb_dma.c
+* Version      : 1.44
 * Description  : Setting code of DMA
 ***********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -30,6 +18,9 @@
  *                              "usb_dma_buf2fifo_restart"->"usb_cstd_dma_send_restart"
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 01.03.2025 1.44 Change Disclaimer.
  ***********************************************************************************************************************/
 
 /*******************************************************************************
@@ -47,6 +38,10 @@ Includes   <System Includes>, "Project Includes"
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
 #define ACTIVE_CNT_NUMBER       (100)
+
+#if defined(BSP_MCU_RX66T)
+    #undef  BSP_MCU_RX72T
+#endif /* #if defined(BSP_MCU_RX66T) */
 
 #if USB_CFG_DTC == USB_CFG_ENABLE
 #include "r_dtc_rx_if.h"
@@ -91,12 +86,12 @@ uint32_t  g_fifo_address[USB_NUM_USBIP][USB_FIFO_ACCESS_NUM_MAX][USB_FIFO_ACCSES
 #if USB_NUM_USBIP == 2
   {
     /* IP1 */
-#if defined(BSP_MCU_RX63N)
+#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX671)
     {(uint32_t)0,                   (uint32_t)&USB_M1.CFIFO.WORD,   (uint32_t)&USB_M1.CFIFO.BYTE.L},    /* USB0 CFIFO  address */
     {(uint32_t)0,                   (uint32_t)&USB_M1.D0FIFO.WORD,  (uint32_t)&USB_M1.D0FIFO.BYTE.L},   /* USB0 D0FIFO address */
     {(uint32_t)0,                   (uint32_t)&USB_M1.D1FIFO.WORD,  (uint32_t)&USB_M1.D1FIFO.BYTE.L},
 
-#endif  /* defined(BSP_MCU_RX63N) */
+#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX671) */
 
 #if defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX64M)
 
@@ -381,15 +376,39 @@ void usb_cstd_dfifo_end(usb_utr_t *ptr, uint16_t useport)
     {
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
         /* received data size */
-        g_usb_pstd_data_cnt[pipe] -= g_usb_cstd_dma_size[ip][channel];
+ #if (BSP_CFG_RTOS_USED == 5)   /* Azure RTOS */    // saeki-san
+        if (g_usb_pstd_data_cnt[pipe] < g_usb_cstd_dma_size[ip][channel])
+        {
+            g_usb_pstd_data_cnt[pipe] = 0U;
+        }
+        else
+        {
+            g_usb_pstd_data_cnt[pipe] -= g_usb_cstd_dma_size[ip][channel];
+        }
 
+ #else                                /* BSP_CFG_RTOS_USED == 5 */
+        g_usb_pstd_data_cnt[pipe] -= g_usb_cstd_dma_size[ip][channel];
+ #endif /* BSP_CFG_RTOS_USED == 5 */
 #endif  /* (USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_REPI */
     }
     else
     {
 #if ((USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST)
         /* received data size */
+  #if (BSP_CFG_RTOS_USED == 5)  /* Azure RTOS */    // saeki-san
+        if (g_usb_hstd_data_cnt[ptr->ip][pipe] < g_usb_cstd_dma_size[ip][channel])
+        {
+            g_usb_hstd_data_cnt[ptr->ip][pipe] = 0U;
+        }
+        else
+        {
+            g_usb_hstd_data_cnt[ptr->ip][pipe] -= g_usb_cstd_dma_size[ip][channel];
+        }
+
+  #else /* BSP_CFG_RTOS_USED == 5 */
+        /* received data size */
         g_usb_hstd_data_cnt[ptr->ip][pipe] -= g_usb_cstd_dma_size[ip][channel];
+  #endif /* BSP_CFG_RTOS_USED == 5 */
 
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
     }
@@ -1508,12 +1527,12 @@ void usb_cstd_dma_rcv_setting(usb_utr_t *ptr, uint32_t des_addr, uint16_t usepor
     td_cfg.chain_transfer_enable = DTC_CHAIN_TRANSFER_DISABLE;
     td_cfg.chain_transfer_mode  = DTC_CHAIN_TRANSFER_CONTINUOUSLY;
     td_cfg.response_interrupt = DTC_INTERRUPT_AFTER_ALL_COMPLETE;
-#if defined(BSP_MCU_RX65N)
+#if defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX671)
     td_cfg.writeback_disable = DTC_WRITEBACK_ENABLE;     /* Write-back disable or enable */
     td_cfg.sequence_end = DTC_SEQUENCE_TRANSFER_CONTINUE;          /* Sequence transfer end or continue */
     td_cfg.refer_index_table_enable = DTC_REFER_INDEX_TABLE_DISABLE; /* Index table refer or not refer */
     td_cfg.disp_add_enable = DTC_SRC_ADDR_DISP_ADD_DISABLE;       /* The displacement value is added or not added */
-#endif /* defined(BSP_MCU_RX65N) */
+#endif /* defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX671) */
 
     /* Call R_DTC_Create(). */
     R_DTC_Create((dtc_activation_source_t)vect, &g_usb_dtc_transfer_data[dma_ch], &td_cfg, 0);
@@ -1711,12 +1730,12 @@ void usb_cstd_dma_send_setting(usb_utr_t *ptr, uint32_t src_adr, uint16_t usepor
     td_cfg.chain_transfer_enable = DTC_CHAIN_TRANSFER_DISABLE;
     td_cfg.chain_transfer_mode  = DTC_CHAIN_TRANSFER_CONTINUOUSLY;
     td_cfg.response_interrupt   = DTC_INTERRUPT_AFTER_ALL_COMPLETE;
-#if defined(BSP_MCU_RX65N)
+#if defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX671)
     td_cfg.writeback_disable = DTC_WRITEBACK_ENABLE;     /* Write-back disable or enable */
     td_cfg.sequence_end = DTC_SEQUENCE_TRANSFER_CONTINUE;          /* Sequence transfer end or continue */
     td_cfg.refer_index_table_enable = DTC_REFER_INDEX_TABLE_DISABLE; /* Index table refer or not refer */
     td_cfg.disp_add_enable = DTC_SRC_ADDR_DISP_ADD_DISABLE;       /* The displacement value is added or not added */
-#endif /* defined(BSP_MCU_RX65N) */
+#endif /* defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX671) */
 
     /* Call R_DTC_Create(). */
     R_DTC_Create((dtc_activation_source_t)vect, &g_usb_dtc_transfer_data[dma_ch], &td_cfg, 0);

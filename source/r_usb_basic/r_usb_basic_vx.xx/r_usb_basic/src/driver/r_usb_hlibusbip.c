@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_usb_hlibusbip.c
+ * Version      : 1.44
  * Description  : USB IP Host library.
  ***********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -30,6 +18,10 @@
  *         : 30.09.2017 1.22 Rename "usb_hstd_buf2fifo"->"usb_hstd_buf_to_fifo" and Function move for"r_usb_hdriver.c"
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
+ *         : 01.03.2025 1.44 Change Disclaimer.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -51,7 +43,9 @@
 #endif  /* ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE)) */
 
 #if defined(USB_CFG_HMSC_USE)
+#if (BSP_CFG_RTOS_USED != 5)	/* Azure RTOS */
 #include "r_usb_hmsc.h"
+#endif /* (BSP_CFG_RTOS_USED != 5) */
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if defined(USB_CFG_HCDC_USE)
@@ -70,6 +64,9 @@
 /******************************************************************************
  Exported global variables (to be accessed by other files)
  ******************************************************************************/
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+extern rtos_sem_id_t g_usb_host_usbx_sem[USB_NUM_USBIP][USB_MAX_PIPE_NO + 1];
+#endif /* (BSP_CFG_RTOS_USED == 5) */
 
 /******************************************************************************
  Private global variables and functions
@@ -817,7 +814,9 @@ uint16_t usb_hstd_read_data (usb_utr_t *ptr, uint16_t pipe, uint16_t pipemode)
         end_flag = USB_READOVER;
         usb_cstd_set_nak(ptr, pipe); /* Set NAK */
         count = (uint16_t) g_usb_hstd_data_cnt[ptr->ip][pipe];
+#if (BSP_CFG_RTOS_USED != 5)
         g_usb_hstd_data_cnt[ptr->ip][pipe] = dtln;
+#endif /* BSP_CFG_RTOS_USED != 5 */
     }
     else if (g_usb_hstd_data_cnt[ptr->ip][pipe] == dtln)
     {
@@ -1057,7 +1056,14 @@ void usb_hstd_brdy_pipe_process (usb_utr_t *ptr, uint16_t bitsts)
                     g_usb_cstd_dma_size[ip][dma_ch] = buffer & USB_DTLN;
                     if (set_dma_block_cnt > trans_dma_block_cnt)
                     {
-                        g_usb_cstd_dma_size[ip][dma_ch] += ((set_dma_block_cnt - (trans_dma_block_cnt + 1)) * maxps);
+                        if (0 == g_usb_cstd_dma_size[ip][dma_ch])   /* DTLN = 0 (Received 0 length packet) */
+                        {
+                            g_usb_cstd_dma_size[ip][dma_ch] += ((set_dma_block_cnt - trans_dma_block_cnt) * maxps);
+                        }
+                        else
+                        {
+                            g_usb_cstd_dma_size[ip][dma_ch] += ((set_dma_block_cnt - (trans_dma_block_cnt + 1)) * maxps);
+                        }
                     }
 
                     /* Check data count */
@@ -1329,7 +1335,7 @@ uint8_t usb_hstd_make_pipe_reg_info (uint16_t ip_no, uint16_t address, uint16_t 
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
         if (USB_IP1 == ip_no)
         {   /* PIPEBUF is USBA module only */
-            pipe_buf = usb_cstd_get_pipe_buf_value(pipe_no);
+            pipe_buf = usb_hstd_get_pipe_buf_value(usb_class, pipe_no);
             pipe_table_work->pipe_buf  = pipe_buf;
         }
 #endif /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
@@ -1366,11 +1372,47 @@ void usb_hstd_clr_pipe_table (uint16_t ip_no, uint16_t device_address)
                     g_usb_pipe_table[ip_no][pipe_no].pipe_buf = USB_NULL;
                 }
 #endif /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
+
+#if (BSP_CFG_RTOS_USED == 5)   /* Azure RTOS */
+                rtos_release_semaphore(&g_usb_host_usbx_sem[ip_no][pipe_no]);
+                rtos_delete_semaphore(&g_usb_host_usbx_sem[ip_no][pipe_no]);
+#endif  /* (BSP_CFG_RTOS_USED == 5) */
             }
         }
     }
 
 } /* eof usb_hstd_clr_pipe_table() */
+
+/******************************************************************************
+Function Name   : usb_hstd_clr_pipe_table_ip
+Description     : Clear pipe table.
+Arguments       : uint16_t ip_no          : USB Module no.(USB_IP0/USB_IP1)
+Return value    : none
+******************************************************************************/
+void usb_hstd_clr_pipe_table_ip (uint16_t ip_no)
+{
+    uint8_t pipe_no;
+
+    /* Search use pipe block */
+    /* WAIT_LOOP */
+    for (pipe_no = USB_MIN_PIPE_NO; pipe_no < (USB_MAX_PIPE_NO +1); pipe_no++)
+    {   /* Check use block */
+        if (USB_TRUE == g_usb_pipe_table[ip_no][pipe_no].use_flag)
+        {   /* Check USB Device address */
+            g_usb_pipe_table[ip_no][pipe_no].use_flag = USB_FALSE;
+            g_usb_pipe_table[ip_no][pipe_no].pipe_cfg = USB_NULL;
+            g_usb_pipe_table[ip_no][pipe_no].pipe_maxp = USB_NULL;
+            g_usb_pipe_table[ip_no][pipe_no].pipe_peri = USB_NULL;
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
+            if (USB_IP1 == ip_no)
+            {   /* PIPEBUF is USBA module only */
+                g_usb_pipe_table[ip_no][pipe_no].pipe_buf = USB_NULL;
+            }
+#endif /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
+        }
+    }
+
+} /* eof usb_hstd_clr_pipe_table_ip() */
 
 /******************************************************************************
 Function Name   : usb_hstd_set_pipe_reg
@@ -1424,9 +1466,11 @@ uint8_t usb_hstd_get_pipe_no (uint16_t ip_no, uint16_t address, uint16_t usb_cla
 #if defined(USB_CFG_HVND_USE)
     uint16_t    pipe;
 #endif /* defined(USB_CFG_HVND_USE) */
+#if (BSP_CFG_RTOS_USED != 5)
 #if defined(USB_CFG_HMSC_USE)
     uint16_t    side;
 #endif /* defined(USB_CFG_HMSC_USE) */
+#endif  /* (BSP_CFG_RTOS_USED != 5) */
 
     switch (usb_class)
     {
@@ -1552,7 +1596,9 @@ uint8_t usb_hstd_get_pipe_no (uint16_t ip_no, uint16_t address, uint16_t usb_cla
         case USB_HMSC:
 #if defined(USB_CFG_HMSC_USE)
             if (USB_EP_BULK == type)
-            {   /* Add USB IP no. for USB Device address */
+            {
+ #if (BSP_CFG_RTOS_USED != 5)
+                /* Add USB IP no. for USB Device address */
                 if (USB_IP1 == ip_no)
                 {
                     address |= USBA_ADDRESS_OFFSET;
@@ -1566,6 +1612,9 @@ uint8_t usb_hstd_get_pipe_no (uint16_t ip_no, uint16_t address, uint16_t usb_cla
                 {   /* Calculate the pipe number corresponding to the drive number */
                     pipe_no     = (USB_PIPE1 + side);
                 }
+ #else  /* defined(BSP_CFG_RTOS_USED != 5) */
+                pipe_no = USB_PIPE1;
+ #endif /* defined(BSP_CFG_RTOS_USED != 5) */
             }
 #endif /* defined(USB_CFG_HMSC_USE) */
         break;
@@ -1633,6 +1682,164 @@ uint16_t usb_hstd_get_pipe_peri_value (uint16_t speed, uint8_t binterval)
 
     return pipe_peri;
 } /* eof usb_hstd_get_pipe_peri_value() */
+
+
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
+/******************************************************************************
+ Function Name   : usb_hstd_get_pipe_buf_value
+ Description     : Get Value for USBA Module PIPE BUF REG.
+ Arguments       : Pipe no.
+ Return value    : PIPE BUF set value.
+ ******************************************************************************/
+uint16_t usb_hstd_get_pipe_buf_value (uint16_t usb_class, uint16_t pipe_no)
+{
+    uint16_t pipe_buf;
+
+    if (USB_PIPE6 > pipe_no)
+    {
+        switch (usb_class)
+        {
+            case USB_HCDC:
+                switch (pipe_no)
+                {
+        #if defined(USB_CFG_HCDC_USE)
+                    case USB_CFG_HCDC_BULK_IN:
+        #if (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE)
+                        pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(8u));
+        #else     /* (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE) */
+                        pipe_buf = (USB_BUF_SIZE(2048u) | USB_BUF_NUMB(8u));
+        #endif    /* (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE) */
+                    break;
+
+                    case USB_CFG_HCDC_BULK_OUT:
+        #if (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE)
+                        pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(40u));
+        #else     /* (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE) */
+                        pipe_buf = (USB_BUF_SIZE(2048u) | USB_BUF_NUMB(72u));
+        #endif    /* (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE) */
+                    break;
+
+                    case USB_CFG_HCDC_BULK_IN2:
+                        pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(72u));
+                    break;
+
+                    case USB_CFG_HCDC_BULK_OUT2:
+                        pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(104u));
+                    break;
+        #endif /* defined(USB_CFG_HCDC_USE) */
+
+                    default:
+                        /* Error */
+                    break;
+                }
+            break;
+
+            case USB_HMSC:
+            switch (pipe_no)
+            {
+        #if defined(USB_CFG_HMSC_USE)
+                case USB_PIPE1:
+                case USB_PIPE2:
+                case USB_PIPE3:
+                case USB_PIPE4:
+                case USB_PIPE5:
+          #if USB_CFG_DTC == USB_CFG_ENABLE
+                    pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(8u));
+          #else     /* USB_CFG_DTC == USB_CFG_ENABLE */
+                    pipe_buf = (USB_BUF_SIZE(2048u) | USB_BUF_NUMB(8u));
+          #endif    /* USB_CFG_DTC == USB_CFG_ENABLE */
+                break;
+        #endif /* defined(USB_CFG_HMSC_USE) */
+
+                default:
+                    /* Error */
+                break;
+            }
+            break;
+
+            case USB_HVND:
+            switch (pipe_no)
+            {
+        #if defined(USB_CFG_HVND_USE)
+                case USB_PIPE1:
+                    pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(8u));
+                break;
+                case USB_PIPE2:
+                    pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(24u));
+                break;
+                case USB_PIPE3:
+                    pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(40u));
+                break;
+                case USB_PIPE4:
+                    pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(56u));
+                break;
+                case USB_PIPE5:
+                    pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(72u));
+                break;
+        #endif  /* defined(USB_CFG_HVND_USE) */
+
+                default:
+                    /* Error */
+                break;
+            }
+            break;
+
+            default:
+                switch (pipe_no)
+                {
+                    case USB_PIPE1:
+                        pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(8u));
+                    break;
+                    case USB_PIPE2:
+                        pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(24u));
+                    break;
+                    case USB_PIPE3:
+                        pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(40u));
+                    break;
+                    case USB_PIPE4:
+                        pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(56u));
+                    break;
+                    case USB_PIPE5:
+                        pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(72u));
+                    break;
+
+                    default:
+                        /* Error */
+                    break;
+                }
+            break;
+        }
+    }
+    else
+    {
+        switch (pipe_no)
+        {
+            case USB_PIPE6:
+                pipe_buf = (USB_BUF_SIZE(64u) | USB_BUF_NUMB(4u));
+            break;
+
+            case USB_PIPE7:
+                pipe_buf = (USB_BUF_SIZE(64u) | USB_BUF_NUMB(5u));
+            break;
+
+            case USB_PIPE8:
+                pipe_buf = (USB_BUF_SIZE(64u) | USB_BUF_NUMB(6u));
+            break;
+
+            case USB_PIPE9:
+                pipe_buf = (USB_BUF_SIZE(64u) | USB_BUF_NUMB(7u));
+            break;
+
+            default:
+                /* Error */
+            break;
+        }
+    }
+
+
+    return pipe_buf;
+} /* End of function usb_hstd_get_pipe_buf_value() */
+#endif /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
 
 #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
 /******************************************************************************
@@ -1744,7 +1951,7 @@ void usb_rtos_send_msg_to_submbx_addr (usb_utr_t *p_ptr, uint16_t devaddr)
 /******************************************************************************
  End of function usb_rtos_send_msg_to_submbx_addr
  ******************************************************************************/
-#endif /* BSP_CFG_RTOS_USE != 0 */
+#endif /* BSP_CFG_RTOS_USED != 0 */
 
 #endif  /* (USB_CFG_MODE & USB_CFG_HOST) == USB_CFG_HOST */
 

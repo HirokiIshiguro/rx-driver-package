@@ -20,20 +20,19 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup light_lightness_module LIGHT_LIGHTNESS (Mesh Light Lightness Model)
+ * \defgroup light_lightness_module Light Lightness Model (LIGHT_LIGHTNESS)
+ * \ingroup lighting_models
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Light Lightness Model (LIGHT_LIGHTNESS) module to the Application.
  */
-
-
 
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup light_lightness_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Light Lightness Model Layer.
  */
 
 /**
@@ -86,14 +85,14 @@ typedef API_RESULT (* MS_LIGHT_LIGHTNESS_SETUP_SERVER_CB)
  * Light Lightness Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_LIGHT_LIGHTNESS_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -101,8 +100,17 @@ typedef API_RESULT (* MS_LIGHT_LIGHTNESS_CLIENT_CB)
 /** \} */
 
 /**
+ * \defgroup light_lightness_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Light Lightness Model Layer.
+ */
+
+/**
  *  \defgroup light_lightness_structures Structures
  *  \{
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Light Lightness Model Layer.
  */
 
 /**
@@ -286,33 +294,81 @@ typedef struct MS_light_lightness_default_status_struct
 
 } MS_LIGHT_LIGHTNESS_DEFAULT_STATUS_STRUCT;
 
+/**
+ * Light Lightness Last or Default Status message parameters.
+ */
 typedef struct MS_light_lightness_last_or_default_status_struct
 {
+    /** The value of the Light Lightness Last or Default state */
     UINT16 lightness;
 
 } MS_LIGHT_LIGHTNESS_LAST_OR_DEFAULT_STATUS_STRUCT;
 
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup light_lightness_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Light Lightness Model APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Light Lightness Model Layer to the Application.
  */
+
 /**
  * \defgroup light_lightness_ser_api_defs Light Lightness Server API Definitions
  * \{
- * This section describes the Light Lightness Server APIs.
+ * \brief This section describes the EtherMind Light Lightness Server
+ * Model APIs.
  */
 
+/**
+ * \name Light Lightness Server Interfaces
+ * \{
+ */
+
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
 /**
  *  \brief API to initialize Light_Lightness Server model
  *
  *  \par Description
- *  This is to initialize Light_Lightness Server model and to register with Acess layer.
+ *  This is to initialize Light_Lightness Server model and to register with Access layer.
+ *
+ *  \param [in] element_handle
+ *              Element identifier to be associated with the model instance.
+ *
+ *  \param [in, out] light_lightness_model_handle
+ *                   Model identifier associated with the Light Lightness model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in, out] light_lightness_setup_model_handle
+ *                   Model identifier associated with the Light Lightness Setup model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in] light_lightness_appl_cb          Application Callback to be used by the Light_Lightness Server.
+ *
+ *  \param [in] light_lightness_setup_appl_cb    Application Callback to be used by the Light_Lightness_Setup Server.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_light_lightness_server_init_ext
+           (
+               /* IN */    MS_ACCESS_ELEMENT_HANDLE            element_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE            * light_lightness_model_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE            * light_lightness_setup_model_handle,
+               /* IN */    MS_LIGHT_LIGHTNESS_SERVER_CB        light_lightness_appl_cb,
+               /* IN */    MS_LIGHT_LIGHTNESS_SETUP_SERVER_CB  light_lightness_setup_appl_cb
+           );
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
+/**
+ *  \brief API to initialize Light_Lightness Server model (deprecated)
+ *
+ *  \par Description
+ *  This is to initialize Light_Lightness Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -334,10 +390,10 @@ API_RESULT MS_light_lightness_server_init
            );
 
 /**
- *  \brief API to initialize Light_Lightness_Setup Server model
+ *  \brief API to initialize Light_Lightness_Setup Server model (deprecated)
  *
  *  \par Description
- *  This is to initialize Light_Lightness_Setup Server model and to register with Acess layer.
+ *  This is to initialize Light_Lightness_Setup Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -369,6 +425,8 @@ API_RESULT MS_light_lightness_setup_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -378,7 +436,9 @@ API_RESULT MS_light_lightness_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 
 /**
@@ -392,6 +452,8 @@ API_RESULT MS_light_lightness_server_state_update
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -401,21 +463,31 @@ API_RESULT MS_light_lightness_setup_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
+/** \} */
+
 /** \} */
 
 /**
  * \defgroup light_lightness_cli_api_defs Light Lightness Client API Definitions
  * \{
- * This section describes the Light Lightness Client APIs.
+ * \brief This section describes the EtherMind Mesh Light Lightness Client
+ * Model APIs.
+ */
+
+/**
+ * \name Light Lightness Client Interfaces
+ * \{
  */
 
 /**
  *  \brief API to initialize Light_Lightness Client model
  *
  *  \par Description
- *  This is to initialize Light_Lightness Client model and to register with Acess layer.
+ *  This is to initialize Light_Lightness Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -452,6 +524,21 @@ API_RESULT MS_light_lightness_client_get_model_handle
            );
 
 /**
+ *  \brief API to set Light_Lightness client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Light_Lightness client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_light_lightness_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
+           );
+
+/**
  *  \brief API to send acknowledged commands
  *
  *  \par Description
@@ -469,6 +556,28 @@ API_RESULT MS_light_lightness_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+/** \} */
+
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup light_lightness_defines
+ * \{
+ */
+
+/**
+ * \defgroup light_lightness_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Light Lightness Model Layer.
+ */
+
+/**
+ * \name Light Lightness Client Macros
+ * \{
+ */
 
 /**
  *  \brief API to get the Light Lightness Actual state of an element.
@@ -495,7 +604,7 @@ API_RESULT MS_light_lightness_client_send_reliable_pdu
  *  The Light Lightness Set is an acknowledged message used to set the Light Lightness Actual state of an element.
  *  The response to the Light Lightness Set message is a Light Lightness Status message.
  *
- *  \param [in] param Light Lightness Set message
+ *  \param [in] param Light Lightness Set message parameter \ref MS_LIGHT_LIGHTNESS_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -514,7 +623,7 @@ API_RESULT MS_light_lightness_client_send_reliable_pdu
  *  The Light Lightness Set Unacknowledged is an unacknowledged message used to
  *  set the Light Lightness Actual state of an element.
  *
- *  \param [in] param Light Lightness Set message
+ *  \param [in] param Light Lightness Set message parameter \ref MS_LIGHT_LIGHTNESS_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -551,7 +660,7 @@ API_RESULT MS_light_lightness_client_send_reliable_pdu
  *  The Light Lightness Linear Set is an acknowledged message used to set the Light Lightness Linear state of an element.
  *  The response to the Light Lightness Linear Set message is a Light Lightness Linear Status message.
  *
- *  \param [in] param Light Lightness Linear Set message
+ *  \param [in] param Light Lightness Linear Set message parameter \ref MS_LIGHT_LIGHTNESS_LINEAR_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -570,7 +679,7 @@ API_RESULT MS_light_lightness_client_send_reliable_pdu
  *  The Light Lightness Linear Set Unacknowledged is an unacknowledged message
  *  used to set the Light Lightness Linear state of an element.
  *
- *  \param [in] param Light Lightness Linear Set message
+ *  \param [in] param Light Lightness Linear Set message parameter \ref MS_LIGHT_LIGHTNESS_LINEAR_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -625,7 +734,7 @@ API_RESULT MS_light_lightness_client_send_reliable_pdu
  *  The Light Lightness Default Set is an acknowledged message used to set the Light Lightness Default state of an element.
  *  The response to the Light Lightness Default Set message is a Light Lightness Default Status message.
  *
- *  \param [in] param Light Lightness Default Set message
+ *  \param [in] param Light Lightness Default Set message parameter \ref MS_LIGHT_LIGHTNESS_DEFAULT_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -644,7 +753,7 @@ API_RESULT MS_light_lightness_client_send_reliable_pdu
  *  The Light Lightness Default Set Unacknowledged is an unacknowledged message
  *  used to set the Light Lightness Default state of an element.
  *
- *  \param [in] param Light Lightness Default Set message
+ *  \param [in] param Light Lightness Default Set message parameter \ref MS_LIGHT_LIGHTNESS_DEFAULT_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -681,7 +790,7 @@ API_RESULT MS_light_lightness_client_send_reliable_pdu
  *  Light Lightness Range Set is an acknowledged message used to set the Light Lightness Range state of an element.
  *  The response to the Light Lightness Range Get message is a Light Lightness Range Status message.
  *
- *  \param [in] param Light Lightness Range Set message
+ *  \param [in] param Light Lightness Range Set message parameter \ref MS_LIGHT_LIGHTNESS_RANGE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -700,7 +809,7 @@ API_RESULT MS_light_lightness_client_send_reliable_pdu
  *  Light Lightness Range Set Unacknowledged is an unacknowledged message used
  *  to set the Light Lightness Range state of an element.
  *
- *  \param [in] param Light Lightness Range Set message
+ *  \param [in] param Light Lightness Range Set message parameter \ref MS_LIGHT_LIGHTNESS_RANGE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -712,7 +821,48 @@ API_RESULT MS_light_lightness_client_send_reliable_pdu
             0xFFFFFFFF\
         )
 /** \} */
+
+/**
+ * \name Light Lightness Server and Light Lightness Setup Server Macros
+ * \{
+ */
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
+/**
+ *  \brief API to send reply or to update state change
+ *
+ *  \par Description
+ *  This is to send reply for a request or to inform change in state.
+ *
+ * \param [in] c   Context of the message.
+ * \param [in] cs  Model specific current state parameters.
+ * \param [in] ts  Model specific target state parameters (NULL: to be ignored).
+ * \param [in] rt  Time from current state to target state (0: to be ignored).
+ * \param [in] ex  Additional parameters (NULL: to be ignored).
+ * \param [in] r   If unicast response to be sent
+ * \param [in] p   If state to be published
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+#define MS_light_lightness_server_state_update_ext(c,cs,ts,rt,ex,r,p) \
+        MS_light_lightness_server_state_update \
+        (\
+            (c),\
+            (cs),\
+            (ts),\
+            (rt),\
+            (ex),\
+            (r),\
+            (p)\
+        )
+
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
 /** \} */
+
+/** \} */
+
+/** \} */
+
 /** \} */
 
 #endif /*_H_MS_LIGHT_LIGHTNESS_API_ */

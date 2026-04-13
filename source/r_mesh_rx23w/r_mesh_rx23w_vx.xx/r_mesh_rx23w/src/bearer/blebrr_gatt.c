@@ -7,7 +7,7 @@
  */
 
 /*
- *  Copyright (C) 2016. Mindtree Ltd.
+ *  Copyright (C) 2016-2021. Mindtree Ltd.
  *  All rights reserved.
  */
 
@@ -16,22 +16,6 @@
 *******************************************************************************/
 #include "r_mesh_rx23w_if.h"
 #include "blebrr.h"
-
-/*******************************************************************************
-* Macro definitions
-*******************************************************************************/
-/* GATT Proxy Segmentation and Reassembly related states */
-#define BLEBRR_GATT_SAR_COMPLETE_PKT        0x00
-#define BLEBRR_GATT_SAR_START_PKT           0x01
-#define BLEBRR_GATT_SAR_CONTINUE_PKT        0x02
-#define BLEBRR_GATT_SAR_END_PKT             0x03
-
-/* GATT Proxy Segmentation and Reassembly related state values */
-#define BLEBRR_GATT_SAR_INIT_STATE          0x00
-#define BLEBRR_GATT_SAR_TX_PROGRESS         0x01
-
-/* GATT PDU Size in octets */
-#define BLEBRR_GATT_PDU_SIZE                75
 
 /*******************************************************************************
 * Global Variables and Private Functions declaration
@@ -44,7 +28,7 @@ static BRR_BEARER_INFO blebrr_gatt;
 static BRR_BEARER_CH_INFO blebrr_gatt_ch_info;
 
 /** GATT Current mode identifier - PROV or PROXY */
-static UCHAR blebrr_gatt_mode = 0xFF;
+static UCHAR blebrr_gatt_mode = BLEBRR_GATT_UNINIT_MODE;
 
 /*******************************************************************************
 * Functions
@@ -52,25 +36,30 @@ static UCHAR blebrr_gatt_mode = 0xFF;
 /***************************************************************************//**
 * @brief Sets new GATT bearer mode
 *******************************************************************************/
-void blebrr_gatt_mode_set(UCHAR flag)
+void R_MS_BRR_Set_GattMode(UCHAR mode)
 {
     /**
-     * The valid values for 'flag' are:
+     * The valid values for 'mode' are:
      *  0x00: BLEBRR_GATT_PROV_MODE  GATT Provisioning Mode
      *  0x01: BLEBRR_GATT_PROXY_MODE GATT Proxy Mode
      *  All other values are RFU.
      */
-     blebrr_gatt_mode = ((flag == BLEBRR_GATT_PROV_MODE) || (flag == BLEBRR_GATT_PROXY_MODE))?
-                        flag: 0xFF;
+    if ((BLEBRR_GATT_PROV_MODE == mode) || (BLEBRR_GATT_PROXY_MODE == mode))
+    {
+        if (blebrr_gatt_mode != mode)
+        {
+            blebrr_gatt_mode = mode;
 
-     /* Notify GATT mode setting to blebrr pl */
-     blebrr_set_gattmode_pl (blebrr_gatt_mode);
+            /* Notify GATT mode setting to blebrr pl */
+            blebrr_set_gattmode_pl(blebrr_gatt_mode);
+        }
+    }
 }
 
 /***************************************************************************//**
 * @brief Gets current GATT bearer mode
 *******************************************************************************/
-UCHAR blebrr_gatt_mode_get(void)
+UCHAR R_MS_BRR_Get_GattMode(void)
 {
     /**
      * The valid return values are:
@@ -81,29 +70,13 @@ UCHAR blebrr_gatt_mode_get(void)
    return blebrr_gatt_mode;
 }
 
-static API_RESULT blebrr_gatt_send
-                       (
-                           BRR_HANDLE * handle,
-                           UCHAR type,
-                           void * pdata,
-                           UINT16 datalen
-                       )
+static API_RESULT blebrr_gatt_send(BRR_HANDLE * handle, UCHAR  type, void * pdata, UINT16 datalen)
 {
     API_RESULT retval;
 
     MS_IGNORE_UNUSED_PARAM(type);
 
-    retval = blebrr_gatt_send_pl
-             (
-                 handle,
-                 pdata,
-                 datalen
-             );
-
-    if (API_SUCCESS != retval)
-    {
-        BLEBRR_LOG("Error - 0x%04X\n", retval);
-    }
+    retval = blebrr_gatt_send_pl(handle, pdata, datalen);
 
     return retval;
 }
@@ -111,12 +84,7 @@ static API_RESULT blebrr_gatt_send
 /***************************************************************************//**
 * @brief Handles packet received over GATT Bearer
 *******************************************************************************/
-API_RESULT blebrr_pl_recv_gattpacket
-           (
-               BRR_HANDLE * handle,
-               UCHAR * pdata,
-               UINT16 pdatalen
-           )
+API_RESULT blebrr_pl_recv_gattpacket(BRR_HANDLE * handle, UCHAR * pdata, UINT16 pdatalen)
 {
     if (NULL != blebrr_gatt.bearer_recv)
     {
@@ -135,13 +103,7 @@ API_RESULT blebrr_pl_recv_gattpacket
 /***************************************************************************//**
 * @brief Registers GATT Bearer with Mesh Stack
 *******************************************************************************/
-API_RESULT blebrr_pl_gatt_connection
-           (
-               BRR_HANDLE * handle,
-               UCHAR        role,
-               UCHAR        mode,
-               UINT16       mtu
-           )
+API_RESULT blebrr_pl_gatt_connection(BRR_HANDLE * handle, UCHAR role, UINT16 mtu, UCHAR mode)
 {
     MS_BUFFER buffer;
     API_RESULT retval;
@@ -160,22 +122,15 @@ API_RESULT blebrr_pl_gatt_connection
     buffer.length = sizeof(blebrr_gatt_ch_info);
     retval = MS_brr_add_bearer(BRR_TYPE_GATT, &blebrr_gatt, handle);
 
-    /* Check the PDU type received and Add bearer to Mesh stack */
     if (BLEBRR_GATT_PROXY_MODE == mode)
     {
-        if (BLEBRR_SERVER_ROLE == role)
+        if (BLEBRR_CLIENT_ROLE == role)
         {
-            /* Start observing */
-            blebrr_scan_enable();
-        }
-        else if (BLEBRR_CLIENT_ROLE == role)
-        {
-            /* Do Nothing */
             /**
-             * Currently, not enabling scan for Proxy Client.
+             * Disable ADV Bearer for Proxy Client
              * Typically, Proxy Client supports only GATT Bearer.
-             * Hence, not initiating 'SCAN' on Bearer UP event.
              */
+            blebrr_adv_disable();
         }
     }
 
@@ -185,15 +140,19 @@ API_RESULT blebrr_pl_gatt_connection
 /***************************************************************************//**
 * @brief Unregisters GATT Bearer from Mesh Stack
 *******************************************************************************/
-API_RESULT blebrr_pl_gatt_disconnection
-           (
-               BRR_HANDLE * handle
-           )
+API_RESULT blebrr_pl_gatt_disconnection(BRR_HANDLE * handle, UCHAR role, UCHAR mode)
 {
     API_RESULT retval;
 
     retval = MS_brr_remove_bearer(BRR_TYPE_GATT, handle);
 
+    if (BLEBRR_GATT_PROXY_MODE == mode)
+    {
+        if (BLEBRR_CLIENT_ROLE == role)
+        {
+            blebrr_adv_enable();
+        }
+    }
+
     return retval;
 }
-

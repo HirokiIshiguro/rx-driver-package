@@ -1,21 +1,8 @@
-/********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (C) 2014-2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2014-2019 Renesas Electronics Corporation. All rights reserved.
-********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /*******************************************************************************************************************
 * File Name : r_flash_type3.c
 * Description  : This module implements functions specific to Flash Type 3 MCUs
@@ -38,6 +25,11 @@
 *           18.11.2016 3.00    Merged functions common to other flash types into r_flash_fcu.c and r_flash_group.c.
 *           27.22.2018 3.10    Added #if FLASH_HAS_2BIT_ERR_CHK (not supported by RX66T).
 *           19.04.2019 4.00    Added support for GNUC and ICCRX.
+*           24.06.2020 4.60    Modified to set the timeout value on global variable in flash_lockbit_write().
+*           10.12.2021 4.81    Modified the if statement for error judgment of flash type 3 in do_cmdlk_recovery().
+*           24.01.2023 5.00    Modified the condition of PFRAM section definition.
+*           15.11.2024 5.21    Added WAIT_LOOP comment.
+*           20.03.2025 5.22    Changed the disclaimer in program sources
 ********************************************************************************************************************/
 
 /********************************************************************************************************************
@@ -66,7 +58,9 @@ lkbit_mode_t g_lkbit_mode = FLASH_LOCKBIT_MODE_NORMAL;
 
 #if (FLASH_CFG_CODE_FLASH_ENABLE == 1)
 static flash_err_t flash_lockbit_write(flash_block_address_t block_address, uint32_t num_blocks);
+#endif
 
+#if (FLASH_CFG_CODE_FLASH_ENABLE == 1) && (FLASH_CFG_CODE_FLASH_RUN_FROM_ROM == 0)
 #define FLASH_PE_MODE_SECTION    R_BSP_ATTRIB_SECTION_CHANGE(P, FRAM)
 #define FLASH_SECTION_CHANGE_END R_BSP_ATTRIB_SECTION_CHANGE_END
 #else
@@ -136,12 +130,13 @@ void do_cmdlk_recovery(void)
         }
     }
 
-    if ((FLASH.FSTATR.BIT.FCUERR == 1)
-#ifdef FLASH_HAS_2BIT_ERR_CHK
+    if ((FLASH.FSTATR.BIT.FLWEERR == 1)
+#ifdef FLASH_HAS_FCU_RAM_ENABLE
      || (FLASH.FSTATR.BIT.FRDTCT == 1)
      || ((FLASH.FSTATR.BIT.FCUERR == 0) && (FLASH.FSTATR.BIT.FRDTCT == 0) && (FLASH.FSTATR.BIT.FLWEERR == 0))
+     || (FLASH.FSTATR.BIT.FCUERR == 1)
 #endif
-     || (FLASH.FSTATR.BIT.FLWEERR == 1))
+    )
 
     {
         flash_stop();
@@ -380,10 +375,9 @@ flash_err_t flash_lockbit_read(flash_block_address_t block_address, flash_res_t 
  *                    Flash hardware locked (should never happen)
  ***********************************************************************************************************************/
 FLASH_PE_MODE_SECTION
-flash_err_t flash_lockbit_write(flash_block_address_t block_address, uint32_t num_blocks)
+static flash_err_t flash_lockbit_write(flash_block_address_t block_address, uint32_t num_blocks)
 {
     flash_err_t err = FLASH_SUCCESS;
-    volatile uint32_t wait_cnt = FLASH_FRDY_CMD_TIMEOUT;
 
 
     if (g_current_parameters.bgo_enabled_cf == true)
@@ -395,6 +389,7 @@ flash_err_t flash_lockbit_write(flash_block_address_t block_address, uint32_t nu
     g_current_parameters.total_count = num_blocks;
 
     /* Loop through each block address and set lockbit */
+    /* WAIT_LOOP */
     for (g_current_parameters.current_count = 0;
          g_current_parameters.current_count < g_current_parameters.total_count;
          g_current_parameters.current_count++)
@@ -411,6 +406,7 @@ flash_err_t flash_lockbit_write(flash_block_address_t block_address, uint32_t nu
         }
 
         /* In blocking mode. Wait until FRDY is 1 unless timeout occurs. */
+        g_current_parameters.wait_cnt = FLASH_FRDY_CMD_TIMEOUT;
         err = flash_wait_frdy();
         if (err != FLASH_SUCCESS)
         {

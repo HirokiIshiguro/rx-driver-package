@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_mpc_rx_if.h
@@ -36,7 +23,7 @@
 *         : 15.03.2016 2.10    Added support for RX65N
 *         : 19.12.2016 2.20    Added support for RX24U, RX24T(512KB)
 *         : 21.07.2017 2.30    Added support for the RX65N-2M, RX130-512KB.
-*         : 31.10.2017 2.31    Added the demo for RX65N, RX65N-2M
+*         : 31.10.2017 2.31    Added the demo for RX65N, RX65N-2M
 *         : 28.09.2018 2.40    Added support for RX66T
 *         : 16.11.2018 2.41    Added XML document number
 *         : 01.02.2019 2.50    Added support for RX72T, RX65N-64pin
@@ -45,6 +32,29 @@
 *         : 15.08.2019 3.20    Added support RX72M
 *         : 25.11.2019 3.30    Added support RX13T
 *         : 30.12.2019 3.40    Added support RX72N, RX66N
+*         : 31.03.2020 3.50    Added support RX23E-A
+*         : 30.06.2020 3.60    Changed revision to reflect demo upgrade.
+*         : 01.04.2021 3.70    Added support RX23W-83pins
+*         : 01.04.2021 3.80    Added support RX72M 144pins, 100pins.
+*         : 07.04.2021 3.90    Added support RX671.
+*         : 15.04.2021 4.00    Added support RX140.
+*         : 13.09.2021 4.10    Added the demo for RX671.
+*         : 11.11.2021 4.20    Added support for RX140-256KB.
+*         : 14.03.2022 4.30    Added support for RX66T 48pins.
+*         : 31.03.2022 4.40    Added support for RX660.
+*         : 28.06.2022 4.50    Updated demo projects.
+*         : 15.12.2022 4.60    Updated dependency module version.
+*         : 28.02.2023 4.70    Updated dependency module version.
+*         : 07.04.2023 4.80    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0
+*                              Updated dependency module version.
+*         : 29.05.2023 4.90    Added support for RX23E-B.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0
+*         : 28.06.2024 5.00    Added support for RX260, RX261.
+*         : 15.03.2025 5.01    Updated disclaimer.
+*         : 23.06.2025 5.10    Updated dependency module version.
+*                              Removed doc folder and updated .rcpc file in FITDemos.
+*         : 30.10.2025 5.20    Added support for RX14T.
 ***********************************************************************************************************************/
 
 #ifndef MPC_RX_INTERFACE_HEADER_FILE
@@ -67,8 +77,8 @@ Macro definitions
 #endif
 
 /* Version Number of API. */
-#define MPC_RX_VERSION_MAJOR           (3)
-#define MPC_RX_VERSION_MINOR           (40)
+#define MPC_RX_VERSION_MAJOR           (5)
+#define MPC_RX_VERSION_MINOR           (20)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -94,9 +104,30 @@ typedef enum
 /***********************************************************************************************************************
 Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
-mpc_err_t   R_MPC_Write(gpio_port_pin_t pin, mpc_config_t * pconfig);
-void        R_MPC_Read(gpio_port_pin_t  pin, mpc_config_t * pconfig);
-uint32_t    R_MPC_GetVersion(void);
+/******************************************************************************
+ * Function Name: R_MPC_Write
+ * Description  : .
+ * Arguments    : pin
+ *              : pconfig
+ * Return Value : .
+ *****************************************************************************/
+mpc_err_t   R_MPC_Write (gpio_port_pin_t pin, mpc_config_t * pconfig);
+
+/******************************************************************************
+ * Function Name: R_MPC_Read
+ * Description  : .
+ * Arguments    : pin
+ *              : pconfig
+ * Return Value : .
+ *****************************************************************************/
+void        R_MPC_Read (gpio_port_pin_t  pin, mpc_config_t * pconfig);
+
+/******************************************************************************
+ * Function Name: R_MPC_GetVersion
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
+uint32_t    R_MPC_GetVersion (void);
 
 #endif /* MPC_RX_INTERFACE_HEADER_FILE */
 

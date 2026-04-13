@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2011 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : platform.h
 * Description  : The user chooses which MCU and board they are developing for in this file. If the board you are using
@@ -141,6 +128,14 @@
 *         : 31.07.2019 5.40     Added support for GENERIC_RX23E-A.
 *         : 08.10.2019 5.50     Added support for GENERIC_RX72N, and GENERIC_RX66N.
 *                               Deleted the board folders of RSKRX63N.
+*         : 18.05.2021 6.11     Added support for GENERIC_RX671.
+*         : 30.06.2021 6.20     Added support for GENERIC_RX140.
+*         : 22.04.2022 7.20     Added support for GENERIC_RX660.
+*         : 28.02.2023 7.30     Added support for GENERIC_RX26T.
+*         : 10.03.2023 7.40     Added support for GENERIC_RX23E-B.
+*         : 31.05.2024 7.50     Added support for GENERIC_RX261 and GENERIC_RX260.
+*         : 26.02.2025 7.53     Changed the disclaimer.
+*         : 12.09.2025 7.70     Added support for GENERIC_RX14T.
 ***********************************************************************************************************************/
 
 /* Multiple inclusion prevention macro */
@@ -156,11 +151,17 @@ DEFINE YOUR SYSTEM - UNCOMMENT THE INCLUDE PATH FOR THE PLATFORM YOU ARE USING.
 /* GENERIC_RX65N */
 //#include "./board/generic_rx65n/r_bsp.h"
 
+/* GENERIC_RX660 */
+//#include "./board/generic_rx660/r_bsp.h"
+
 /* GENERIC_RX66N */
 //#include "./board/generic_rx66n/r_bsp.h"
 
 /* GENERIC_RX66T */
 //#include "./board/generic_rx66t/r_bsp.h"
+
+/* GENERIC_RX671 */
+//#include "./board/generic_rx671/r_bsp.h"
 
 /* GENERIC_RX71M */
 //#include "./board/generic_rx71m/r_bsp.h"
@@ -183,6 +184,9 @@ DEFINE YOUR SYSTEM - UNCOMMENT THE INCLUDE PATH FOR THE PLATFORM YOU ARE USING.
 /* GENERIC_RX23E-A */
 //#include "./board/generic_rx23e-a/r_bsp.h"
 
+/* GENERIC_RX23E-B */
+//#include "./board/generic_rx23e-b/r_bsp.h"
+
 /* GENERIC_RX23T */
 //#include "./board/generic_rx23t/r_bsp.h"
 
@@ -194,6 +198,15 @@ DEFINE YOUR SYSTEM - UNCOMMENT THE INCLUDE PATH FOR THE PLATFORM YOU ARE USING.
 
 /* GENERIC_RX24U */
 //#include "./board/generic_rx24u/r_bsp.h"
+
+/* GENERIC_RX260 */
+//#include "./board/generic_rx260/r_bsp.h"
+
+/* GENERIC_RX261 */
+//#include "./board/generic_rx261/r_bsp.h"
+
+/* GENERIC_RX26T */
+//#include "./board/generic_rx26t/r_bsp.h"
 
 /* GENERIC_RX111 */
 //#include "./board/generic_rx111/r_bsp.h"
@@ -209,6 +222,12 @@ DEFINE YOUR SYSTEM - UNCOMMENT THE INCLUDE PATH FOR THE PLATFORM YOU ARE USING.
 
 /* GENERIC_RX13T */
 //#include "./board/generic_rx13t/r_bsp.h"
+
+/* GENERIC_RX140 */
+//#include "./board/generic_rx140/r_bsp.h"
+
+/* GENERIC_RX14T */
+//#include "./board/generic_rx14t/r_bsp.h"
 
 /* User Board - Define your own board here. */
 //#include "./board/user/r_bsp.h"

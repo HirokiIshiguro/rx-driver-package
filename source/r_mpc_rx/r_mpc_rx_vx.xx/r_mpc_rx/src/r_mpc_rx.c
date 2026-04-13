@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_mpc_rx.c
@@ -38,6 +25,9 @@
 *         : 25.11.2019 3.30    Added support RX13T
 *                              Modified comment of API function to Doxygen style
 *         : 30.12.2019 3.40    Added support RX72N, RX66N
+*         : 15.04.2021 4.00    Updated Doxygen comment.
+*         : 07.04.2023 4.80    Fixed to comply with GSCE Coding Standards Rev.6.5.0
+*         : 15.03.2025 5.01    Updated disclaimer.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -68,20 +58,20 @@ Includes   <System Includes> , "Project Includes"
 /***********************************************************************************************************************
 * Private global variables and functions
 ***********************************************************************************************************************/
-static uint8_t volatile * mpc_base_addr_get(uint8_t volatile * base_addr, uint16_t index);
+static uint8_t volatile * mpc_base_addr_get (uint8_t volatile * base_addr, uint16_t index);
 
 /***********************************************************************************************************************
 * Function Name: R_MPC_Read
 ********************************************************************************************************************//**
 * @brief This function reads the function configuration of a pin.
 * @param[in] pin - Which pin to read configuration information for.
-* @param[in] pconfig - Pointer to structure where pin configuration information will be stored. See Section 2.9.1, MPC
+* @param[in] pconfig - Pointer to structure where pin configuration information will be stored. See Section 2.10.1, MPC
 * Pin Configuration.
 * @details This function will read the configuration information for a pin and store it in a structure supplied by the
 * user.
 * @note None.
 */
-void R_MPC_Read (gpio_port_pin_t pin, mpc_config_t * pconfig)
+void R_MPC_Read(gpio_port_pin_t pin, mpc_config_t * pconfig)
 {
     uint8_t volatile * pfs_reg;
 
@@ -117,7 +107,7 @@ void R_MPC_Read (gpio_port_pin_t pin, mpc_config_t * pconfig)
 ********************************************************************************************************************//**
 * @brief This function sets the function of a pin.
 * @param[in] pin - Which pin to configure.
-* @param[in] pconfig - Pointer to structure with pin configuration information. See section 2.9.1, MPC Pin
+* @param[in] pconfig - Pointer to structure with pin configuration information. See section 2.10.1, MPC Pin
 * Configuration.
 * @retval [MPC_SUCCESS] Successful; pin configured.
 * @retval [MPC_ERR_INVALID_CFG] Error; invalid configuration input.
@@ -131,7 +121,7 @@ void R_MPC_Read (gpio_port_pin_t pin, mpc_config_t * pconfig)
 * Which pin is to be configured by this function is defined using the gpio_port_pin_t type from the r_gpio_rx module.
 * @note None.
 */
-mpc_err_t R_MPC_Write (gpio_port_pin_t pin, mpc_config_t * pconfig)
+mpc_err_t R_MPC_Write(gpio_port_pin_t pin, mpc_config_t * pconfig)
 {
     uint8_t volatile * pfs_reg;
     uint8_t            write_value;
@@ -188,7 +178,7 @@ mpc_err_t R_MPC_Write (gpio_port_pin_t pin, mpc_config_t * pconfig)
 * Version 4.25 would be returned as 0x00040019.
 * @note None.
 */
-uint32_t R_MPC_GetVersion (void)
+uint32_t R_MPC_GetVersion(void)
 {
     /* These version macros are defined in r_mpc_rx_if.h. */
     return ((((uint32_t)MPC_RX_VERSION_MAJOR) << 16) | (uint32_t)MPC_RX_VERSION_MINOR);
@@ -204,7 +194,7 @@ uint32_t R_MPC_GetVersion (void)
 * Return Value : Address of the register that was requested
 ***********************************************************************************************************************/
 R_BSP_PRAGMA_STATIC_INLINE(mpc_base_addr_get)
-uint8_t volatile * mpc_base_addr_get (uint8_t volatile * base_addr, uint16_t index)
+uint8_t volatile * mpc_base_addr_get(uint8_t volatile * base_addr, uint16_t index)
 {
     uint32_t port_offset;
     uint32_t pin_offset;

@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_usb_pdriver.c
+ * Version      : 1.44
  * Description  : USB Peripheral driver code.
  ***********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -29,6 +17,11 @@
  *         : 30.09.2017 1.22 Rename "usb_pstd_buf2fifo"->"usb_pstd_buf_to_fifo" and Function move from"r_usb_plibusbip.c"
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
+ *         : 01.03.2025 1.44 Change Disclaimer.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -49,6 +42,8 @@
 #if (BSP_CFG_RTOS_USED == 4)        /* Renesas RI600V4 & RI600PX */
 #include "kernel.h"
 #include "kernel_id.h"
+#elif (BSP_CFG_RTOS_USED == 5)      /* Azure RTOS */
+#include "ux_api.h"
 #endif /* (BSP_CFG_RTOS_USED == 4) */
 
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
@@ -91,6 +86,10 @@ uint16_t g_usb_peri_connected;                          /* Status for USB connec
 /* Driver registration */
 usb_pcdreg_t g_usb_pstd_driver;
 usb_setup_t g_usb_pstd_req_reg;                         /* Device Request - Request structure */
+
+ #if (BSP_CFG_RTOS_USED == 5)
+uint8_t g_usb_peri_usbx_is_configured;
+ #endif /* (BSP_CFG_RTOS_USED == 1) */
 
 /******************************************************************************
 Exported global variables
@@ -153,6 +152,15 @@ static void usb_pstd_interrupt (uint16_t type, uint16_t status)
             {
                 USB_PRINTF0("VBUS int detach\n");
                 usb_pstd_detach_process();    /* USB detach */
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+                if (USB_YES == g_usb_peri_usbx_is_configured)
+                {
+                    _ux_device_stack_disconnect();
+                    g_usb_peri_usbx_is_configured = USB_NO;
+                }
+
+#endif /* (BSP_CFG_RTOS_USED == 5) */
+
             }
         break;
 
@@ -369,6 +377,9 @@ static void usb_pstd_interrupt (usb_utr_t *p_mess)
             {
                 USB_PRINTF0("VBUS int detach\n");
                 usb_pstd_detach_process();    /* USB detach */
+#if (BSP_CFG_RTOS_USED == 5)
+                _ux_device_stack_disconnect();
+#endif /* (BSP_CFG_RTOS_USED == 5) */
             }
         break;
 
@@ -534,13 +545,10 @@ static void usb_pstd_interrupt (usb_utr_t *p_mess)
  Arguments       : none
  Return value    : none
  ******************************************************************************/
-#if (BSP_CFG_RTOS_USED == 4)        /* Renesas RI600V4 & RI600PX */
-void usb_pstd_pcd_task (VP_INT a)
-#else /* (BSP_CFG_RTOS_USED == 4) */
-void usb_pstd_pcd_task (void)
-#endif /* (BSP_CFG_RTOS_USED == 4) */
+void usb_pstd_pcd_task (rtos_task_arg_t stacd)
 {
 #if (BSP_CFG_RTOS_USED == 0)        /* Non-OS */
+    (void)stacd;
     if (g_usb_pstd_usb_int.wp != g_usb_pstd_usb_int.rp)
     {
         /* Pop Interrupt info */
@@ -556,6 +564,8 @@ void usb_pstd_pcd_task (void)
 #else /* (BSP_CFG_RTOS_USED == 0) */
     usb_utr_t   *p_mess;
     rtos_err_t ret;
+
+    (void)stacd;
 
     /* WAIT_LOOP */
     while(1)
@@ -1126,7 +1136,7 @@ usb_er_t usb_pstd_transfer_start(usb_utr_t * ptr)
     uint16_t pipenum;
 #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
     usb_utr_t       *p_tran_data;
-    rtos_task_id_t  task_id;
+    rtos_current_task_id_t  task_id;
 #endif /* BSP_CFG_RTOS_USED != 0 */
 
     pipenum = ptr->keyword;
@@ -1161,7 +1171,7 @@ usb_er_t usb_pstd_transfer_start(usb_utr_t * ptr)
 
     rtos_get_fixed_memory(&g_rtos_usb_mpf_id, (void **)&p_tran_data, RTOS_ZERO);
 
-    if (NULL == ptr)
+    if (NULL == ptr || NULL == p_tran_data)
     {
         return USB_ERROR;
     }
@@ -1177,6 +1187,14 @@ usb_er_t usb_pstd_transfer_start(usb_utr_t * ptr)
     {
         rtos_release_fixed_memory (&g_rtos_usb_mpf_id, (void *)p_tran_data);
     }
+
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+    if (0 != pipenum)
+    {
+        rtos_get_semaphore(&g_usb_peri_usbx_sem[pipenum], RTOS_FOREVER);
+    }
+#endif                              /* #if (BSP_CFG_RTOS_USED == 5) */
+
 #endif /* (BSP_CFG_RTOS_USED == 0) */
 
     return err;
@@ -1467,11 +1485,9 @@ void usb_peri_devdefault (usb_utr_t *ptr, uint16_t mode, uint16_t data2)
 {
     uint8_t *ptable;
     uint16_t len;
-#if (defined(USB_CFG_PCDC_USE) | defined(USB_CFG_PHID_USE))
     usb_ctrl_t ctrl;
-#endif
 
-    usb_peri_detach(ptr, USB_NULL, USB_NULL);
+    usb_peri_detach(ptr, USB_DEFAULT, USB_NULL);
 
     /* Connect Speed = Hi-Speed? */
     if (USB_HSCONNECT == mode)
@@ -1512,10 +1528,8 @@ void usb_peri_devdefault (usb_utr_t *ptr, uint16_t mode, uint16_t data2)
     usb_pstd_clr_pipe_table ();
     usb_peri_pipe_info(ptable, mode, len);
 
-#if (defined(USB_CFG_PCDC_USE) | defined(USB_CFG_PHID_USE))
     ctrl.module = USB_CFG_USE_USBIP;
     usb_set_event(USB_STS_DEFAULT, &ctrl);
-#endif
 
 } /* End of function usb_peri_devdefault() */
 
@@ -1532,6 +1546,7 @@ uint16_t usb_peri_pipe_info (uint8_t *table, uint16_t speed, uint16_t length)
     uint16_t ofdsc;
     uint16_t retval = USB_ERROR;
     uint8_t         pipe_no;
+    uint8_t class;
 
     /* Check Endpoint Descriptor */
     ofdsc = table[0];
@@ -1539,11 +1554,19 @@ uint16_t usb_peri_pipe_info (uint8_t *table, uint16_t speed, uint16_t length)
     /* WAIT_LOOP */
     while (ofdsc < length)
     {
+
+        /* Interface Descriptor */
+        if ( USB_DT_INTERFACE == table[ofdsc + USB_EP_B_DESCRIPTORTYPE])
+        {
+            /* bInterfaceClass set */
+            class = table[ofdsc + USB_IF_B_INTERFACECLASS];
+        }
+
         /* Endpoint Descriptor */
         if ( USB_DT_ENDPOINT == table[ofdsc + USB_EP_B_DESCRIPTORTYPE])
         {
             /* EP Table pipe Information set */
-            pipe_no = usb_pstd_set_pipe_table (&table[ofdsc]);
+            pipe_no = usb_pstd_set_pipe_table (&table[ofdsc], class);
             if (USB_NULL != pipe_no)
             {
                 retval = USB_OK;
@@ -1571,22 +1594,58 @@ void usb_peri_configured (usb_utr_t *ptr, uint16_t data1, uint16_t data2)
     ctrl.module = USB_CFG_USE_USBIP;
     usb_set_event(USB_STS_CONFIGURED, &ctrl);
 
+#if (BSP_CFG_RTOS_USED != 5)    /* Azure RTOS */
 #if defined(USB_CFG_PMSC_USE)
-    usb_pmsc_receive_cbw();
+    if (USB_NULL != (g_usb_open_class[USB_CFG_USE_USBIP] & (1 << USB_PMSC)))      /* Check USB Open device class */
+    {
+        usb_pmsc_receive_cbw();
+    }
 #endif
+#endif /* (BSP_CFG_RTOS_USED != 5) */
 } /* End of function usb_configured() */
 
 /******************************************************************************
  Function Name   : usb_peri_detach
  Description     : Peripheral Devices Class close function
  Arguments       : usb_utr_t    *ptr        : Not used
-                 : uint16_t     data1       : Not used
+                 : uint16_t     usb_state   : USB state
                  : uint16_t     data2       : Not used
  Return value    : none
  ******************************************************************************/
-void usb_peri_detach (usb_utr_t *ptr, uint16_t data1, uint16_t data2)
+void usb_peri_detach (usb_utr_t *ptr, uint16_t usb_state, uint16_t data2)
 {
     usb_ctrl_t ctrl;
+#if (BSP_CFG_RTOS_USED == 5)   /* Azure RTOS */
+    uint8_t  pipe;
+    uint16_t intsts;
+#endif  /* (BSP_CFG_RTOS_USED == 5) */
+
+#if (BSP_CFG_RTOS_USED == 5)
+    intsts = hw_usb_read_intsts();
+    if (USB_VBSTS == (intsts & USB_VBSTS))
+    {
+        /* When doing the warm start PC(USB_Host), PC sends the USB Reset.                          *
+         * The following code is needed to release the waiting status of the semaphore waiting task *
+         * before doing the warm start.                                                             */
+        if (USB_DEFAULT == usb_state)
+        {
+            for (pipe = USB_MIN_PIPE_NO; pipe < (USB_MAXPIPE_NUM + 1); pipe++)
+            {
+                g_usb_peri_usbx_is_detach[pipe] = USB_NO;
+                rtos_release_semaphore(&g_usb_peri_usbx_sem[pipe]);
+                rtos_delete_semaphore(&g_usb_peri_usbx_sem[pipe]);
+            }
+
+            if (USB_YES == g_usb_peri_usbx_is_configured)
+            {
+                /* The "ux_device_stack_disconnect" function must be not executed when attaching USB device to USB Host. */
+                /* Because the unnecessary detaching event is notfied to the application program when attaching USB device to USB Host. */
+                /* But, when doing the warm start PC, the "ux_device_stack_disconnect" function must be executed. */
+                _ux_device_stack_disconnect();
+            }
+        }
+    }
+#endif /* (BSP_CFG_RTOS_USED == 5) */
 
     if(USB_TRUE == g_usb_peri_connected)
     {
@@ -1611,6 +1670,13 @@ void usb_peri_suspended(usb_utr_t *ptr, uint16_t data1, uint16_t data2)
 
     ctrl.module = USB_CFG_USE_USBIP;
     usb_set_event(USB_STS_SUSPEND, &ctrl);
+
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+    if (UX_NULL != _ux_system_slave->ux_system_slave_change_function)
+    {
+        _ux_system_slave->ux_system_slave_change_function(UX_DEVICE_SUSPENDED);
+    }
+#endif  /* (BSP_CFG_RTOS_USED == 5) */
 } /* End of function usb_suspended() */
 
 /******************************************************************************
@@ -1631,6 +1697,14 @@ void usb_peri_resume(usb_utr_t *ptr, uint16_t data1, uint16_t data2)
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
     usb_set_event(USB_STS_RESUME, &ctrl);
+
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+    if (UX_NULL != _ux_system_slave->ux_system_slave_change_function)
+    {
+        _ux_system_slave->ux_system_slave_change_function(UX_DEVICE_RESUMED);
+    }
+#endif  /* (BSP_CFG_RTOS_USED == 5) */
+
 } /* End of function usb_peri_resume() */
 
 /******************************************************************************
@@ -1643,11 +1717,16 @@ void usb_peri_resume(usb_utr_t *ptr, uint16_t data1, uint16_t data2)
  ******************************************************************************/
 void usb_peri_interface(usb_utr_t *ptr, uint16_t data1, uint16_t data2)
 {
+#if (BSP_CFG_RTOS_USED != 5)    /* Azure RTOS */
 #if defined(USB_CFG_PMSC_USE)
-    usb_pmsc_receive_cbw();
+    if (USB_NULL != (g_usb_open_class[USB_CFG_USE_USBIP] & (1 << USB_PMSC)))      /* Check USB Open device class */
+    {
+        usb_pmsc_receive_cbw();
+    }
 #else   /* defined(USB_CFG_PMSC_USE) */
     /* Non processing */
 #endif  /* defined(USB_CFG_PMSC_USE) */
+#endif /* (BSP_CFG_RTOS_USED != 5) */
 } /* End of function usb_peri_interface() */
 
 #if defined(USB_CFG_PVND_USE)

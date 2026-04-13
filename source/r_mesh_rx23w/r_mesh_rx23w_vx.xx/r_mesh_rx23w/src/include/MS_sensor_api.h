@@ -20,20 +20,19 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup sensor_module SENSOR (Mesh Sensor Model)
+ * \defgroup sensor_module Sensor Model (SENSOR)
+ * \ingroup sensors_models
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Sensor Model (SENSOR) module to the Application.
  */
-
-
 
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup sensor_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Sensor Model Layer.
  */
 
 /**
@@ -86,14 +85,14 @@ typedef API_RESULT (* MS_SENSOR_SETUP_SERVER_CB)
  * Sensor Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_SENSOR_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -101,8 +100,17 @@ typedef API_RESULT (* MS_SENSOR_CLIENT_CB)
 /** \} */
 
 /**
+ * \defgroup sensor_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Sensor Model Layer.
+ */
+
+/**
  *  \defgroup sensor_structures Structures
  *  \{
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Sensor Model Layer.
  */
 
 /**
@@ -341,6 +349,15 @@ typedef struct MS_sensor_cadence_status_struct
     UINT16 status_trigger_delta_up_len;
 
     /** Minimum interval between two consecutive Status messages. */
+    /**
+     * \note
+     * <b> APPLICATION NOTE: </b>
+     * The Current Sensor Server Model implementation does not inherently
+     * check for the time interval between two consecutive status messages.
+     * The application layer which manages the data for the Sensor Server
+     * Model holds the responsibility for interleaving consecutive status
+     * messages with the configured Minimum time interval for statuses.
+     */
     UCHAR  status_min_interval;
 
     /** Low value for the fast cadence range. */
@@ -445,25 +462,70 @@ typedef struct MS_sensor_setting_status_struct
 
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup sensor_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Sensor Model APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Sensor Model Layer to the Application.
  */
 /**
  * \defgroup sensor_ser_api_defs Sensor Server API Definitions
  * \{
- * This section describes the Sensor Server APIs.
+ * \brief This section describes the EtherMind Mesh Sensor Server Model APIs.
  */
 
+/**
+ * \name Sensor Server Interfaces
+ * \{
+ */
+
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
 /**
  *  \brief API to initialize Sensor Server model
  *
  *  \par Description
- *  This is to initialize Sensor Server model and to register with Acess layer.
+ *  This is to initialize Sensor Server model and to register with Access layer.
+ *
+ *  \param [in] element_handle
+ *              Element identifier to be associated with the model instance.
+ *
+ *  \param [in, out] sensor_model_handle
+ *                   Model identifier associated with the Sensor model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in, out] sensor_setup_model_handle
+ *                   Model identifier associated with the Sensor Setup model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in] sensor_appl_cb          Application Callback to be used by the Sensor Server.
+ *
+ *  \param [in] sensor_setup_appl_cb    Application Callback to be used by the Sensor_Setup Server.
+ *
+ *  \param [in] pub_cb                  Publication Callback to be used for the Sensor Server application.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_sensor_server_init_ext
+           (
+               /* IN */    MS_ACCESS_ELEMENT_HANDLE              element_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE              * sensor_model_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE              * sensor_setup_model_handle,
+               /* IN */    MS_SENSOR_SERVER_CB                   sensor_appl_cb,
+               /* IN */    MS_SENSOR_SETUP_SERVER_CB             sensor_setup_appl_cb,
+               /* IN */    MS_ACCESS_MODEL_PUBLISH_TIMEOUT_CB    pub_cb
+           );
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
+/**
+ *  \brief API to initialize Sensor Server model (deprecated)
+ *
+ *  \par Description
+ *  This is to initialize Sensor Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -488,10 +550,10 @@ API_RESULT MS_sensor_server_init
            );
 
 /**
- *  \brief API to initialize Sensor_Setup Server model
+ *  \brief API to initialize Sensor_Setup Server model (deprecated)
  *
  *  \par Description
- *  This is to initialize Sensor_Setup Server model and to register with Acess layer.
+ *  This is to initialize Sensor_Setup Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -523,6 +585,8 @@ API_RESULT MS_sensor_setup_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -532,7 +596,9 @@ API_RESULT MS_sensor_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 
 /**
@@ -546,6 +612,8 @@ API_RESULT MS_sensor_server_state_update
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -555,21 +623,60 @@ API_RESULT MS_sensor_setup_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
+
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
+/**
+ *  \brief API to send reply or to update state change
+ *
+ *  \par Description
+ *  This is to send reply for a request or to inform change in state.
+ *
+ * \param [in] ctx                     Context of the message.
+ * \param [in] current_state_params    Model specific current state parameters.
+ * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
+ * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
+ * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_sensor_server_state_update_ext
+           (
+               /* IN */ MS_ACCESS_MODEL_REQ_MSG_CONTEXT    * ctx,
+               /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
+               /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
+               /* IN */ UINT16                               remaining_time,
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
+           );
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
+/** \} */
+
 /** \} */
 
 /**
  * \defgroup sensor_cli_api_defs Sensor Client API Definitions
  * \{
- * This section describes the Sensor Client APIs.
+ * \brief This section describes the EtherMind Mesh Sensor Client Model APIs.
+ */
+
+/**
+ * \name Sensor Client Interfaces
+ * \{
  */
 
 /**
  *  \brief API to initialize Sensor Client model
  *
  *  \par Description
- *  This is to initialize Sensor Client model and to register with Acess layer.
+ *  This is to initialize Sensor Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -606,6 +713,21 @@ API_RESULT MS_sensor_client_get_model_handle
            );
 
 /**
+ *  \brief API to set Sensor client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Sensor client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_sensor_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
+           );
+
+/**
  *  \brief API to send acknowledged commands
  *
  *  \par Description
@@ -623,6 +745,28 @@ API_RESULT MS_sensor_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+/** \} */
+
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup sensor_defines
+ * \{
+ */
+
+/**
+ * \defgroup sensor_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Sensor Model Layer.
+ */
+
+/**
+ * \name Sensor Client Macros
+ * \{
+ */
 
 /**
  *  \brief API to get the Sensor Descriptor state of all sensors within an element.
@@ -631,7 +775,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Descriptor Get is an acknowledged message used to get the Sensor Descriptor state of all sensors within an element.
  *  The response to a Sensor Descriptor Get message is a Sensor Descriptor Status message.
  *
- *  \param [in] param Sensor Descriptor Get message
+ *  \param [in] param Sensor Descriptor Get message parameter \ref MS_SENSOR_DESCRIPTOR_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -650,7 +794,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Get is an acknowledged message used to get the Sensor Data state.
  *  The response to the Sensor Get message is a Sensor Status message.
  *
- *  \param [in] param Sensor Get message
+ *  \param [in] param Sensor Get message parameter \ref MS_SENSOR_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -669,7 +813,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Column Get is an acknowledged message used to get the Sensor Series Column state.
  *  The response to the Sensor Column Get message is a Sensor Column Status message
  *
- *  \param [in] param Sensor Column Get message
+ *  \param [in] param Sensor Column Get message parameter \ref MS_SENSOR_COLUMN_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -688,7 +832,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Series Get is an acknowledged message used to get a sequence of the Sensor Series Column states.
  *  The response to the Sensor Series Get message is a Sensor Series Status message.
  *
- *  \param [in] param Sensor Series Get message
+ *  \param [in] param Sensor Series Get message parameter \ref MS_SENSOR_SERIES_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -707,7 +851,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Cadence Get is an acknowledged message used to get the Sensor Cadence state of an element.
  *  The response to the Sensor Cadence Get message is a Sensor Cadence Status message.
  *
- *  \param [in] param Sensor Cadence Get message
+ *  \param [in] param Sensor Cadence Get message parameter \ref MS_SENSOR_CADENCE_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -726,7 +870,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Cadence Set is an acknowledged message used to set the Sensor Cadence state of an element.
  *  The response to the Sensor Cadence Set message is a Sensor Cadence Status message.
  *
- *  \param [in] param Sensor Cadence Set message
+ *  \param [in] param Sensor Cadence Set message parameter \ref MS_SENSOR_CADENCE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -744,7 +888,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  \par Description
  *  Sensor Cadence Set Unacknowledged is an unacknowledged message used to set the Sensor Cadence state of an element.
  *
- *  \param [in] param Sensor Cadence Set message
+ *  \param [in] param Sensor Cadence Set message parameter \ref MS_SENSOR_CADENCE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -763,7 +907,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Settings Get is an acknowledged message used to get the list of Sensor Setting states of an element.
  *  The response to the Sensor Settings Get message is a Sensor Settings Status message
  *
- *  \param [in] param Sensor Settings Get message
+ *  \param [in] param Sensor Settings Get message parameter \ref MS_SENSOR_SETTINGS_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -782,7 +926,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Setting Get is an acknowledged message used to get the Sensor Setting state of an element.
  *  The response to the Sensor Setting Get message is a Sensor Setting Status message.
  *
- *  \param [in] param Sensor Setting Get message
+ *  \param [in] param Sensor Setting Get message parameter \ref MS_SENSOR_SETTING_GET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -801,7 +945,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  Sensor Setting Set is an acknowledged message used to set the Sensor Setting state of an element.
  *  The response to the Sensor Setting Set message is a Sensor Setting Status message.
  *
- *  \param [in] param Sensor Setting Set message
+ *  \param [in] param Sensor Setting Set message parameter \ref MS_SENSOR_SETTING_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -819,7 +963,7 @@ API_RESULT MS_sensor_client_send_reliable_pdu
  *  \par Description
  *  Sensor Setting Set Unacknowledged is an unacknowledged message used to set the Sensor Setting state of an element.
  *
- *  \param [in] param Sensor Setting Set message
+ *  \param [in] param Sensor Setting Set message parameter \ref MS_SENSOR_SETTING_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -831,7 +975,11 @@ API_RESULT MS_sensor_client_send_reliable_pdu
             0xFFFFFFFF\
         )
 /** \} */
+
 /** \} */
+
+/** \} */
+
 /** \} */
 
 #endif /*_H_MS_SENSOR_API_ */

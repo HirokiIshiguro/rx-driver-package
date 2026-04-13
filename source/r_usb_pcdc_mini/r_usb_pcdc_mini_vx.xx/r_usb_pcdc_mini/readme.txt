@@ -10,7 +10,7 @@ R01AN2170JJ
 
 Version
 -------
-v1.12
+v1.31
 
 
 Overview
@@ -29,6 +29,7 @@ Supported MCUs
 * RX113 Group
 * RX231 Group
 * RX23W Group
+* RX261 Group
 
 Boards Tested On
 ----------------
@@ -36,6 +37,7 @@ Boards Tested On
 * RSKRX113
 * RSKRX231
 * RSSKRX23W
+* EK-RX261
  
 Limitations
 -----------
@@ -54,9 +56,9 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v.3.01.00
-* GCC for Renesas RX 4.08.04.201902
-* IAR C/C++ Compiler for Renesas version 4.12.01
+* Renesas RX v.3.07.00
+* GCC for Renesas RX 8.3.0.202411
+* IAR C/C++ Compiler for Renesas version 5.10.1
 
 File Structure
 --------------
@@ -66,9 +68,9 @@ r_usb_pcdc_mini
 |
 +---doc
 |     \en
-|     |   r01an2170ej0112_usb.pdf
+|     |   r01an2170ej0131_usb.pdf
 |     \jp
-|         r01an2170jj0112_usb.pdf
+|         r01an2170jj0131_usb.pdf
 |
 +---ref
 |       r_usb_pcdc_mini_config_reference.h

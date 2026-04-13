@@ -1,21 +1,8 @@
 /***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
- * No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
- * applicable laws, including copyright laws. 
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO 
- * THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the 
- * following link:
- * http://www.renesas.com/disclaimer 
- *
- * Copyright (C) 2013(2019) Renesas Electronics Corporation. All rights reserved.
- **********************************************************************************************************************/
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_riic_rx_if.h
  * Description  : Functions for using RIIC on RX devices. 
@@ -59,6 +46,32 @@
  *         : 30.07.2019 2.43     Changed minor version to '43' for RX72M support.
  *         : 10.10.2019 2.44     Changed minor version to '44' for RX13T support.
  *         : 22.11.2019 2.45     Changed minor version to '45' for RX66N and RX72N support.
+ *         : 10.03.2020 2.46     Changed minor version to '46' for RX23E-A support.
+ *         : 30.10.2020 2.47     Changed minor version to '47' for e2studio 2020-10 support.
+ *         : 30.06.2021 2.48     Changed minor version to '48' for RX671 support.
+ *         : 31.07.2021 2.49     Changed minor version to '49' for RX140 support.
+ *         : 31.12.2021 2.50     Changed minor version to '50' for RX660 support.
+ *         : 16.12.2022 2.60     Fixed processing error of riic_bps_calc.
+ *         : 31.03.2023 2.70     Changed minor version to '70' for RX26T support.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *                               Added RX671 Demo, RX72N Demo.
+ *                               Apply a digital noise filter circuit to the riic_bps_calc function.
+ *                               Added new macros for SCL rise time and SCL fall time.
+ *         : 29.05.2023 2.80     Changed minor version to '80' for RX23E-B support.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0
+ *         : 10.10.2023 2.90     Changed EEI and TEI default interrupt priority levels
+ *                                for devices with EEI and TEI assigned to group interrupts,
+ *                                to be higher than TXI and RXI priority levels in MDF file.
+ *                               Modified source code comments of RIIC_CFG_CHi_RXI_INT_PRIORITY,
+ *                                RIIC_CFG_CHi_TXI_INT_PRIORITY, RIIC_CFG_CHi_EEI_INT_PRIORITY,
+ *                                RIIC_CFG_CHi_TEI_INT_PRIORITY (i = 0 to 2) in r_riic_rx_config.h.
+ *         : 01.08.2024 2.91     Fixed issues related to EEI and TEI interrupt priority levels for RX651 in MDF file.
+ *         : 08.08.2024 3.00     Added RX260, RX261 support.
+ *         : 15.03.2025 3.01     Updated disclaimer.
+ *         : 23.06.2025 3.02     Removed doc folder and updated .rcpc file in FITDemos.
+ *         : 30.10.2025 3.10     Added RX14T support.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.6.0.
+ *                               Updated MDF using Category.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_IF_H
@@ -80,8 +93,8 @@ R_BSP_PRAGMA_UNPACK
 #endif
 
 /* Version Number of API. */
-    #define RIIC_VERSION_MAJOR      (2)
-    #define RIIC_VERSION_MINOR      (45)
+    #define RIIC_VERSION_MAJOR      (3)
+    #define RIIC_VERSION_MINOR      (10)
 
 /*----------------------------------------------------------------------------*/
 /*   Defines the argument of the R_RIIC_Control function.                     */
@@ -130,6 +143,11 @@ typedef enum
 /*   Define iic information structure type.                                   */
 /*----------------------------------------------------------------------------*/
 /* ---- Callback function type. ---- */
+/******************************************************************************
+ * Function Name: riic_callback
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 typedef void (*riic_callback) (void); /* Callback function type */
 
 /* ---- IIC Information structure type. ---- */
@@ -189,14 +207,70 @@ extern riic_ch_dev_status_t g_riic_ChStatus[];
  Exported global functions (to be accessed by other files)
  **********************************************************************************************************************/
 /* ---- RIIC Driver API functions ---- */
+/******************************************************************************
+ * Function Name: R_RIIC_Open
+ * Description  : .
+ * Argument     : riic_return_t
+ * Return Value : .
+ *****************************************************************************/
 riic_return_t R_RIIC_Open (riic_info_t *);
+
+/******************************************************************************
+ * Function Name: R_RIIC_MasterSend
+ * Description  : .
+ * Argument     : riic_info_t
+ * Return Value : .
+ *****************************************************************************/
 riic_return_t R_RIIC_MasterSend (riic_info_t *);
+
+/******************************************************************************
+ * Function Name: R_RIIC_MasterReceive
+ * Description  : .
+ * Argument     : riic_info_t
+ * Return Value : .
+ *****************************************************************************/
 riic_return_t R_RIIC_MasterReceive (riic_info_t *);
+
+/******************************************************************************
+ * Function Name: R_RIIC_SlaveTransfer
+ * Description  : .
+ * Argument     : riic_info_t
+ * Return Value : .
+ *****************************************************************************/
 riic_return_t R_RIIC_SlaveTransfer (riic_info_t *);
+
+/******************************************************************************
+ * Function Name: R_RIIC_GetStatus
+ * Description  : .
+ * Arguments    : riic_info_t
+ *              : riic_mcu_status_t
+ * Return Value : .
+ *****************************************************************************/
 riic_return_t R_RIIC_GetStatus (riic_info_t *, riic_mcu_status_t *);
+
+/******************************************************************************
+ * Function Name: R_RIIC_Control
+ * Description  : .
+ * Arguments    : riic_info_t
+ *              : ctrl_ptn
+ * Return Value : .
+ *****************************************************************************/
 riic_return_t R_RIIC_Control (riic_info_t *, uint8_t ctrl_ptn);
+
+/******************************************************************************
+ * Function Name: R_RIIC_Close
+ * Description  : .
+ * Argument     : riic_return_t
+ * Return Value : .
+ *****************************************************************************/
 riic_return_t R_RIIC_Close (riic_info_t *);
-uint32_t R_RIIC_GetVersion (void);
+
+/******************************************************************************
+ * Function Name: R_RIIC_GetVersion
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
+uint32_t      R_RIIC_GetVersion (void);
 
 R_BSP_PRAGMA_PACKOPTION
 #endif /* RIIC_IF_H */

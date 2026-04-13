@@ -1,33 +1,15 @@
-/*******************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/***********************************************************************************************************************
+* Copyright (c) 2019 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-*******************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /*******************************************************************************
 * System Name  : QSPI single master driver
 * File Name    : r_qspi_smstr_target_dev_port.c
-* Version      : 1.14
+* Version      : 1.30
 * Device       : RX
 * Abstract     : Source file dedicated to RX66N for QSPI single master driver
-* Tool-Chain   : Renesas RXC Toolchain v3.01.00
+* Tool-Chain   : Renesas RXC Toolchain v3.07.00
 * OS           : not use
 * H/W Platform : not use
 * Description  : Functions for QSPI single master driver
@@ -36,6 +18,11 @@
 /*******************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 22.11.2019 1.14     First Release
+*              : 15.06.2023 1.21     Fixed typo in the comment of the r_qspi_smstr_check_timer()
+*              :                     Fixed typo in the comment of the r_qspi_smstr_tx_dmacdtc_wait()
+*              :                     Fixed typo in the comment of the r_qspi_smstr_rx_dmacdtc_wait()
+*              : 15.03.2025 1.22     Updated disclaimer
+*              : 30.10.2025 1.30     Added support Nested Interrupt
 *******************************************************************************/
 
 /*******************************************************************************
@@ -77,6 +64,11 @@ static void                 r_qspi_smstr_end_timer(uint8_t channel);
 R_BSP_PRAGMA_STATIC_INTERRUPT(r_qspi_smstr_spti_isr0, VECT(QSPI, SPTI))
 R_BSP_ATTRIB_STATIC_INTERRUPT void r_qspi_smstr_spti_isr0(void)
 {
+#if QSPI_SMSTR_CFG_SPTI_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow Nested Interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     R_QSPI_SMstr_Int_Spti_Ier_Clear(0);
     R_QSPI_SMstr_Int_Spti_Dmacdtc_Flag_Set(0, QSPI_SET_TRANS_STOP);
 }
@@ -84,6 +76,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void r_qspi_smstr_spti_isr0(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(r_qspi_smstr_spri_isr0, VECT(QSPI, SPRI))
 R_BSP_ATTRIB_STATIC_INTERRUPT void r_qspi_smstr_spri_isr0(void)
 {
+#if QSPI_SMSTR_CFG_SPRI_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow Nested Interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     R_QSPI_SMstr_Int_Spri_Ier_Clear(0);
     R_QSPI_SMstr_Int_Spri_Dmacdtc_Flag_Set(0, QSPI_SET_TRANS_STOP);
 }
@@ -738,8 +735,6 @@ void r_qspi_smstr_module_disable(uint8_t channel)
 *                    Size of data
 * Return Value : QSPI_SMSTR_SUCCESS -
 *                    Successful operation
-*                QSPI_SMSTR_ERR_PARAM -
-*                    Parameter error
 *                QSPI_SMSTR_ERR_HARD -
 *                    Hardware error
 *******************************************************************************/
@@ -768,7 +763,7 @@ qspi_smstr_status_t r_qspi_smstr_tx_dmacdtc_wait(uint8_t channel, uint32_t size)
     while (1)
     {
         /* Check timeout. */
-        if (QSPI_SMSTR_ERR_HARD == r_qspi_smstr_check_timer(channel))
+        if ((QSPI_SMSTR_ERR_HARD == r_qspi_smstr_check_timer(channel)) && (QSPI_SET_TRANS_STOP != gs_qspi_int_spti_dmacdtc_flg[channel]))
         {
             R_QSPI_SMSTR_LOG_FUNC(QSPI_SMSTR_DEBUG_ERR_ID, (uint32_t)QSPI_SMSTR_TARGET_DEV_PORT, __LINE__);
             ret = QSPI_SMSTR_ERR_HARD;
@@ -797,8 +792,6 @@ qspi_smstr_status_t r_qspi_smstr_tx_dmacdtc_wait(uint8_t channel, uint32_t size)
 *                    Size of data
 * Return Value : QSPI_SMSTR_SUCCESS -
 *                    Successful operation
-*                QSPI_SMSTR_ERR_PARAM -
-*                    Parameter error
 *                QSPI_SMSTR_ERR_HARD -
 *                    Hardware error
 *******************************************************************************/
@@ -827,7 +820,7 @@ qspi_smstr_status_t r_qspi_smstr_rx_dmacdtc_wait(uint8_t channel, uint32_t size)
     while (1)
     {
         /* Check timeout. */
-        if (QSPI_SMSTR_ERR_HARD == r_qspi_smstr_check_timer(channel))
+        if ((QSPI_SMSTR_ERR_HARD == r_qspi_smstr_check_timer(channel)) && (QSPI_SET_TRANS_STOP != gs_qspi_int_spri_dmacdtc_flg[channel]))
         {
             R_QSPI_SMSTR_LOG_FUNC(QSPI_SMSTR_DEBUG_ERR_ID, (uint32_t)QSPI_SMSTR_TARGET_DEV_PORT, __LINE__);
             ret = QSPI_SMSTR_ERR_HARD;
@@ -1205,7 +1198,7 @@ static void r_qspi_smstr_start_timer(uint8_t channel, uint32_t msec)
 /*******************************************************************************
 * Function Name: r_qspi_smstr_check_timer
 * Description  : Checks timeout to set r_qspi_smstr_start_timer function.
-*              : If timeout,return QSPI_SMSTR_ERR_OTHER. 
+*              : If timeout,return QSPI_SMSTR_ERR_HARD.
 *              : In the case of others, return QSPI_SMSTR_SUCCESS.
 * Arguments    : channel -
 *                    Which channel to use

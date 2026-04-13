@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : r_bsp_common.c
 * Description  : Implements functions that apply to all r_bsp boards and MCUs.
@@ -49,6 +36,9 @@
 *                               Renamed following function.
 *                               - delay_wait
 *         : 26.07.2019 2.01     Modified comment of API function to Doxygen style.
+*         : 21.11.2023 2.02     Added the R_BSP_ClockReset_Bootloader function.
+*         : 31.05.2024 2.03     Fixed coding style.
+*         : 26.02.2025 2.04     Changed the disclaimer.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -86,7 +76,7 @@ Private global variables and functions
  * where the top 2 bytes are the major version number and the bottom 2 bytes are the minor version number. For 
  * example, Version 4.25 would be returned as 0x00040019.
  */
-uint32_t R_BSP_GetVersion (void)
+uint32_t R_BSP_GetVersion(void)
 {
     /* These version macros are defined in platform.h. */
     return ((((uint32_t)R_BSP_VERSION_MAJOR) << 16) | (uint32_t)R_BSP_VERSION_MINOR);
@@ -101,7 +91,7 @@ uint32_t R_BSP_GetVersion (void)
 * Return Value : None
 ***********************************************************************************************************************/
 R_BSP_PRAGMA_STATIC_INLINE_ASM(delay_wait)
-void delay_wait (unsigned long loop_cnt)
+void delay_wait(unsigned long loop_cnt)
 {
     R_BSP_ASM_INTERNAL_USED(loop_cnt)
     R_BSP_ASM_BEGIN
@@ -154,7 +144,7 @@ bool R_BSP_SoftwareDelay(uint32_t delay, bsp_delay_units_t units)
 #ifdef BSP_CFG_PARAM_CHECKING_ENABLE
     if ((BSP_DELAY_MICROSECS != units) && (BSP_DELAY_MILLISECS != units) && (BSP_DELAY_SECS != units))
     {
-        return(false);
+        return (false);
     }
 #endif
 
@@ -168,8 +158,8 @@ bool R_BSP_SoftwareDelay(uint32_t delay, bsp_delay_units_t units)
      * and/or a slow ICLK we use 32 bit integers to reduce the overhead cycles of this function
      * by approximately a third and stand the best chance of achieving the requested delay.
      */
-    if ( (BSP_DELAY_MICROSECS == units) &&
-         (delay <= (0xFFFFFFFFUL / iclk_rate)) )  /* Ensure (iclk_rate * delay) will not exceed 32 bits */
+    if ((BSP_DELAY_MICROSECS == units) &&
+        (delay <= (0xFFFFFFFFUL / iclk_rate)))  /* Ensure (iclk_rate * delay) will not exceed 32 bits */
     {
         delay_cycles = ((iclk_rate * delay) / units);
 
@@ -188,7 +178,7 @@ bool R_BSP_SoftwareDelay(uint32_t delay, bsp_delay_units_t units)
         {
             /* The requested delay is too large/small for the current ICLK. Return false which
              * also results in the minimum possible delay. */
-            return(false);
+            return (false);
         }
     }
     else
@@ -211,7 +201,7 @@ bool R_BSP_SoftwareDelay(uint32_t delay, bsp_delay_units_t units)
         {
             /* The requested delay is too large/small for the current ICLK. Return false which
              * also results in the minimum possible delay. */
-            return(false);
+            return (false);
         }
 
         /* Casting is valid because it matches the type to the right side or argument. */
@@ -220,6 +210,25 @@ bool R_BSP_SoftwareDelay(uint32_t delay, bsp_delay_units_t units)
 
     delay_wait(loop_cnt);
 
-    return(true);
+    return (true);
 } /* End of function R_BSP_SoftwareDelay() */
+
+#if defined(BSP_CFG_BOOTLOADER_PROJECT)
+  #if BSP_CFG_BOOTLOADER_PROJECT == 1
+/**********************************************************************************************************************
+ * Function Name: R_BSP_ClockReset_Bootloader
+ ******************************************************************************************************************//**
+ * @brief Returns the MCU clock settings to the reset state.
+ * @return none.
+ * @details This function returns the MCU clock settings to the reset state. The system clock returns to LOCO.
+ * @note This function for bootloader only. This function is valid only in the bootloader project.
+ * Assume the default clock settings in r_bsp_config.h. If the clock settings in r_bsp_config.h are not in the 
+ * default state, some clock types will not return to the reset state.
+ */
+void R_BSP_ClockReset_Bootloader(void)
+{
+    bsp_mcu_clock_reset_bootloader();
+} /* End of function R_BSP_ClockReset_Bootloader() */
+  #endif /* BSP_CFG_BOOTLOADER_PROJECT == 1 */
+#endif /* defined(BSP_CFG_BOOTLOADER_PROJECT) */
 

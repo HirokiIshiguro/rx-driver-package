@@ -1,35 +1,22 @@
-/************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2018(2025) Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
-*************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /************************************************************************************************
 * File Name    : r_flash_dm_rx_if.h
-* Version      : 2.01
+* Version      : 2.31
 * Description  : DATFRX interface header file
 *************************************************************************************************/
 /************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
 *              : 28.09.2018 2.00     First Release
 *              : 25.01.2019 2.01     English PDF added, Fixed blank check processing and Busy check procedure
+*              : 21.04.2023 2.10     Added macro constant judgment of "FLASH_TYPE_5".
+*                                    Minor version change.
+*              : 31.08.2023 2.20     Minor version change.
+*              : 14.03.2024 2.30     Minor version change.
+*              : 20.03.2025 2.31     Changed the disclaimer.
 *************************************************************************************************/
 
 /************************************************************************************************
@@ -52,7 +39,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define FLASH_DM_VERSION_MAJOR           (2)
-#define FLASH_DM_VERSION_MINOR           (01)
+#define FLASH_DM_VERSION_MINOR           (31)
 
 /* Activity flag. */
 #define FLASH_DM_ACT_IDLE                   ((uint16_t)(0x00))
@@ -292,9 +279,9 @@ Exported global functions (to be accessed by other files)
 e_flash_dm_status_t R_FLASH_DM_Open(uint32_t* p_flash_dm_work, p_flash_dm_callback func);
 e_flash_dm_status_t R_FLASH_DM_Close(void);
 e_flash_dm_status_t R_FLASH_DM_Init(void);
-#if(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4)
+#if(FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5)
 e_flash_dm_status_t R_FLASH_DM_InitAdvance(void);
-#endif /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 */
+#endif /* FLASH_TYPE == FLASH_TYPE_2 || FLASH_TYPE == FLASH_TYPE_3 || FLASH_TYPE == FLASH_TYPE_4 || FLASH_TYPE == FLASH_TYPE_5 */
 e_flash_dm_status_t R_FLASH_DM_Format(void);
 e_flash_dm_status_t R_FLASH_DM_Read(st_flash_dm_info_t * p_flash_dm_info);
 e_flash_dm_status_t R_FLASH_DM_Write(st_flash_dm_info_t * p_flash_dm_info);

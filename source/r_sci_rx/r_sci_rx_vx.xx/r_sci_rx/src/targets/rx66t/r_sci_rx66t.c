@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2018 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /**********************************************************************************************************************
 * File Name    : r_sci_rx66t.c
@@ -26,6 +13,15 @@
 *                              Fix GSCE Code Checker errors.
 *           20.05.2019 3.00    Added support for GNUC and ICCRX.
 *           15.08.2019 3.20    Fixed warnings in IAR.
+*           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
+*           31.03.2021 3.80    Added support circular buffer in mode asynchronous.
+*                              Updated macro definition enable and disable TXI, RXI, ERI, TEI.
+*           27.12.2022 4.60    Updated macro definition enable and disable nested interrupt for TXI, RXI, ERI, TEI.
+*           16.02.2023 4.70    Fixed a bug that return wrong value in sci_init_bit_rate() function.
+*           28.06.2024 5.30    Corrected the typecasting formula in sci_init_bit_rate().
+*           01.11.2024 5.40    Fixed the issue that data cannot be sent when using the SCI_CMD_TX_Q_FLUSH command
+*                              with the R_SCI_Control() function before executing the R_SCI_Send() function.
+*           15.03.2025 5.41    Updated disclaimer
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -276,15 +272,30 @@ int32_t sci_init_bit_rate(sci_hdl_t const  hdl,
 #endif
     }
 
-    /* FIND DIVISOR; table has associated ABCS, BGDM and CKS values */
+    /* FIND DIVISOR; table has associated ABCS, BGDM, ABCSE and CKS values */
     /* BRR must be 255 or less */
     /* the "- 1" is ignored in some steps for approximations */
     /* BRR = (PCLK/(divisor * baud)) - 1 */
     /* BRR = (ratio / divisor) - 1 */
     ratio = pclk/baud;
+
     /* WAIT_LOOP */
     for(i = 0; i < num_divisors; i++)
     {
+        if (SCI_MODE_ASYNC == hdl->mode)
+        {
+#if (SCI_CFG_ASYNC_INCLUDED)
+   /* ABCSE bit is not available on CH12 */
+   /* Skip divisor result have ABCSE bit*/
+            if (SCI_CH12 == hdl->rom->chan)   
+            {
+                if(1 == p_baud_info[i].abcse)
+                {
+                    continue;
+                }
+            }
+#endif
+        }
         /* Casting int16_t to uint32_t is valid. Because clock divisor is positive integer */
         if (ratio < (uint32_t)(p_baud_info[i].divisor * 256))
         {
@@ -332,6 +343,7 @@ int32_t sci_init_bit_rate(sci_hdl_t const  hdl,
     hdl->rom->regs->SEMR.BIT.ABCS = p_baud_info[i].abcs;
     hdl->rom->regs->SEMR.BIT.BGDM = p_baud_info[i].bgdm;
     hdl->rom->regs->SMR.BIT.CKS = p_baud_info[i].cks;
+    hdl->rom->regs->SEMR.BIT.ABCSE= p_baud_info[i].abcse;
 
     /* CALCULATE BIT RATE ERROR.
      * RETURN IF ERROR LESS THAN 1% OR IF IN SYNCHRONOUS/SSPI MODE.
@@ -354,7 +366,7 @@ int32_t sci_init_bit_rate(sci_hdl_t const  hdl,
     hdl->rom->regs->BRR = (uint8_t)(tmp-1);
 
     /* Casting uint32_t to float is valid  */
-    float_M = ((float)((baud * divisor) * 256) * tmp) / pclk;
+    float_M = ((((float)baud * divisor) * 256) * tmp) / pclk;
     float_M *= 2;
 
     /* Casting float to uint32_t */
@@ -437,8 +449,8 @@ void sci_initialize_ints(sci_hdl_t const hdl,
     /* CLEAR INTERRUPT FLAGS */
     *hdl->rom->ir_rxi = 0;
     *hdl->rom->ir_txi = 0;
-    (*hdl->rom->icu_grp) &= (~hdl->rom->tei_ch_mask);
-    (*hdl->rom->icu_grp) &= (~hdl->rom->eri_ch_mask);
+    DISABLE_TEI_INT;
+    DISABLE_ERI_INT;
 
     /* REGISTER GROUP INTERRUPTS WITH BSP */
     #if SCI_CFG_TEI_INCLUDED
@@ -577,21 +589,63 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
         }
     #endif
 
+#if TX_DTC_DMACA_ENABLE
+        case (SCI_CMD_CHECK_TX_DONE):
+        {
+            if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable))
+            {
+                if (false == hdl->tx_idle)
+                {
+                    err = SCI_ERR_XCVR_BUSY;
+                }
+            }
+            break;
+        }
+#endif
+
+#if RX_DTC_DMACA_ENABLE
+        case (SCI_CMD_CHECK_RX_DONE):
+        {
+            if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+            {
+                if (0 != hdl->queue[0].rx_cnt)
+                {
+                    err = SCI_ERR_XCVR_BUSY;
+                }
+            }
+            break;
+        }
+#endif
+
         case (SCI_CMD_TX_Q_FLUSH):
         {
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+            R_BYTEQ_Flush(hdl->u_tx_data.que);
+#else
             /* Disable TXI interrupt */
             DISABLE_TXI_INT;
             R_BYTEQ_Flush(hdl->u_tx_data.que);
             ENABLE_TXI_INT;
+
+            /* Re-enable interrupts */
+            hdl->rom->regs->SCR.BYTE &= (~SCI_EN_XCVR_MASK);
+            SCI_SCR_DUMMY_READ;
+            SCI_IR_TXI_CLEAR;
+            hdl->rom->regs->SCR.BYTE |= SCI_EN_XCVR_MASK;
+#endif
         break;
         }
 
         case (SCI_CMD_RX_Q_FLUSH):
         {
+#if (SCI_CFG_USE_CIRCULAR_BUFFER == 1)
+            R_BYTEQ_Flush(hdl->u_rx_data.que);
+#else
             /* Disable RXI interrupt */
             DISABLE_RXI_INT;
             R_BYTEQ_Flush(hdl->u_rx_data.que);
             ENABLE_RXI_INT;
+#endif
         break;
         }
 
@@ -614,6 +668,40 @@ sci_err_t sci_async_cmds(sci_hdl_t const hdl,
             /* flush transmit queue */
             DISABLE_TXI_INT;
             R_BYTEQ_Flush(hdl->u_tx_data.que);
+#if(TX_DTC_DMACA_ENABLE)
+        if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable))
+        {
+            sci_fifo_ctrl_t        *p_tctrl = &hdl->queue[hdl->qindex_app_rx];
+            p_tctrl->tx_cnt = 0;
+            p_tctrl->tx_fraction = 0;
+#if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+            if(SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable)
+            {
+                dtc_cmd_arg_t           args_dtc;
+                args_dtc.act_src = hdl->rom->dtc_tx_act_src;
+                R_DTC_Control(DTC_CMD_ACT_SRC_DISABLE, NULL, &args_dtc);
+
+            }
+#endif
+#if ((TX_DTC_DMACA_ENABLE & 0x02) || (RX_DTC_DMACA_ENABLE & 0x02))
+            if(SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable)
+            {
+                dmaca_stat_t   stat_dmaca;
+                R_DMACA_Control(hdl->rom->dmaca_tx_channel, DMACA_CMD_DISABLE, &stat_dmaca);
+
+            }
+#endif
+#if SCI_CFG_FIFO_INCLUDED
+            if (true == hdl->fifo_ctrl)
+            {
+
+                /* reset TX FIFO */
+                hdl->rom->regs->FCR.BIT.TFRST = 0x01;
+            }
+#endif
+        }
+#endif
+            
             ENABLE_TXI_INT;
 
             /* NOTE: the following steps will abort anything being sent */
@@ -746,7 +834,43 @@ sci_err_t sci_sync_cmds(sci_hdl_t const hdl,
             /* Disable receive interrupts in ICU and peripheral */
             DISABLE_RXI_INT;
             DISABLE_ERI_INT;
+#if(TX_DTC_DMACA_ENABLE)
+        if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable))
+        {
+            sci_fifo_ctrl_t        *p_tctrl = &hdl->queue[hdl->qindex_app_rx];
+            p_tctrl->tx_cnt = 0;
+            p_tctrl->tx_fraction = 0;
+#if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+            if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_tx_enable) && (SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+            {
+                // Set condition for reset TDFR to generate interrupt in next time
+                hdl->qindex_int_tx = 1;
+                dtc_cmd_arg_t           args_dtc;
+                args_dtc.act_src               = hdl->rom->dtc_tx_act_src;
+                R_DTC_Control(DTC_CMD_ACT_SRC_DISABLE, NULL, &args_dtc);
 
+                args_dtc.act_src               = hdl->rom->dtc_rx_act_src;
+                R_DTC_Control(DTC_CMD_ACT_SRC_DISABLE, NULL, &args_dtc);
+            }
+#endif
+#if ((TX_DTC_DMACA_ENABLE & 0x02) || (RX_DTC_DMACA_ENABLE & 0x02))
+            if((SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_tx_enable) && (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+            {
+                R_DMACA_Close(hdl->rom->dmaca_tx_channel);
+                R_DMACA_Close(hdl->rom->dmaca_rx_channel);
+            }
+#endif
+#if SCI_CFG_FIFO_INCLUDED
+            if (true == hdl->fifo_ctrl)
+            {
+                /* reset TX FIFO */
+                hdl->rom->regs->FCR.BIT.TFRST = 0x01;
+                /* reset RX FIFO */
+                hdl->rom->regs->FCR.BIT.RFRST = 0x01;
+            }
+#endif
+        }
+#endif
             hdl->rom->regs->SCR.BYTE &= (~(SCI_SCR_REI_MASK | SCI_SCR_RE_MASK | SCI_SCR_TE_MASK));
 
             hdl->tx_cnt = 0;
@@ -764,8 +888,23 @@ sci_err_t sci_sync_cmds(sci_hdl_t const hdl,
             }
 
             *hdl->rom->ir_rxi = 0;                  /* clear rxi interrupt flag */
-            (*hdl->rom->icu_grp) &= (~hdl->rom->eri_ch_mask);  /* clear eri interrupt flag */
+#if SCI_CFG_FIFO_INCLUDED
+#if(TX_DTC_DMACA_ENABLE)
+            if((SCI_DTC_DMACA_DISABLE != hdl->rom->dtc_dmaca_tx_enable) && (true != hdl->fifo_ctrl))
+            {
+                *hdl->rom->ir_txi = 0;
+            }
+#endif
+#else
+#if(TX_DTC_DMACA_ENABLE)
+            if((SCI_DTC_DMACA_DISABLE != hdl->rom->dtc_dmaca_tx_enable))
+            {
+                *hdl->rom->ir_txi = 0;
+            }
+#endif
+#endif
 
+            DISABLE_ERI_INT;                        /* clear eri interrupt flag */
             ENABLE_ERI_INT;                         /* enable rx err interrupts in ICU */
             ENABLE_RXI_INT;                         /* enable receive interrupts in ICU */
 
@@ -774,7 +913,19 @@ sci_err_t sci_sync_cmds(sci_hdl_t const hdl,
             hdl->rom->regs->SCR.BYTE |= SCI_SCR_REI_MASK;
         break;
         }
-
+#if RX_DTC_DMACA_ENABLE
+        case (SCI_CMD_CHECK_RX_SYNC_DONE):
+        {
+            if((SCI_DTC_ENABLE == hdl->rom->dtc_dmaca_rx_enable) || (SCI_DMACA_ENABLE == hdl->rom->dtc_dmaca_rx_enable))
+            {
+                if (0 != hdl->queue[0].rx_cnt)
+                {
+                    err = SCI_ERR_XCVR_BUSY;
+                }
+            }
+            break;
+        }
+#endif
         case (SCI_CMD_CHANGE_SPI_MODE):
         {
     #if SCI_CFG_PARAM_CHECKING_ENABLE
@@ -823,7 +974,9 @@ sci_err_t sci_sync_cmds(sci_hdl_t const hdl,
 ISRs
 ******************************************************************************/
 
-#if (SCI_CFG_ASYNC_INCLUDED)
+
+#if ((SCI_CFG_ASYNC_INCLUDED) || (TX_DTC_DMACA_ENABLE | RX_DTC_DMACA_ENABLE))
+
 /*****************************************************************************
 * sciN_txiN_isr
 
@@ -838,6 +991,11 @@ ISRs
 R_BSP_PRAGMA_STATIC_INTERRUPT(sci1_txi1_isr, VECT(SCI1,TXI1))
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_txi1_isr(void)
 {
+#if SCI_CFG_CH1_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     txi_handler(&ch1_ctrl);
 } /* End of function sci1_txi1_isr() */
 
@@ -851,6 +1009,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_txi1_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(sci5_txi5_isr, VECT(SCI5,TXI5))
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_txi5_isr(void)
 {
+#if SCI_CFG_CH5_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     txi_handler(&ch5_ctrl);
 } /* End of function sci5_txi5_isr() */
 
@@ -864,6 +1027,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_txi5_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(sci6_txi6_isr, VECT(SCI6,TXI6))
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci6_txi6_isr(void)
 {
+#if SCI_CFG_CH6_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     txi_handler(&ch6_ctrl);
 } /* End of function sci6_txi6_isr() */
 
@@ -877,6 +1045,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci6_txi6_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(sci8_txi8_isr, VECT(SCI8,TXI8))
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_txi8_isr(void)
 {
+#if SCI_CFG_CH8_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     txi_handler(&ch8_ctrl);
 } /* End of function sci8_txi8_isr() */
 
@@ -890,6 +1063,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_txi8_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(sci9_txi9_isr, VECT(SCI9,TXI9))
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci9_txi9_isr(void)
 {
+#if SCI_CFG_CH9_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     txi_handler(&ch9_ctrl);
 } /* End of function sci9_txi9_isr() */
 
@@ -903,6 +1081,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci9_txi9_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(sci11_txi11_isr, VECT(SCI11,TXI11))
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci11_txi11_isr(void)
 {
+#if SCI_CFG_CH11_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     txi_handler(&ch11_ctrl);
 } /* End of function sci11_txi11_isr() */
 
@@ -916,12 +1099,17 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci11_txi11_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(sci12_txi12_isr, VECT(SCI12,TXI12))
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_txi12_isr(void)
 {
+#if SCI_CFG_CH12_EN_TXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     txi_handler(&ch12_ctrl);
 } /* End of function sci12_txi12_isr() */
 
 #endif /* End of SCI_CFG_CH12_INCLUDED */
 
-#endif /* End of SCI_CFG_ASYNC_INCLUDED */
+#endif /* End of ((SCI_CFG_ASYNC_INCLUDED) || (TX_DTC_DMACA_ENABLE | RX_DTC_DMACA_ENABLE)) */
 
 #if SCI_CFG_TEI_INCLUDED
 /*****************************************************************************
@@ -938,6 +1126,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_txi12_isr(void)
  ******************************************************************************/
 void sci1_tei1_isr(void *cb_args)
 {
+#if SCI_CFG_CH1_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     tei_handler(&ch1_ctrl);
 } /* End of function sci1_tei1_isr() */
 
@@ -950,6 +1143,11 @@ void sci1_tei1_isr(void *cb_args)
  ******************************************************************************/
 void sci5_tei5_isr(void *cb_args)
 {
+#if SCI_CFG_CH5_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     tei_handler(&ch5_ctrl);
 } /* End of function sci5_tei5_isr() */
 
@@ -962,6 +1160,11 @@ void sci5_tei5_isr(void *cb_args)
  ******************************************************************************/
 void sci6_tei6_isr(void *cb_args)
 {
+#if SCI_CFG_CH6_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     tei_handler(&ch6_ctrl);
 } /* End of function sci6_tei6_isr() */
 
@@ -974,6 +1177,11 @@ void sci6_tei6_isr(void *cb_args)
  ******************************************************************************/
 void sci8_tei8_isr(void *cb_args)
 {
+#if SCI_CFG_CH8_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     tei_handler(&ch8_ctrl);
 } /* End of function sci8_tei8_isr() */
 
@@ -986,6 +1194,11 @@ void sci8_tei8_isr(void *cb_args)
  ******************************************************************************/
 void sci9_tei9_isr(void *cb_args)
 {
+#if SCI_CFG_CH9_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     tei_handler(&ch9_ctrl);
 } /* End of function sci9_tei9_isr() */
 
@@ -998,6 +1211,11 @@ void sci9_tei9_isr(void *cb_args)
  ******************************************************************************/
 void sci11_tei11_isr(void *cb_args)
 {
+#if SCI_CFG_CH11_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     tei_handler(&ch11_ctrl);
 } /* End of function sci11_tei11_isr() */
 
@@ -1010,6 +1228,11 @@ void sci11_tei11_isr(void *cb_args)
  ******************************************************************************/
 void sci12_tei12_isr(void *cb_args)
 {
+#if SCI_CFG_CH12_EN_TEI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     tei_handler(&ch12_ctrl);
 } /* End of function sci12_tei12_isr() */
 
@@ -1031,6 +1254,11 @@ void sci12_tei12_isr(void *cb_args)
 R_BSP_PRAGMA_STATIC_INTERRUPT(sci1_rxi1_isr, VECT(SCI1,RXI1))
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_rxi1_isr(void)
 {
+#if SCI_CFG_CH1_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     rxi_handler(&ch1_ctrl);
 } /* End of function sci1_rxi1_isr() */
 
@@ -1044,6 +1272,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci1_rxi1_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(sci5_rxi5_isr, VECT(SCI5,RXI5))
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_rxi5_isr(void)
 {
+#if SCI_CFG_CH5_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     rxi_handler(&ch5_ctrl);
 } /* End of function sci5_rxi5_isr() */
 
@@ -1057,6 +1290,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci5_rxi5_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(sci6_rxi6_isr, VECT(SCI6,RXI6))
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci6_rxi6_isr(void)
 {
+#if SCI_CFG_CH6_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     rxi_handler(&ch6_ctrl);
 } /* End of function sci6_rxi6_isr() */
 
@@ -1070,6 +1308,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci6_rxi6_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(sci8_rxi8_isr, VECT(SCI8,RXI8))
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_rxi8_isr(void)
 {
+#if SCI_CFG_CH8_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     rxi_handler(&ch8_ctrl);
 } /* End of function sci8_rxi8_isr() */
 
@@ -1083,6 +1326,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci8_rxi8_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(sci9_rxi9_isr, VECT(SCI9,RXI9))
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci9_rxi9_isr(void)
 {
+#if SCI_CFG_CH9_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     rxi_handler(&ch9_ctrl);
 } /* End of function sci9_rxi9_isr() */
 
@@ -1096,6 +1344,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci9_rxi9_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(sci11_rxi11_isr, VECT(SCI11,RXI11))
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci11_rxi11_isr(void)
 {
+#if SCI_CFG_CH11_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     rxi_handler(&ch11_ctrl);
 } /* End of function sci11_rxi11_isr() */
 
@@ -1109,6 +1362,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci11_rxi11_isr(void)
 R_BSP_PRAGMA_STATIC_INTERRUPT(sci12_rxi12_isr, VECT(SCI12,RXI12))
 R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_rxi12_isr(void)
 {
+#if SCI_CFG_CH12_EN_RXI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     rxi_handler(&ch12_ctrl);
 } /* End of function sci12_rxi12_isr() */
 
@@ -1128,6 +1386,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void sci12_rxi12_isr(void)
 ******************************************************************************/
 void sci1_eri1_isr(void *cb_args)
 {
+#if SCI_CFG_CH1_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     eri_handler(&ch1_ctrl);
 } /* End of function sci1_eri1_isr() */
 
@@ -1140,6 +1403,11 @@ void sci1_eri1_isr(void *cb_args)
 ******************************************************************************/
 void sci5_eri5_isr(void *cb_args)
 {
+#if SCI_CFG_CH5_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     eri_handler(&ch5_ctrl);
 } /* End of function sci5_eri5_isr() */
 
@@ -1153,6 +1421,11 @@ void sci5_eri5_isr(void *cb_args)
 ******************************************************************************/
 void sci6_eri6_isr(void *cb_args)
 {
+#if SCI_CFG_CH6_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     eri_handler(&ch6_ctrl);
 } /* End of function sci6_eri6_isr() */
 
@@ -1165,6 +1438,11 @@ void sci6_eri6_isr(void *cb_args)
 ******************************************************************************/
 void sci8_eri8_isr(void *cb_args)
 {
+#if SCI_CFG_CH8_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     eri_handler(&ch8_ctrl);
 } /* End of function sci8_eri8_isr() */
 
@@ -1177,6 +1455,11 @@ void sci8_eri8_isr(void *cb_args)
 ******************************************************************************/
 void sci9_eri9_isr(void *cb_args)
 {
+#if SCI_CFG_CH9_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     eri_handler(&ch9_ctrl);
 } /* End of function sci9_eri9_isr() */
 
@@ -1189,6 +1472,11 @@ void sci9_eri9_isr(void *cb_args)
 ******************************************************************************/
 void sci11_eri11_isr(void *cb_args)
 {
+#if SCI_CFG_CH11_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     eri_handler(&ch11_ctrl);
 } /* End of function sci11_eri11_isr() */
 
@@ -1201,6 +1489,11 @@ void sci11_eri11_isr(void *cb_args)
 ******************************************************************************/
 void sci12_eri12_isr(void *cb_args)
 {
+#if SCI_CFG_CH12_EN_ERI_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     eri_handler(&ch12_ctrl);
 } /* End of function sci12_eri12_isr() */
 

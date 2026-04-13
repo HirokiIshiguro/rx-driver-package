@@ -1,3 +1,8 @@
+/*
+* Copyright (c) 2013(2014-2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /*********************************************************************************
 *
 * Device     : RX/RX100/RX113
@@ -6,17 +11,17 @@
 *
 * Abstract   : Definition of I/O Register.
 *
-* History    : 0.4  (2013-11-18)  [Hardware Manual Revision : 0.40]
-*            : 0.5  (2014-01-05)  [Hardware Manual Revision : 0.50]
-*            : 1.0  (2014-07-22)  [Hardware Manual Revision : 1.00]
-*            : 1.0A (2015-04-20)  [Hardware Manual Revision : 1.02 + TU]
-*            : 1.0B (2016-08-24)  [Hardware Manual Revision : 1.02 + TU]
-*            : 1.0C (2016-11-10)  [Hardware Manual Revision : 1.02 + TU]
-*            : 1.1  (2018-04-24)  [Hardware Manual Revision : 1.10]
+* History    : 0.4   (2013-11-18)  [Hardware Manual Revision : 0.40]
+*            : 0.5   (2014-01-05)  [Hardware Manual Revision : 0.50]
+*            : 1.0   (2014-07-22)  [Hardware Manual Revision : 1.00]
+*            : 1.0A  (2015-04-20)  [Hardware Manual Revision : 1.02 + TU]
+*            : 1.0B  (2016-08-24)  [Hardware Manual Revision : 1.02 + TU]
+*            : 1.0C  (2016-11-10)  [Hardware Manual Revision : 1.02 + TU]
+*            : 1.1   (2018-03-31)  [Hardware Manual Revision : 1.10]
+*            : 1.1A  (2023-03-03)  [Hardware Manual Revision : 1.10]
+*            : 1.10B (2025-02-14)  [Hardware Manual Revision : 1.10]
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
-*
-* Copyright (C) 2016 (2013 - 2015) Renesas Electronics Corporation.
 *
 *********************************************************************************/
 /********************************************************************************/
@@ -460,7 +465,8 @@ struct st_ctsu {
 			unsigned short CTSUICOMP:1;
 			unsigned short :7;
 			unsigned short CTSUTSOC:1;
-			unsigned short :3;
+			unsigned short CTSUCLKSEL1:1;
+			unsigned short :2;
 			unsigned short CTSUDRV:1;
 			unsigned short CTSUTSOD:1;
 			unsigned short CTSUSPMD:2;
@@ -5274,7 +5280,15 @@ struct st_system {
 			unsigned char LCDSCLKSTP:1;
 		} BIT;
 	} LCDSCLKCR2;
-	char           wk9[78];
+	char           wk9_1[22];
+	union {
+		unsigned char BYTE;
+		struct {
+			unsigned char :2;
+			unsigned char HOCOTRD:6;
+		} BIT;
+	} HOCOTRR0;        
+	char           wk9_2[55];
 	union {
 		unsigned char BYTE;
 		struct {

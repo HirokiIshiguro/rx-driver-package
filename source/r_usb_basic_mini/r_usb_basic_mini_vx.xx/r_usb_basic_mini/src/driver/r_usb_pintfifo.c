@@ -1,33 +1,18 @@
-/*******************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- * Copyright (C) 2015(2018) Renesas Electronics Corporation. All rights reserved.
- *****************************************************************************/
+/*
+* Copyright (c) 2014(2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /******************************************************************************
  * File Name    : r_usb_pintfifo.c
  * Description  : USB Peripheral FIFO access code
  ******************************************************************************/
 /*******************************************************************************
  * History : DD.MM.YYYY Version Description
- *         : 08.01.2014 1.00 First Release
+ *         : 08.01.2014 1.00    First Release
  *         : 30.11.2018 1.10    Supporting Smart Configurator
+ *         : 30.06.2020 1.20    Added support for RTOS.
+ *         : 20.03.2025 1.31    Changed the disclaimer.
 *******************************************************************************/
 
 /******************************************************************************
@@ -92,8 +77,6 @@ void usb_pstd_brdy_pipe (uint16_t bitsts)
 
                 /* FIFO access error */
             case USB_READOVER :
-                USB_PRINTF0("### Receive data over PIPE0 \n");
-
                 /* Clear BVAL */
                 hw_usb_set_bclr(USB_CUSE);
 
@@ -103,8 +86,6 @@ void usb_pstd_brdy_pipe (uint16_t bitsts)
 
                 /* FIFO access error */
             case USB_FIFOERROR :
-                USB_PRINTF0("### FIFO access error \n");
-
                 /* Control transfer stop(end) */
                 usb_pstd_ctrl_end((uint16_t) USB_DATA_ERR);
             break;
@@ -129,11 +110,7 @@ void usb_pstd_brdy_pipe (uint16_t bitsts)
 void usb_pstd_nrdy_pipe (uint16_t bitsts)
 {
     /* The function for peripheral driver is created here. */
-    if (USB_NRDY0 == (bitsts & USB_NRDY0))
-    {
-        /* Non processing. */
-    }
-    else
+    if (USB_NRDY0 != (bitsts & USB_NRDY0))
     {
         /* Nrdy Pipe interrupt */
         usb_pstd_nrdy_pipe_process(bitsts);
@@ -175,8 +152,6 @@ void usb_pstd_bemp_pipe (uint16_t bitsts)
 
                 /* FIFO access error */
             case USB_FIFOERROR :
-                USB_PRINTF0("### FIFO access error \n");
-
                 /* Control transfer stop(end) */
                 usb_pstd_ctrl_end((uint16_t) USB_DATA_ERR);
             break;

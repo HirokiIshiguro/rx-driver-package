@@ -1,19 +1,42 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
+/*
+* Copyright (c) 2018-2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
   Purpose: Module Description File (MDF) Example (Schema Version 2.0)
            This is a description of a sample FIT module configuration file
 ***********************************************************************************************************************/
 -->
-<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.16" xs:noNamespaceSchemaLocation="schema_mdf_2.16.xsd">
     <fileVersion>1.00</fileVersion>
-    <formatVersion>2.00</formatVersion>
+    <formatVersion>2.16</formatVersion>
     <resourceInfo>
       <peripheral name="BLE">
         <pin name="CLKOUT_RF">
           <constraint display="CLKOUT_RF valid if BLE_CFG_RF_CLKOUT_EN is not 0." actionOnFail="disable">${BLE_CFG_RF_CLKOUT_EN} != ${BLE_CFG_RF_CLKOUT_EN.0}</constraint>
           <pinConfiguration config="AUTO"/>
         </pin>
+        <pinReadOnly name="XTAL1_RF" default="1">
+          <pinConfiguration config="AUTO"/>
+        </pinReadOnly>
+        <pinReadOnly name="XTAL2_RF" default="1">
+          <pinConfiguration config="AUTO"/>
+        </pinReadOnly>
+        <pinReadOnly name="ANT" default="1">
+          <pinConfiguration config="AUTO"/>
+        </pinReadOnly>
+        <pinReadOnly name="DCLOUT" default="1">
+          <pinConfiguration config="AUTO"/>
+        </pinReadOnly>
+        <pinReadOnly name="DCLIN_A" default="1">
+          <pinConfiguration config="AUTO"/>
+        </pinReadOnly>
+        <pinReadOnly name="DCLIN_D" default="1">
+          <pinConfiguration config="AUTO"/>
+        </pinReadOnly>
       </peripheral>
     </resourceInfo>
     <configuration>
@@ -192,12 +215,19 @@ default : 0
 default : 0 
         </description>
         </property>
-        <property id="BLE_CFG_RF_CLVAL" display="Capacity adjustment of 32MHz crystal resonator." default="6" type="textbox">
+        <property id="BLE_CFG_RF_CLVAL" 
+        display="Capacity adjustment of 32MHz crystal resonator." 
+        default="6" 
+        conditionalDefault= "if ('${Device.id}' === 'R5F523W8CxLN') {'7';} else if ('${Device.id}'==='R5F523W8DxLN') {'7';}" 
+        type="textbox">
             <constraint display="Value must be greater or equal to 0">("${BLE_CFG_RF_CLVAL}" &gt;=0)</constraint>
             <constraint display="Value must be less or equal to 15">("${BLE_CFG_RF_CLVAL}" &lt;=15)</constraint>
             <description>Capacity adjustment of 32MHz crystal resonator. Adjust according to board environment.</description>
         </property>
-        <property id="BLE_CFG_RF_DDC_EN" display="DC-DC converter configuration for RF part." default="0" type="combobox">
+        <property id="BLE_CFG_RF_DDC_EN" 
+        display="DC-DC converter configuration for RF part." 
+        default="0" 
+        type="combobox">
             <option id="BLE_CFG_RF_DDC_EN.0" display="Disable" value="0"/>
             <option id="BLE_CFG_RF_DDC_EN.1" display="Enable" value="1"/>
             <description>Set DC-DC converter for RF part.
@@ -367,7 +397,10 @@ default : 0
 default : 0
         </description>
         </property>
-        <property id="BLE_CFG_CMD_LINE_CH" display="SCI CH for command line function." default="1" type="textbox">
+        <property id="BLE_CFG_CMD_LINE_CH" 
+        display="SCI CH for command line function." 
+        default="1" 
+        type="textbox">
             <constraint display="Enable CMD_LINE" actionOnFail="disable">"${BLE_CFG_CMD_LINE_EN}" == "${BLE_CFG_CMD_LINE_EN.1}"</constraint>
             <description>SCI CH for command line function.
 default : 1
@@ -382,7 +415,10 @@ default : 1
 default : 0
         </description>
         </property>
-        <property id="BLE_CFG_BOARD_TYPE" display="Board Type" default="0" type="combobox">
+        <property id="BLE_CFG_BOARD_TYPE" 
+        display="Board Type" 
+        default="0" 
+        type="combobox">
             <option id="BLE_CFG_BOARD_TYPE.0" display="Customer board" value="0"/>
             <option id="BLE_CFG_BOARD_TYPE.1" display="Target board" value="1"/>
             <option id="BLE_CFG_BOARD_TYPE.2" display="RSSK" value="2"/>

@@ -1,21 +1,9 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2019-2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
+
 #include "r_ble_cmd.h"
 #include "cli/r_ble_cli.h"
 
@@ -27,11 +15,19 @@ void R_BLE_CMD_ParseValues(char *p_str, uint8_t *p_buffer, uint16_t *p_length)
 
     char *p_tp = strtok(p_str, ",");
 
+    /* WAIT_LOOP */
     while ((p_tp != NULL) && (*p_length < 50))
     {
         if (p_tp != NULL)
         {
-            p_buffer[*p_length] = (uint8_t)strtol(p_tp, NULL, 0);
+            char *p_endp;
+            p_endp = NULL;
+            p_buffer[*p_length] = (uint8_t)strtol(p_tp, &p_endp, 0);
+            if((p_buffer[*p_length] == 0) && (p_endp != NULL) && (*p_endp != '\0'))
+            {
+                *p_length = 0;
+                return;
+            }
             *p_length += 1;
         }
 
@@ -41,6 +37,7 @@ void R_BLE_CMD_ParseValues(char *p_str, uint8_t *p_buffer, uint16_t *p_length)
 
 void R_BLE_CMD_PrintValues(uint8_t *p_buffer, uint16_t length)
 {
+    /* WAIT_LOOP */
     for (int i = 0; i < length; i++)
     {
         R_BLE_CLI_Printf("0x%02x", p_buffer[i]);
@@ -57,6 +54,7 @@ void R_BLE_CMD_ParseAddr(char *p_str, uint8_t *p_addr)
     int p = 5;
     char *p_tp = strtok(p_str, ":");
 
+    /* WAIT_LOOP */
     while ((p_tp != NULL) && (p >= 0))
     {
         if (p_tp != NULL)
@@ -71,6 +69,7 @@ void R_BLE_CMD_ParseAddr(char *p_str, uint8_t *p_addr)
 
 void R_BLE_CMD_PrintAddr(uint8_t *p_addr)
 {
+    /* WAIT_LOOP */
     for (uint16_t i = 0; i < 6; i++)
     {
         R_BLE_CLI_Printf("%02x", p_addr[5-i]);

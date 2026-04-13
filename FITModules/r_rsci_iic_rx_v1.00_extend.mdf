@@ -1,0 +1,629 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* Copyright (c) 2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) Example (Schema Version 2.0)
+           This is a description of a sample FIT module configuration file
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.17.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+
+    <fileTemplate>r_pinset_type1</fileTemplate>
+    <fileTemplatePath>r_config/r_rsci_iic_rx_pin_config.h</fileTemplatePath>
+    <resourceInfo>
+      <peripheral name="RSCI">
+        <channel number="RSCI0">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${RSCI_IIC_CFG_CH0_INCLUDED} == ${RSCI_IIC_CFG_CH0_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL000">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI0_SSCL000_PORT" value="portnum"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI0_SSCL000_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA000">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI0_SSDA000_PORT" value="portnum"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI0_SSDA000_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="RSCI8">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${RSCI_IIC_CFG_CH8_INCLUDED} == ${RSCI_IIC_CFG_CH8_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL008">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI8_SSCL008_PORT" value="portnum"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI8_SSCL008_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA008">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI8_SSDA008_PORT" value="portnum"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI8_SSDA008_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="RSCI9">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${RSCI_IIC_CFG_CH9_INCLUDED} == ${RSCI_IIC_CFG_CH9_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL009">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI9_SSCL009_PORT" value="portnum"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI9_SSCL009_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA009">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI9_SSDA009_PORT" value="portnum"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI9_SSDA009_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="RSCI10">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${RSCI_IIC_CFG_CH10_INCLUDED} == ${RSCI_IIC_CFG_CH10_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL010">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI10_SSCL010_PORT" value="portnum"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI10_SSCL010_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA010">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI10_SSDA010_PORT" value="portnum"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI10_SSDA010_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+        <channel number="RSCI11">
+          <constraint display="Channel only valid for Supported" actionOnFail="disable">${RSCI_IIC_CFG_CH11_INCLUDED} == ${RSCI_IIC_CFG_CH11_INCLUDED.1}</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSCL011">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI11_SSCL011_PORT" value="portnum"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI11_SSCL011_BIT" value="bitnum"/>
+          </pin>
+          <pin name="SSDA011">
+            <pinConfiguration config="AUTO"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI11_SSDA011_PORT" value="portnum"/>
+            <macro name="R_RSCI_IIC_CFG_RSCI11_SSDA011_BIT" value="bitnum"/>
+          </pin>
+        </channel>
+      </peripheral>
+    </resourceInfo>
+    <function>
+    function checkChannelSupport(channel, device_group, rom_size, ram_size, pin_count) 
+    {
+        var valid = false;
+
+        switch (device_group)
+        {
+            case 'RX261':
+            case 'RX260':
+            {
+                if (((pin_count == '100') || (pin_count == '80')) &amp;&amp; ((channel == 'RSCI0') || (channel == 'RSCI8') || (channel == 'RSCI9')))
+                {
+                    valid = true;
+                }
+                else if ((pin_count == '64') &amp;&amp; ((channel == 'RSCI8') || (channel == 'RSCI9')))
+                {
+                    valid = true;
+                }
+                else if ((pin_count == '48') &amp;&amp;(channel == 'RSCI8'))
+                {
+                    valid = true;
+                }
+                break;
+            }
+
+            case 'RX26T':
+            {
+                if ((ram_size == '64') &amp;&amp; ((channel == 'RSCI8') || (channel == 'RSCI9') || (channel == 'RSCI11')))
+                {
+                    valid = true;
+                }
+                break;
+            }
+
+            case 'RX660':
+            {
+                if (((pin_count == '144') || (pin_count == '100') || (pin_count == '80') || (pin_count == '64')) &amp;&amp; ((channel == 'RSCI10') || (channel == 'RSCI11')))
+                {
+                    valid = true;
+                }
+                else if ((pin_count == '48') &amp;&amp; (channel == 'RSCI10'))
+                {
+                    valid = true;
+                }
+                break;
+            }
+
+            case 'RX671':
+            {
+                if ((channel == 'RSCI10') || (channel == 'RSCI11'))
+                {
+                    valid = true;
+                }
+                break;
+            }
+            
+            default:
+            {
+                break;
+            }
+        }
+
+        return valid;
+    }
+
+    function checkChannelDefault(channel, device_group, rom_size, ram_size, pin_count) 
+    {
+        var valid = false;
+
+        switch (device_group)
+        {
+            case 'RX261':
+            case 'RX260':
+            {
+                if (((pin_count == '100') || (pin_count == '80') || (pin_count == '64')) &amp;&amp; (channel == 'RSCI9'))
+                {
+                    valid = true;
+                }
+                else if ((pin_count == '48') &amp;&amp; (channel == 'RSCI8'))
+                {
+                    valid = true;
+                }
+                break;
+            }
+
+            case 'RX26T':
+            {
+                if ((ram_size == '64') &amp;&amp; (channel == 'RSCI11'))
+                {
+                    valid = true;
+                }
+                break;
+            }
+
+            case 'RX660':
+            {
+                if (((pin_count == '144') || (pin_count == '100') || (pin_count == '80') || (pin_count == '64')) &amp;&amp; (channel == 'RSCI11'))
+                {
+                    valid = true;
+                }
+                else if ((pin_count == '48') &amp;&amp; (channel == 'RSCI10'))
+                {
+                    valid = true;
+                }
+                break;
+            }
+
+            case 'RX671':
+            {
+                if (channel == 'RSCI11')
+                {
+                    valid = true;
+                }
+                break;
+            }
+
+            default:
+            {
+                break;
+            }
+        }
+
+        return valid;
+    }
+    </function>
+    <configuration>
+        <category id="COMMON" display="Common settings">
+            <description>Common settings.</description>
+        </category>
+        <category id="RSCI0" display="RSCI_IIC channel 0 settings">
+            <description>RSCI_IIC channel 0 settings.</description>
+        </category>
+        <category id="RSCI8" display="RSCI_IIC channel 8 settings">
+            <description>RSCI_IIC channel 8 settings.</description>
+        </category>
+        <category id="RSCI9" display="RSCI_IIC channel 9 settings">
+            <description>RSCI_IIC channel 9 settings.</description>
+        </category>
+        <category id="RSCI10" display="RSCI_IIC channel 10 settings">
+            <description>RSCI_IIC channel 10 settings.</description>
+        </category>
+        <category id="RSCI11" display="RSCI_IIC channel 11 settings">
+            <description>RSCI_IIC channel 11 settings.</description>
+        </category>
+        <property id="RSCI_IIC_CFG_PARAM_CHECKING_ENABLE" display="Set parameter checking enable" default="1" type="combobox" category="COMMON">
+            <option id="RSCI_IIC_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System Default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="RSCI_IIC_CFG_PARAM_CHECKING_ENABLE.0" display="Not" value="0"/>
+            <option id="RSCI_IIC_CFG_PARAM_CHECKING_ENABLE.1" display="Include" value="1"/>
+            <description>Selectable whether to include parameter checking in the code.
+BSP_CFG_PARAM_CHECKING_ENABLE = System default.
+0 = Compile out parameter checking.
+1 = Includes parameter checking.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH0_INCLUDED" display="Include software support for channel 0" default="0" conditionalDefault="if (checkChannelDefault('RSCI0','${Device.group}','${Device.romSize}', '${Device.ramSize}','${Device.pinCount}')) {'1';} else {'0';}" type="combobox" category="RSCI0">
+            <option id="RSCI_IIC_CFG_CH0_INCLUDED.0" display="Not included" value="0"/>
+            <option id="RSCI_IIC_CFG_CH0_INCLUDED.1" display="Included" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">checkChannelSupport("RSCI0","${Device.group}","${Device.romSize}", "${Device.ramSize}","${Device.pinCount}")</constraint>
+            <description>Selectable whether to use available channels.
+0 = Not included.
+1 = Included.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH8_INCLUDED" display="Include software support for channel 8" default="0" conditionalDefault="if (checkChannelDefault('RSCI8','${Device.group}','${Device.romSize}', '${Device.ramSize}','${Device.pinCount}')) {'1';} else {'0';}" type="combobox" category="RSCI8">
+            <option id="RSCI_IIC_CFG_CH8_INCLUDED.0" display="Not included" value="0"/>
+            <option id="RSCI_IIC_CFG_CH8_INCLUDED.1" display="Included" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">checkChannelSupport("RSCI8","${Device.group}","${Device.romSize}", "${Device.ramSize}","${Device.pinCount}")</constraint>
+            <description>Selectable whether to use available channels.
+0 = Not included.
+1 = Included.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH9_INCLUDED" display="Include software support for channel 9" default="0" conditionalDefault="if (checkChannelDefault('RSCI9','${Device.group}','${Device.romSize}', '${Device.ramSize}','${Device.pinCount}')) {'1';} else {'0';}" type="combobox" category="RSCI9">
+            <option id="RSCI_IIC_CFG_CH9_INCLUDED.0" display="Not included" value="0"/>
+            <option id="RSCI_IIC_CFG_CH9_INCLUDED.1" display="Included" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">checkChannelSupport("RSCI9","${Device.group}","${Device.romSize}", "${Device.ramSize}","${Device.pinCount}")</constraint>
+            <description>Selectable whether to use available channels.
+0 = Not included.
+1 = Included.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH10_INCLUDED" display="Include software support for channel 10" default="0" conditionalDefault="if (checkChannelDefault('RSCI10','${Device.group}','${Device.romSize}', '${Device.ramSize}','${Device.pinCount}')) {'1';} else {'0';}" type="combobox" category="RSCI10">
+            <option id="RSCI_IIC_CFG_CH10_INCLUDED.0" display="Not included" value="0"/>
+            <option id="RSCI_IIC_CFG_CH10_INCLUDED.1" display="Included" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">checkChannelSupport("RSCI10","${Device.group}","${Device.romSize}", "${Device.ramSize}","${Device.pinCount}")</constraint>
+            <description>Selectable whether to use available channels.
+0 = Not included.
+1 = Included.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH11_INCLUDED" display="Include software support for channel 11" default="0" conditionalDefault="if (checkChannelDefault('RSCI11','${Device.group}','${Device.romSize}', '${Device.ramSize}','${Device.pinCount}')) {'1';} else {'0';}" type="combobox" category="RSCI11">
+            <option id="RSCI_IIC_CFG_CH11_INCLUDED.0" display="Not included" value="0"/>
+            <option id="RSCI_IIC_CFG_CH11_INCLUDED.1" display="Included" value="1"/>
+            <constraint display="Channel only valid for Supported" actionOnFail="disable">checkChannelSupport("RSCI11","${Device.group}","${Device.romSize}", "${Device.ramSize}","${Device.pinCount}")</constraint>
+            <description>Selectable whether to use available channels.
+0 = Not included.
+1 = Included.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH0_BITRATE_BPS" display="RSCI IIC bitrate (bps) for CH0" default="384000" type="textbox" category="RSCI0">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH0_INCLUDED} == ${RSCI_IIC_CFG_CH0_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${RSCI_IIC_CFG_CH0_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${RSCI_IIC_CFG_CH0_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${RSCI_IIC_CFG_CH0_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH8_BITRATE_BPS" display="RSCI IIC bitrate (bps) for CH8" default="384000" type="textbox" category="RSCI8">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH8_INCLUDED} == ${RSCI_IIC_CFG_CH8_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${RSCI_IIC_CFG_CH8_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${RSCI_IIC_CFG_CH8_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${RSCI_IIC_CFG_CH8_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH9_BITRATE_BPS" display="RSCI IIC bitrate (bps) for CH9" default="384000" type="textbox" category="RSCI9">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH9_INCLUDED} == ${RSCI_IIC_CFG_CH9_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${RSCI_IIC_CFG_CH9_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${RSCI_IIC_CFG_CH9_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${RSCI_IIC_CFG_CH9_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH10_BITRATE_BPS" display="RSCI IIC bitrate (bps) for CH10" default="384000" type="textbox" category="RSCI10">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH10_INCLUDED} == ${RSCI_IIC_CFG_CH10_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${RSCI_IIC_CFG_CH10_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${RSCI_IIC_CFG_CH10_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${RSCI_IIC_CFG_CH10_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH11_BITRATE_BPS" display="RSCI IIC bitrate (bps) for CH11" default="384000" type="textbox" category="RSCI11">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH11_INCLUDED} == ${RSCI_IIC_CFG_CH11_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${RSCI_IIC_CFG_CH11_BITRATE_BPS}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 384000" actionOnFail="error">("${RSCI_IIC_CFG_CH11_BITRATE_BPS}" &gt;= 1) &amp;&amp; ("${RSCI_IIC_CFG_CH11_BITRATE_BPS}" &lt;= 384000)</constraint>
+            <description>Specifies the bit rate. Specify a value less than or equal to 384000 (384 kbit/sec.).
+The bit rate setting should be based on this definition value and the clock setting definition value specified by RX Family Board Support Package Module (BSP FIT module ). Depending on the target device to be used and the BSP FIT module clock setting, the actual bit rate may differ from the expected bit rate.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH0_INT_PRIORITY" display="Interrupt Priority for CH0" default="2" type="combobox" category="RSCI0">
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="RSCI_IIC_CFG_CH0_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH0_INCLUDED} == ${RSCI_IIC_CFG_CH0_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH8_INT_PRIORITY" display="Interrupt Priority for CH8" default="2" type="combobox" category="RSCI8">
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="RSCI_IIC_CFG_CH8_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH8_INCLUDED} == ${RSCI_IIC_CFG_CH8_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH9_INT_PRIORITY" display="Interrupt Priority for CH9" default="2" type="combobox" category="RSCI9">
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="RSCI_IIC_CFG_CH9_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH9_INCLUDED} == ${RSCI_IIC_CFG_CH9_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH10_INT_PRIORITY" display="Interrupt Priority for CH10" default="2" type="combobox" category="RSCI10">
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="RSCI_IIC_CFG_CH10_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH10_INCLUDED} == ${RSCI_IIC_CFG_CH10_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH11_INT_PRIORITY" display="Interrupt Priority for CH11" default="2" type="combobox" category="RSCI11">
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.1" display="Level 1" value="1"/>
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.2" display="Level 2" value="2"/>
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.3" display="Level 3" value="3"/>
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.4" display="Level 4" value="4"/>
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.5" display="Level 5" value="5"/>
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.6" display="Level 6" value="6"/>
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.7" display="Level 7" value="7"/>
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.8" display="Level 8" value="8"/>
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.9" display="Level 9" value="9"/>
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.10" display="Level 10" value="10"/>
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.11" display="Level 11" value="11"/>
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.12" display="Level 12" value="12"/>
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.13" display="Level 13" value="13"/>
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.14" display="Level 14" value="14"/>
+            <option id="RSCI_IIC_CFG_CH11_INT_PRIORITY.15" display="Level 15 (highest)" value="15"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH11_INCLUDED} == ${RSCI_IIC_CFG_CH11_INCLUDED.1}</constraint>
+            <description>Specifies interrupt priority levels for condition generation, receivedata-full, transmit-data-empty, and transmit-end interrupts.
+Specify the level between 1 and 15.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH0_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH0" default="1" type="combobox" category="RSCI0">
+            <option id="RSCI_IIC_CFG_CH0_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="RSCI_IIC_CFG_CH0_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH0_INCLUDED} == ${RSCI_IIC_CFG_CH0_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH8_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH8" default="1" type="combobox" category="RSCI8">
+            <option id="RSCI_IIC_CFG_CH8_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="RSCI_IIC_CFG_CH8_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH8_INCLUDED} == ${RSCI_IIC_CFG_CH8_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH9_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH9" default="1" type="combobox" category="RSCI9">
+            <option id="RSCI_IIC_CFG_CH9_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="RSCI_IIC_CFG_CH9_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH9_INCLUDED} == ${RSCI_IIC_CFG_CH9_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH10_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH10" default="1" type="combobox" category="RSCI10">
+            <option id="RSCI_IIC_CFG_CH10_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="RSCI_IIC_CFG_CH10_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH10_INCLUDED} == ${RSCI_IIC_CFG_CH10_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH11_DIGITAL_FILTER" display="Digital noise filter (NFEN bit) for CH11" default="1" type="combobox" category="RSCI11">
+            <option id="RSCI_IIC_CFG_CH11_DIGITAL_FILTER.0" display="Disable" value="0"/>
+            <option id="RSCI_IIC_CFG_CH11_DIGITAL_FILTER.1" display="Enable" value="1"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH11_INCLUDED} == ${RSCI_IIC_CFG_CH11_INCLUDED.1}</constraint>
+            <description>Selectable whether to use the noise cancellation function for the SSCL and SSDA input signals.
+0 = Noise cancellation function is disabled.
+1 = Noise cancellation function is enabled.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH0_FILTER_CLOCK" display="Noise Filter Clock Setting (NFCS bit) for CH0" default="1" type="combobox" category="RSCI0">
+            <option id="RSCI_IIC_CFG_CH0_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="RSCI_IIC_CFG_CH0_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="RSCI_IIC_CFG_CH0_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="RSCI_IIC_CFG_CH0_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH0_INCLUDED} == ${RSCI_IIC_CFG_CH0_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH8_FILTER_CLOCK" display="Noise Filter Clock Setting (NFCS bit) for CH8" default="1" type="combobox" category="RSCI8">
+            <option id="RSCI_IIC_CFG_CH8_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="RSCI_IIC_CFG_CH8_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="RSCI_IIC_CFG_CH8_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="RSCI_IIC_CFG_CH8_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH8_INCLUDED} == ${RSCI_IIC_CFG_CH8_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH9_FILTER_CLOCK" display="Noise Filter Clock Setting (NFCS bit) for CH9" default="1" type="combobox" category="RSCI9">
+            <option id="RSCI_IIC_CFG_CH9_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="RSCI_IIC_CFG_CH9_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="RSCI_IIC_CFG_CH9_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="RSCI_IIC_CFG_CH9_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH9_INCLUDED} == ${RSCI_IIC_CFG_CH9_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH10_FILTER_CLOCK" display="Noise Filter Clock Setting (NFCS bit) for CH10" default="1" type="combobox" category="RSCI10">
+            <option id="RSCI_IIC_CFG_CH10_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="RSCI_IIC_CFG_CH10_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="RSCI_IIC_CFG_CH10_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="RSCI_IIC_CFG_CH10_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH10_INCLUDED} == ${RSCI_IIC_CFG_CH10_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH11_FILTER_CLOCK" display="Noise Filter Clock Setting (NFCS bit) for CH11" default="1" type="combobox" category="RSCI11">
+            <option id="RSCI_IIC_CFG_CH11_FILTER_CLOCK.1" display="The clock divided by 1" value="1"/>
+            <option id="RSCI_IIC_CFG_CH11_FILTER_CLOCK.2" display="The clock divided by 2" value="2"/>
+            <option id="RSCI_IIC_CFG_CH11_FILTER_CLOCK.3" display="The clock divided by 4" value="3"/>
+            <option id="RSCI_IIC_CFG_CH11_FILTER_CLOCK.4" display="The clock divided by 8" value="4"/>
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH11_INCLUDED} == ${RSCI_IIC_CFG_CH11_INCLUDED.1}</constraint>
+            <description>Select the sampling clock used for digital noise filter.
+1 = The clock divided by 1 is used.
+2 = The clock divided by 2 is used.
+3 = The clock divided by 4 is used.
+4 = The clock divided by 8 is used.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH0_SSDA_DELAY_SELECT" display="I2C Mode Register (IICDL bit) for CH0" default="18" type="textbox" category="RSCI0">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH0_INCLUDED} == ${RSCI_IIC_CFG_CH0_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${RSCI_IIC_CFG_CH0_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${RSCI_IIC_CFG_CH0_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${RSCI_IIC_CFG_CH0_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH8_SSDA_DELAY_SELECT" display="I2C Mode Register (IICDL bit) for CH8" default="18" type="textbox" category="RSCI8">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH8_INCLUDED} == ${RSCI_IIC_CFG_CH8_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${RSCI_IIC_CFG_CH8_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${RSCI_IIC_CFG_CH8_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${RSCI_IIC_CFG_CH8_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH9_SSDA_DELAY_SELECT" display="I2C Mode Register (IICDL bit) for CH9" default="18" type="textbox" category="RSCI9">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH9_INCLUDED} == ${RSCI_IIC_CFG_CH9_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${RSCI_IIC_CFG_CH9_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${RSCI_IIC_CFG_CH9_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${RSCI_IIC_CFG_CH9_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH10_SSDA_DELAY_SELECT" display="I2C Mode Register (IICDL bit) for CH10" default="18" type="textbox" category="RSCI10">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH10_INCLUDED} == ${RSCI_IIC_CFG_CH10_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${RSCI_IIC_CFG_CH10_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${RSCI_IIC_CFG_CH10_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${RSCI_IIC_CFG_CH10_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_CH11_SSDA_DELAY_SELECT" display="I2C Mode Register (IICDL bit) for CH11" default="18" type="textbox" category="RSCI11">
+            <constraint display="when target channel is supported only" actionOnFail="disable">${RSCI_IIC_CFG_CH11_INCLUDED} == ${RSCI_IIC_CFG_CH11_INCLUDED.1}</constraint>
+            <constraint display="Value must be an integer" actionOnFail="error">testInteger("${RSCI_IIC_CFG_CH11_SSDA_DELAY_SELECT}")</constraint>
+            <constraint display="Value must be in the range 1 ~ 31" actionOnFail="error">("${RSCI_IIC_CFG_CH11_SSDA_DELAY_SELECT}" &gt;= 1) &amp;&amp; ("${RSCI_IIC_CFG_CH11_SSDA_DELAY_SELECT}" &lt;= 31)</constraint>
+            <description>Select the delay time for output on the SSDA pin relative to the falling edge of the output on the SSCL pin.
+Specify the delay between 1 and 31.
+The default value is a value based on PCLK which operates in 60
+MHz and is the clock source of the on-chip baud rate generator.
+The SSDA delay time is increased or decreased according to the
+clock source of the on-chip baud rate generator.
+When the bit rate or the PCLK frequency is set to low speed,
+the SSDA falling timing may occur after the SSCL falling timing in
+the start condition.
+Confirm and set an appropriate value depending on the user system.</description>
+        </property>
+        <property id="RSCI_IIC_CFG_BUS_CHECK_COUNTER" display="Software bus busy check counter" default="1000" type="textbox" category="COMMON">
+            <constraint display="Value must be an integer">testInteger("${RSCI_IIC_CFG_BUS_CHECK_COUNTER}")</constraint>
+            <constraint display="Value must be in the range 0 ~ 4294967295">("${RSCI_IIC_CFG_BUS_CHECK_COUNTER}" &gt;= 0) &amp;&amp; ("${RSCI_IIC_CFG_BUS_CHECK_COUNTER}" &lt;= 4294967295)</constraint>
+            <description>Specifies the timeout counter (number of times to perform bus checking) when the simple I2C API function performs bus checking. Specify a value less than or equal to 0xFFFFFFFF.
+The bus checking is performed after generating each condition using
+the simple I2C control function (R_RSCI_IIC_Control function).
+With the bus checking, the timeout counter is decremented after
+generating each condition. When the counter reaches 0, the API
+determines that a timeout has occurred and returns an error (Busy) as
+the return value.
+* The timeout counter is used for the bus not to be locked by the bus
+lock or others. Therefore specify the value greater than or equal to
+the time for that the other device holds the SCL pin low.
+</description>
+        </property>
+        <property id="RSCI_IIC_CFG_PORT_SETTING_PROCESSING" display="Setting port setting processing" default="1" type="combobox" category="COMMON">
+            <option id="RSCI_IIC_CFG_PORT_SETTING_PROCESSING.0" display="Not include port setting" value="0"/>
+            <option id="RSCI_IIC_CFG_PORT_SETTING_PROCESSING.1" display="Include port setting" value="1"/>
+            <description>Specifies whether to include processing for port setting in the code.
+ 1 =  Includes rsci (simple iic) port setting processing
+ 0 =  Compiles out rsci (simple iic) port setting processing</description>
+        </property>
+    </configuration>
+</module>

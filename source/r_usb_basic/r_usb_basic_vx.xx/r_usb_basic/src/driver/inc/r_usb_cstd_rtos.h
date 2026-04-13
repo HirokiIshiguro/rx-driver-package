@@ -1,28 +1,11 @@
-/*******************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only 
-* intended for use with Renesas products. No other uses are authorized. This 
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE 
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS 
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE 
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer
-* Copyright (C) 2016(2020) Renesas Electronics Corporation. All rights reserved.    
-*******************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /*******************************************************************************
 * File Name    : r_usb_cstd_rtos.h
-* Version      : 1.0
+* Version      : 1.44
 * Description  : Create tasks, mailboxes, memory pool for USB in freeRTOS.
 ******************************************************************************/
 /*****************************************************************************
@@ -30,6 +13,9 @@
 *         : 15.06.2016 1.00     First Release
 *         : 16.11.2018 1.24     Supporting RTOS Thread safe
 *         : 01.03.2020 1.30     RX72N/RX66N is added and uITRON is supported.
+*         : 30.06.2022 1.40     USBX PCDC is supported.
+*         : 30.10.2022 1.41     USBX HMSC is supported.
+*         : 01.03.2025 1.44     Change Disclaimer.
 ******************************************************************************/
 
 #ifndef R_USB_RTOS_H
@@ -48,9 +34,11 @@ Includes   <System Includes> , "Project Includes"
 #include "kernel_id.h"
 #endif /* BSP_CFG_RTOS_USED == 4 */
 
+#if BSP_CFG_RTOS_USED != 5
 #if defined(USB_CFG_HMSC_USE)
 #include "r_usb_hmsc_if.h"
 #endif /* defined(USB_CFG_HMSC_USE) */
+#endif /* BSP_CFG_RTOS_USED != 5 */
 
 #if defined(USB_CFG_HCDC_USE)
 #include "r_usb_hcdc.h"
@@ -105,13 +93,23 @@ Includes   <System Includes> , "Project Includes"
 #define PMSC_TSK_PRI            (4)
 #define HCDC_TSK_PRI            (4)
 #define HHID_TSK_PRI            (4)
+
+#elif BSP_CFG_RTOS_USED == 5    /* Azure RTOS */
+/** USB task's priority **/
+#define USB_TASK_PRI_BASE    (10)
+#define HCD_TSK_PRI          (USB_TASK_PRI_BASE)
+#define HUB_TSK_PRI          (HCD_TSK_PRI + 2)
+#define MGR_TSK_PRI          (HCD_TSK_PRI + 1)
+#define PCD_TSK_PRI          (USB_TASK_PRI_BASE)
+#define PMSC_TSK_PRI         (PCD_TSK_PRI + 1)
+
 #else
 #endif  /* BSP_CFG_RTOS_USED == 1 */
 
 /** USB task stack size in words **/
 #define HCD_STACK_SIZE          (512)
 #define HUB_STACK_SIZE          (512)
-#define MGR_STACK_SIZE          (512)
+#define MGR_STACK_SIZE          (1536)
 #define PCD_STACK_SIZE          (512)
 #define PMSC_STACK_SIZE         (512)
 #define HCDC_STACK_SIZE         (512)

@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_usb_hdriver.c
+ * Version      : 1.44
  * Description  : USB Host Control Driver
  ***********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -31,6 +19,10 @@
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 16.11.2018 1.24 Supporting RTOS Thread safe
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
+ *         : 01.03.2025 1.44 Change Disclaimer.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -49,9 +41,10 @@
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
 #if defined(USB_CFG_HCDC_USE)
+#if (BSP_CFG_RTOS_USED != 5)	/* Azure RTOS */
 #include "r_usb_hcdc_if.h"
-
-#endif /* defined(USB_CFG_PCDC_USE) */
+#endif /* BSP_CFG_RTOS_USED != 5 */
+#endif /* defined(USB_CFG_HCDC_USE) */
 
 #if defined(USB_CFG_HHID_USE)
 #include "r_usb_hhid_if.h"
@@ -59,8 +52,9 @@
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if defined(USB_CFG_HMSC_USE)
+#if (BSP_CFG_RTOS_USED != 5)	/* Azure RTOS */
 #include "r_usb_hmsc_if.h"
-
+#endif /* BSP_CFG_RTOS_USED != 5 */
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if defined(USB_CFG_PCDC_USE)
@@ -101,7 +95,7 @@ static usb_utr_t usb_shstd_clr_stall_ctrl[USB_NUM_USBIP];
 static void     usb_hvnd_configured (usb_utr_t *ptr, uint16_t dev_addr, uint16_t data2);
 static void     usb_hvnd_detach (usb_utr_t *ptr, uint16_t dev_addr, uint16_t data2);
 static void     usb_hvnd_enumeration (usb_clsinfo_t *mess, uint16_t **table);
-static void     usb_hvnd_pipe_info (uint8_t *table, uint16_t speed, uint16_t length);
+static void     usb_hvnd_pipe_info (usb_utr_t *ptr, uint8_t *table, uint16_t speed, uint16_t length);
 #endif /* defined(USB_CFG_HVND_USE) */
 
 #if (BSP_CFG_RTOS_USED == 0)    /* Non-OS */
@@ -175,6 +169,9 @@ const uint16_t g_usb_apl_devicetpl[] =
 };
 #endif /* defined(USB_CFG_HVND_USE) */
 
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+extern rtos_sem_id_t g_usb_host_usbx_sem[USB_NUM_USBIP][USB_MAX_PIPE_NO + 1];
+#endif /* (BSP_CFG_RTOS_USED == 5) */
 
 /******************************************************************************
  Renesas USB Host Driver functions
@@ -225,7 +222,7 @@ usb_er_t usb_hstd_transfer_start_req (usb_utr_t *ptr)
     uint16_t        connect_inf;
 #else   /* (BSP_CFG_RTOS_USED == 0) */
     rtos_err_t      ret;
-    rtos_task_id_t  task_id;
+    rtos_current_task_id_t  task_id;
     usb_utr_t       *p_tran_data;
 #endif  /* BSP_CFG_RTOS_USED == 0 */
 
@@ -1144,10 +1141,10 @@ static void usb_hstd_clr_stall_result (usb_utr_t *ptr, uint16_t data1, uint16_t 
 /******************************************************************************
  Function Name   : usb_hstd_hcd_task
  Description     : USB Host Control Driver Task.
- Argument        : usb_vp_int_t stacd  : Task Start Code.
+ Argument        : rtos_task_arg_t stacd  : Task Start Code.
  Return          : none
  ******************************************************************************/
-void usb_hstd_hcd_task (usb_vp_int_t stacd)
+void usb_hstd_hcd_task (rtos_task_arg_t stacd)
 {
     usb_utr_t *p_mess;
     usb_utr_t *ptr;
@@ -1162,6 +1159,8 @@ void usb_hstd_hcd_task (usb_vp_int_t stacd)
     rtos_err_t ret;
 #endif /* (BSP_CFG_RTOS_USED == 0) */
     usb_hcdinfo_t* hp;
+
+    (void) stacd;
 
 #if (BSP_CFG_RTOS_USED != 0)        /* Use RTOS */
     /* WAIT_LOOP */
@@ -1831,43 +1830,25 @@ void usb_hstd_driver_registration (usb_utr_t *ptr, usb_hcdreg_t *callback)
  Function Name   : usb_hstd_driver_release
  Description     : Release the Device Class Driver.
  Arguments       : usb_utr_t *ptr       : Pointer to usb_utr_t structure.
-                 : uint8_t   devclass   : Interface class
  Return          : none
  ******************************************************************************/
-void usb_hstd_driver_release (usb_utr_t *ptr, uint8_t devclass)
+void usb_hstd_driver_release (usb_utr_t *ptr)
 {
     usb_hcdreg_t *driver;
     uint16_t i;
-    uint16_t flg;
 
-    if (USB_IFCLS_NOT == devclass)
+    /* WAIT_LOOP */
+    for (i = 0u; i < (USB_MAXDEVADDR + 1u); i++)
     {
-        /* Device driver number */
-        g_usb_hstd_device_num[ptr->ip] = 0;
+        driver = &g_usb_hstd_device_drv[ptr->ip][i];
+        driver->rootport = USB_NOPORT; /* Root port */
+        driver->devaddr = USB_NODEVICE; /* Device address */
+        driver->devstate = USB_DETACHED; /* Device state */
+
+        /* Interface Class : NO class */
+        driver->ifclass = (uint16_t) USB_IFCLS_NOT;
     }
-    else
-    {
-        /* WAIT_LOOP */
-        for (flg = 0u, i = 0u
-        ; (i < (USB_MAXDEVADDR + 1u)) && (0u == flg); i++)
-        {
-            driver = &g_usb_hstd_device_drv[ptr->ip][i];
-            if (driver->ifclass == devclass)
-            {
-
-                driver->rootport = USB_NOPORT; /* Root port */
-                driver->devaddr = USB_NODEVICE; /* Device address */
-                driver->devstate = USB_DETACHED; /* Device state */
-
-                /* Interface Class : NO class */
-                driver->ifclass = (uint16_t) USB_IFCLS_NOT;
-
-                g_usb_hstd_device_num[ptr->ip]--;
-                USB_PRINTF1("*** Release class %d driver ***\n",devclass);
-                flg = 1u; /* break; */
-            }
-        }
-    }
+    g_usb_hstd_device_num[ptr->ip] = 0;
 }
 /******************************************************************************
  End of function usb_hstd_driver_release
@@ -1883,6 +1864,10 @@ void usb_hstd_driver_release (usb_utr_t *ptr, uint8_t devclass)
  ******************************************************************************/
 void usb_hstd_set_pipe_info (uint16_t ip_no, uint16_t pipe_no, usb_pipe_table_reg_t *src_ep_tbl)
 {
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+    rtos_sem_info_t info;
+#endif /* (BSP_CFG_RTOS_USED == 5) */
+
     g_usb_pipe_table[ip_no][pipe_no].use_flag  = USB_TRUE;
     g_usb_pipe_table[ip_no][pipe_no].pipe_cfg  = src_ep_tbl->pipe_cfg;
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
@@ -1893,6 +1878,12 @@ void usb_hstd_set_pipe_info (uint16_t ip_no, uint16_t pipe_no, usb_pipe_table_re
 #endif /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
     g_usb_pipe_table[ip_no][pipe_no].pipe_maxp = src_ep_tbl->pipe_maxp;
     g_usb_pipe_table[ip_no][pipe_no].pipe_peri = src_ep_tbl->pipe_peri;
+
+#if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+    info.p_name         = "USB_FSP_SEMX_HOST";
+    info.initial_count  = 0;
+    rtos_create_semaphore(&g_usb_host_usbx_sem[ip_no][pipe_no], &info);
+#endif /* (BSP_CFG_RTOS_USED == 5) */
 }
 /******************************************************************************
  End of function usb_hstd_set_pipe_info
@@ -1996,7 +1987,7 @@ usb_er_t usb_hstd_change_device_state (usb_utr_t *ptr, usb_cb_t complete, uint16
     usb_er_t            err = USB_SUCCESS;
     rtos_err_t          ret;
     usb_hcdinfo_t       *hp;
-    rtos_task_id_t      task_id;
+    rtos_current_task_id_t      task_id;
 
     switch (msginfo)
     {
@@ -2077,7 +2068,6 @@ usb_err_t usb_hstd_hcd_open (usb_utr_t *ptr)
 {
     static uint8_t is_init = USB_NO;
     uint16_t i;
-    uint16_t j;
     usb_err_t err = USB_SUCCESS;
 
     if (USB_MAXDEVADDR < USB_DEVICEADDR)
@@ -2138,7 +2128,7 @@ usb_err_t usb_hstd_hcd_open (usb_utr_t *ptr)
     /* WAIT_LOOP */
     for (i = USB_PIPE0; i <= USB_MAX_PIPE_NO; i++)
     {
-        g_p_usb_hstd_pipe[j][i] = (usb_utr_t*) USB_NULL;
+        g_p_usb_hstd_pipe[ptr->ip][i] = (usb_utr_t*) USB_NULL;
     }
 
 #if USB_CFG_BC == USB_CFG_ENABLE
@@ -2279,25 +2269,40 @@ void usb_hstd_device_information (usb_utr_t *ptr, uint16_t devaddr, uint16_t *tb
 void usb_host_registration (usb_utr_t *ptr)
 {
 
+#if BSP_CFG_RTOS_USED == 5   /* Azure RTOS */
+    usb_host_usbx_registration(ptr);
+#else                                 /* BSP_CFG_RTOS_USED == 5 */
 #if defined(USB_CFG_HCDC_USE)
-    usb_hcdc_registration(ptr);
-
+    if (USB_HCDC == ptr->keyword)
+    {
+        usb_hcdc_registration(ptr);
+    }
 #endif /* defined(USB_CFG_PCDC_USE) */
 
 #if defined(USB_CFG_HHID_USE)
-    usb_hhid_registration(ptr);
+    if (USB_HHID == ptr->keyword)
+    {
+        usb_hhid_registration(ptr);
+    }
 
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if defined(USB_CFG_HMSC_USE)
-    usb_hmsc_registration(ptr);
+    if (USB_HMSC == ptr->keyword)
+    {
+        usb_hmsc_registration(ptr);
+    }
 
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if defined(USB_CFG_HVND_USE)
-    usb_hvnd_registration(ptr);
+    if (USB_HVND == ptr->keyword)
+    {
+        usb_hvnd_registration(ptr);
+    }
+ #endif /* defined(USB_CFG_HVND_USE) */
+#endif                                 /* BSP_CFG_RTOS_USED == 5 */
 
-#endif /* defined(USB_CFG_HVND_USE) */
 }
 /******************************************************************************
  End of function usb_host_registration
@@ -2407,6 +2412,7 @@ void usb_hvnd_configured (usb_utr_t *ptr, uint16_t dev_addr, uint16_t data2)
 
     ctrl.module = ptr->ip; /* Module number setting */
     ctrl.address = dev_addr;
+    ctrl.type = USB_HVND;
     if (0 != dev_addr)
     {
 
@@ -2464,7 +2470,7 @@ void usb_hvnd_enumeration (usb_clsinfo_t *mess, uint16_t **table)
     total_len |= (uint16_t) *(pdesc + 2);
 
     /* Pipe Information table set */
-    usb_hvnd_pipe_info(pdesc, speed, total_len);
+    usb_hvnd_pipe_info(mess, pdesc, speed, total_len);
 
 #if (BSP_CFG_RTOS_USED == 0)    /* Non-OS */
     usb_hstd_return_enu_mgr(mess, USB_OK); /* Return to MGR */
@@ -2482,7 +2488,7 @@ void usb_hvnd_enumeration (usb_clsinfo_t *mess, uint16_t **table)
  : uint16_t length       : Configuration Descriptor Length
  Return value    : none
  ******************************************************************************/
-void usb_hvnd_pipe_info (uint8_t *table, uint16_t speed, uint16_t length)
+void usb_hvnd_pipe_info (usb_utr_t *ptr, uint8_t *table, uint16_t speed, uint16_t length)
 {
     uint16_t ofdsc;
     uint16_t pipe_no;
@@ -2497,14 +2503,14 @@ void usb_hvnd_pipe_info (uint8_t *table, uint16_t speed, uint16_t length)
         /* Search within Interface */
         if (USB_DT_ENDPOINT == table[ofdsc + 1])
         {
-            pipe_no = usb_hstd_make_pipe_reg_info (USB_IP0, 1, USB_HVND, speed, &table[ofdsc], &ep_tbl);
+            pipe_no = usb_hstd_make_pipe_reg_info (ptr->ip, 1, USB_HVND, speed, &table[ofdsc], &ep_tbl);
             if ( USB_NULL == pipe_no)
             {
                 return;
             }
             else
             {
-                usb_hstd_set_pipe_info (USB_IP0, pipe_no, &ep_tbl);
+                usb_hstd_set_pipe_info (ptr->ip, pipe_no, &ep_tbl);
             }
 
             ofdsc += table[ofdsc];

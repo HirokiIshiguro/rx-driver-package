@@ -1,29 +1,23 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2019-2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /*******************************************************************************
 * File Name    : r_mesh_rx23w_if.h
 *******************************************************************************/
 /*******************************************************************************
 * History : DD.MM.YYYY Version  Description
-*           30.09.2019 1.00     First Release.
-*           29.11.2019 1.01     Add random-delay to advertising transmission.
+*           30.09.2019  1.00    First Release.
+*           29.11.2019  1.01    Added random-delay to ADV-Bearer transmission control.
+*           30.09.2020  1.10    Updated Mesh API, Improved Network Layer operation, etc.
+*           30.09.2021  1.20    Improved Provisioniong/Network/Transport Layer operation, etc.
+*           23.12.2022  1.30    Improved Model Layer operation, etc.
+*           31.03.2025  1.31    No update in Mesh stack.
+*
+* For details, refer to "Program Updates (MESH FIT Module)" in the application note of 
+* RX23W Group Bluetooth Mesh FIT Module (R01AN4930).
 *******************************************************************************/
 
 #ifndef R_MESH_RX23W_IF_H
@@ -67,12 +61,7 @@
 #include "EM_os.h"
 #include "EM_platform.h"
 #include "EM_timer.h"
-#include "mempool_pl.h"
 #include "MS_features.h"
-#include "nvs.h"
-#include "nvsto.h"
-#include "storage_pl.h"
-#include "prov_pl.h"
 
 /* Mesh Stack configurations */
 #include "r_mesh_rx23w_config.h"

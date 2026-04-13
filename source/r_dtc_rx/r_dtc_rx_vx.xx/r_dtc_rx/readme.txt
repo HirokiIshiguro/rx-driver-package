@@ -3,14 +3,9 @@ PLEASE REFER TO THE APPLICATION NOTE FOR THIS MIDDLEWARE FOR MORE INFORMATION
 r_dtc_rx
 =========
 
-Document Number 
----------------
-R01AN1819EJ0330
-R01AN1819JJ0330
-
 Version
 -------
-v3.30
+v4.60
 
 Overview
 --------
@@ -31,16 +26,25 @@ Supported MCUs
 * RX111 MCU
 * RX113 MCU
 * RX130 MCU
+* RX140 MCU
+* RX14T MCU
 * RX230 MCU
 * RX231 MCU
+* RX23E-A MCU
+* RX23E-B MCU
 * RX64M MCU
 * RX71M MCU
 * RX23T MCU
 * RX24T MCU
 * RX24U MCU
+* RX260 MCU
+* RX261 MCU
+* RX26T MCU
 * RX65N MCU
 * RX651 MCU
 * RX66T MCU
+* RX660 MCU
+* RX671 MCU
 * RX66N MCU
 * RX72T MCU
 * RX23W MCU
@@ -48,29 +52,6 @@ Supported MCUs
 * RX13T MCU
 * RX72N MCU
 
-Boards Tested On
-----------------
-* RSKRX110
-* RSKRX111
-* RSKRX113
-* RSKRX130
-* RSKRX130_512KB
-* RSKRX230
-* RSKRX231
-* RSKRX64M
-* RSKRX71M
-* RSKRX23T
-* RSKRX24T
-* RSKRX24U
-* RSKRX65N
-* RSKRX65N_2MB
-* RSKRX66T
-* RSKRX66N
-* RSKRX72T
-* RSKRX23W
-* RSKRX72M
-* RSKRX13T
-* RSKRX72N
 Limitations
 -----------
 * None
@@ -86,34 +67,23 @@ Required Packages
 How to add to your project
 --------------------------
 This module must be added to each project in which it is used.
-Renesas recommends using "Smart Configurator" described in (1) or (3).
+Renesas recommends using "Smart Configurator" described in (1) or (2).
 However, "Smart Configurator" only supports some RX devices.
-Please use the methods of (2) or (4) for unsupported RX devices.
+Please use the methods of (3) for unsupported RX devices.
 
 (1)	Adding the FIT module to your project using "Smart Configurator" in e2 studio
 By using the "Smart Configurator" in e2 studio, 
 the FIT module is automatically added to your project.
 Refer to "Renesas e2 studio Smart Configurator User Guide (R20AN0451)" for details.
 
-(2)	Adding the FIT module to your project using "FIT Configurator" in e2 studio
-By using the "FIT Configurator" in e2 studio,
-the FIT module is automatically added to your project.
-Refer to "Adding Firmware Integration Technology Modules to Projects (R01AN1723)" for details.
-
-(3)	Adding the FIT module to your project using "Smart Configurator" on CS+
+(2)	Adding the FIT module to your project using "Smart Configurator" on CS+
 By using the "Smart Configurator Standalone version" in CS+,
 the FIT module is automatically added to your project.
 Refer to "Renesas e2 studio Smart Configurator User Guide (R20AN0451)" for details.
 
-(4)	Adding the FIT module to your project in CS+
+(3)	Adding the FIT module to your project in CS+
 In CS+, please manually add the FIT module to your project.
 Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1826)" for details.
-
-Toolchain(s) Used
------------------
-* Renesas RX v3.01.00
-* GCC for Renesas RX 4.8.4.201902
-* IAR C/C++ Compiler for Renesas RX 4.12.1
 
 File Structure
 --------------
@@ -127,9 +97,6 @@ r_dtc_rx
 |   |       r01an1819ej{VERSION_NUMBER}-rx-dtc-dmac2.pdf
 |   +---ja
 |           r01an1819jj{VERSION_NUMBER}-rx-dtc-dmac2.pdf
-|
-+---ref
-|       r_dtc_rx_config_reference.h
 |
 +---src
     |   r_dtc_rx.c
@@ -157,6 +124,21 @@ r_dtc_rx
         |       r_dtc_rx_target.h
         |       r_dtc_rx_target_if.h
         |
+        +---rx260
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
+        +---rx261
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
+        +---rx26t
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
         +---rx64m
         |       r_dtc_rx_target.c
         |       r_dtc_rx_target.h
@@ -168,6 +150,16 @@ r_dtc_rx
         |       r_dtc_rx_target_if.h
         |
         +---rx66t
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
+        +---rx660
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
+        +---rx671
         |       r_dtc_rx_target.c
         |       r_dtc_rx_target.h
         |       r_dtc_rx_target_if.h
@@ -222,16 +214,36 @@ r_dtc_rx
         |       r_dtc_rx_target.h
         |       r_dtc_rx_target_if.h
         |
+        +---rx140
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
+        +---rx14t
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
         +---rx230
         |       r_dtc_rx_target.c
         |       r_dtc_rx_target.h
         |       r_dtc_rx_target_if.h
         |
         +---rx231
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
+        +---rx23e-a
+        |       r_dtc_rx_target.c
+        |       r_dtc_rx_target.h
+        |       r_dtc_rx_target_if.h
+        |
+        +---rx23e-b
                 r_dtc_rx_target.c
                 r_dtc_rx_target.h
                 r_dtc_rx_target_if.h
-
+        
 r_config
     r_dtc_rx_config.h
 

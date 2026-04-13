@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
- *********************************************************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_usb_atapi_driver.c
+ * Version      : 1.44
  * Description  : USB ATAPI Driver code
  *********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -38,6 +26,7 @@
  *                           "usb_pmsc_atapi_command_execute()"->"pmsc_atapi_command_processing()"
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 01.03.2025 1.44 Change Disclaimer.
  ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -71,6 +60,7 @@ static uint8_t          g_usb_atapi_is_data_stage = USB_FALSE;      /* Data SetU
 static uint8_t          g_usb_pmsc_media_buffer[USB_ATAPI_BLOCK_UNIT * USB_CFG_PMSC_TRANS_COUNT];
 static usb_pmsc_cdb_t   *g_usb_atapi_cbwcb;                        /* CBWCB pointer */
 static uint32_t         g_usb_atapi_cur_lba;                        /* the current Logical Block Address */
+static uint8_t          g_usb_pmsc_atapi_data[256];
 
 /* Inquiry data */
 static uint8_t   g_usb_atapi_inquiry_tbl[USB_ATAPI_INQUIRY_SIZE] =
@@ -255,6 +245,16 @@ static const uint8_t   g_usb_atapi_ms_capa_tbl[USB_ATAPI_MODE_SENSE10_CAP_P_SIZE
 /* Mode Sense data (Timer & Protect Page) */
 static const uint8_t   g_usb_atapi_ms_op_cmd_tbl[USB_ATAPI_MODE_SENSE10_OP_CMD_SIZE] =
 {
+    /* Mode Parameter List */
+    0x00,   /* [0]Mode Data Length */
+    0x08,   /* [1]Mode Data Length */
+    0x00,   /* [2]Medium Type Code(00h-FFh Vendor Specific) */
+    0x00,   /* [3]b7:WP(Write Protect), b6-b0:Reserved */
+    0x00,   /* [4]Reserved */
+    0x00,   /* [5]Reserved */
+    0x00,   /* [6]Reserved */
+    0x00,   /* [7]Reserved */
+    /* Page(Removable Block Access Capacities Page 12byte) */
     0x1C,   /* [0]b7:PS, b6:Reserved, b5-b0:Page Code(1Ch) */
     0x06,   /* [1]Page Length(06h) */
     0x00,   /* [2]Reserved */
@@ -638,6 +638,14 @@ static void pmsc_atapi_get_read_data(uint32_t *size, uint8_t **buff)
         *size = g_usb_pmsc_message.ul_size;
     }
 
+    if ((g_usb_pmsc_dtl > *size) && (g_usb_pmsc_dtl <256))
+    {
+        memcpy (&g_usb_pmsc_atapi_data[0], *buff, *size);
+        memset ((void *)&g_usb_pmsc_atapi_data[*size], 0, (g_usb_pmsc_dtl - *size));
+        *buff = &g_usb_pmsc_atapi_data[0];
+        *size = g_usb_pmsc_dtl;
+        g_usb_pmsc_message.ul_size = g_usb_pmsc_dtl;
+    }
 } /* End of function pmsc_atapi_get_read_data() */
 
 /***********************************************************************************************************************
@@ -715,8 +723,7 @@ void pmsc_atapi_command_processing(uint8_t *cbw, uint16_t usb_result, usb_cb_t c
                         }
                         else
                         {
-                            if ((USB_ATAPI_MODE_SENSE10 == g_usb_atapi_cbwcb->s_usb_ptn0.uc_opcode)
-                                || (USB_ATAPI_READ_FORMAT_CAPACITY == g_usb_atapi_cbwcb->s_usb_ptn0.uc_opcode))
+                            if (USB_ATAPI_READ10 != g_usb_atapi_cbwcb->s_usb_ptn0.uc_opcode)
                             {
                                 if (g_usb_pmsc_dtl > g_usb_pmsc_message.ul_size)
                                 {
@@ -733,7 +740,7 @@ void pmsc_atapi_command_processing(uint8_t *cbw, uint16_t usb_result, usb_cb_t c
                             }
                             else
                             {
-                                status = (uint16_t)USB_PMSC_CMD_FAILED;             /* case 5 & 7*/
+                                status = (uint16_t)USB_PMSC_CMD_FAILED;         /* case 7*/
                             }
                         }
                         g_usb_pmsc_dtl = g_usb_pmsc_dtl - g_usb_pmsc_message.ul_size;

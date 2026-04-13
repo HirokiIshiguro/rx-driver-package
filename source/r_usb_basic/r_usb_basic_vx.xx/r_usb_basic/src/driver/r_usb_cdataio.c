@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_usb_cdataio.c
+ * Version      : 1.44
  * Description  : USB Host and Peripheral low level data I/O code
  ***********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -31,17 +19,22 @@
  *                           "pcdc_write_complete"->"usb_pcdc_write_complete"
  *                           "phid_read_complete"->"usb_phid_read_complete"
  *                           "phid_write_complete"->"usb_phid_write_complete"
- *                           "pvndr_read_complete"->"usb_pvndr_read_complete"
+ *                           "pvndr_read_complete"->"usb_pvnd_read_complete"
  *                           "pnvdr_write_complete"->"usb_pnvdr_write_complete"
  *                           "hcdc_read_complete"->"usb_hcdc_read_complete"
  *                           "hcdc_write_complete"->"usb_hcdc_write_complete"
  *                           "hhid_read_complete"->"usb_hhid_read_complete"
  *                           "hhid_write_complete"->"usb_hhid_write_complete"
- *                           "hvndr_read_complete"->"usb_hvndr_read_complete"
+ *                           "hvndr_read_complete"->"usb_hvnd_read_complete"
  *                           "hnvdr_write_complete"->"usb_hnvdr_write_complete"
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 16.11.2018 1.24 Supporting RTOS Thread safe
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added
+ *         : 30.06.2022 1.40 USBX PCDC is supported
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
+ *         : 01.03.2025 1.44 Change Disclaimer.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -62,6 +55,10 @@
 #include "r_usb_hcdc_config.h"
 #endif /* defined(USB_CFG_HCDC_USE) */
 
+#if defined(USB_CFG_HHID_USE)
+#include "r_usb_hhid_config.h"
+#endif /* defined(USB_CFG_HHID_USE) */
+
 #if defined(USB_CFG_PCDC_USE)
 #include "r_usb_pcdc_if.h"
 #endif /* defined(USB_CFG_PCDC_USE) */
@@ -74,12 +71,10 @@
 #include "r_usb_phid_if.h"
 #endif /* defined(USB_CFG_PHID_USE) */
 
-#if defined(USB_CFG_HHID_USE)
-#include "r_usb_hhid_config.h"
-#endif /* defined(USB_CFG_HHID_USE) */
-
 #if defined(USB_CFG_HMSC_USE)
+#if (BSP_CFG_RTOS_USED != 5)	/* Azure RTOS */
 #include "r_usb_hmsc.h"
+#endif /* BSP_CFG_RTOS_USED != 5 */
 #endif /* defined(USB_CFG_HMSC_USE) */
 
 #if ((USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_DMA == USB_CFG_ENABLE))
@@ -140,7 +135,16 @@ static const uint8_t g_usb_pipe_peri[] =
   #if defined(USB_CFG_PCDC_USE)
     USB_CFG_PCDC_BULK_OUT,  USB_CFG_PCDC_BULK_IN,       /* USB_PCDC */
     USB_NULL,               USB_CFG_PCDC_INT_IN,        /* USB_PCDCC */
+   #if defined(USB_CFG_PCDC_2COM_USE)
+    USB_CFG_PCDC_BULK_OUT2, USB_CFG_PCDC_BULK_IN2,      /* USB_PCDC2 */
+    USB_NULL,               USB_CFG_PCDC_INT_IN2,       /* USB_PCDCC2 */
+   #else  /* defined(USB_CFG_PCDC_2COM_USE) */
+    USB_NULL,               USB_NULL,
+    USB_NULL,               USB_NULL,
+   #endif /* defined(USB_CFG_PCDC_2COM_USE) */
   #else   /* defined(USB_CFG_PCDC_USE) */
+    USB_NULL,               USB_NULL,
+    USB_NULL,               USB_NULL,
     USB_NULL,               USB_NULL,
     USB_NULL,               USB_NULL,
   #endif  /* defined(USB_CFG_PCDC_USE) */
@@ -175,51 +179,71 @@ void (*g_usb_callback[]) (usb_utr_t *, uint16_t, uint16_t) =
 {
     /* PCDC, PCDCC */
 #if defined(USB_CFG_PCDC_USE)
+ #if (BSP_CFG_RTOS_USED == 5)    /* Azure RTOS */
+        USB_NULL, USB_NULL,                              /* USB_PCDC  (0) */
+        USB_NULL, USB_NULL,                              /* USB_PCDCC (1) */
+        USB_NULL, USB_NULL,                              /* USB_PCDC2  (2) */
+        USB_NULL, USB_NULL,                              /* USB_PCDCC2 (3) */
+ #else  /* #if (BSP_CFG_RTOS_USED == 5) */
         usb_pcdc_read_complete, usb_pcdc_write_complete, /* USB_PCDC  (0) */
         USB_NULL, usb_pcdc_write_complete, /* USB_PCDCC (1) */
+        usb_pcdc_read_complete, usb_pcdc_write_complete, /* USB_PCDC  (2) */
+        USB_NULL, usb_pcdc_write_complete, /* USB_PCDCC (3) */
+ #endif /* #if (BSP_CFG_RTOS_USED == 5) */
 #else
         USB_NULL, USB_NULL, /* USB_PCDC  (0) */
         USB_NULL, USB_NULL, /* USB_PCDCC (1) */
+        USB_NULL, USB_NULL, /* USB_PCDC  (2) */
+        USB_NULL, USB_NULL, /* USB_PCDCC (3) */
 #endif
 
         /* PHID */
 #if defined(USB_CFG_PHID_USE)
-        usb_phid_read_complete, usb_phid_write_complete, /* USB_PHID (2) */
+ #if (BSP_CFG_RTOS_USED != 5)   /* Other than Azure RTOS */
+        usb_phid_read_complete, usb_phid_write_complete, /* USB_PHID (4) */
+ #else  /* (BSP_CFG_RTOS_USED != 5) */
+        USB_NULL, USB_NULL, /* USB_PHID  (4) */
+ #endif /* (BSP_CFG_RTOS_USED != 5) */
 #else
-        USB_NULL, USB_NULL, /* USB_PHID (2) */
+        USB_NULL, USB_NULL, /* USB_PHID (4) */
 #endif
 
-        /* PVNDR */
-        USB_NULL, USB_NULL, /* USB_PVND  (3) */
+        /* PVND */
+        USB_NULL, USB_NULL, /* USB_PVND  (5) */
+
+        USB_NULL, USB_NULL, /* USB_PCDC_PHID(dummy 6) */
+        USB_NULL, USB_NULL, /* USB_PCDC_PMSC(dummy 7) */
+        USB_NULL, USB_NULL, /* USB_PHID_PMSC(dummy 8) */
 
         /* HCDC, HCDCC */
 #if defined(USB_CFG_HCDC_USE)
-        usb_hcdc_read_complete, usb_hcdc_write_complete, /* USB_HCDC  (4) */
-        usb_hcdc_read_complete, USB_NULL, /* USB_HCDCC (5) */
+ #if (BSP_CFG_RTOS_USED == 5)   /* Azure RTOS */
+        USB_NULL, USB_NULL, /* USB_HCDC  (9) */
+        USB_NULL, USB_NULL, /* USB_HCDCC (10) */
+ #else  /* (BSP_CFG_RTOS_USED == 5) */
+        usb_hcdc_read_complete, usb_hcdc_write_complete, /* USB_HCDC  (9) */
+        usb_hcdc_read_complete, USB_NULL, /* USB_HCDCC (10) */
+ #endif /* (BSP_CFG_RTOS_USED == 5) */
 #else
-        USB_NULL, USB_NULL, /* USB_HCDC  (4) */
-        USB_NULL, USB_NULL, /* USB_HCDCC (5) */
+        USB_NULL, USB_NULL, /* USB_HCDC  (9) */
+        USB_NULL, USB_NULL, /* USB_HCDCC (10) */
 #endif
 
         /* HHID */
 #if defined(USB_CFG_HHID_USE)
-        usb_hhid_read_complete, usb_hhid_write_complete, /* USB_HHID  (6) */
+        usb_hhid_read_complete, usb_hhid_write_complete, /* USB_HHID  (11) */
 #else
-        USB_NULL, USB_NULL, /* USB_HHID  (6) */
+        USB_NULL, USB_NULL, /* USB_HHID  (11) */
 #endif
 
-        /* HVNDR */
-#if defined(USB_CFG_HVNDR_USE)
-        usb_hvndr_read_complete, usb_hnvdr_write_complete, /* USB_HVND  (7) */
-#else
-        USB_NULL, USB_NULL, /* USB_HVND  (7) */
-#endif
+        /* HVND */
+        USB_NULL, USB_NULL, /* USB_HVND  (12) */
 
         /* HMSC */
-        USB_NULL, USB_NULL, /* USB_HMSC  (8) */
+        USB_NULL, USB_NULL, /* USB_HMSC  (13) */
 
         /* PMSC */
-        USB_NULL, USB_NULL, /* USB_PMSC  (9) */
+        USB_NULL, USB_NULL, /* USB_PMSC  (14) */
 }; /* const void (g_usb_callback[])(usb_utr_t *, uint16_t, uint16_t) */
 
 
@@ -371,7 +395,7 @@ usb_er_t usb_ctrl_write (usb_ctrl_t *p_ctrl, uint8_t *buf, uint32_t size)
 #if ((USB_CFG_MODE & USB_CFG_PERI) == USB_CFG_PERI)
     usb_ctrl_t ctrl;
 #if (BSP_CFG_RTOS_USED != 0)                /* Use RTOS */
-    rtos_task_id_t  task_id;
+    rtos_current_task_id_t  task_id;
 #endif /* (BSP_CFG_RTOS_USED != 0) */
 
     if (USB_PERI == g_usb_usbmode)
@@ -658,140 +682,6 @@ uint8_t usb_get_usepipe (usb_ctrl_t *p_ctrl, uint8_t dir)
     }
     return pipe;
 } /* End of function usb_get_usepipe() */
-
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
-
-/******************************************************************************
- Function Name   : usb_cstd_get_pipe_buf_value
- Description     : Get Value for USBA Module PIPE BUF REG.
- Arguments       : Pipe no.
- Return value    : PIPE BUF set value.
- ******************************************************************************/
-uint16_t usb_cstd_get_pipe_buf_value (uint16_t pipe_no)
-{
-    uint16_t pipe_buf;
-
-    switch (pipe_no)
-    {
-#if defined(USB_CFG_HCDC_USE)
-        case USB_CFG_HCDC_BULK_IN:
-  #if (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE)
-            pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(8u));
-  #else     /* (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE) */
-            pipe_buf = (USB_BUF_SIZE(2048u) | USB_BUF_NUMB(8u));
-  #endif    /* (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE) */
-        break;
-
-        case USB_CFG_HCDC_BULK_OUT:
-  #if (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE)
-            pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(36u));
-  #else     /* (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE) */
-            pipe_buf = (USB_BUF_SIZE(2048u) | USB_BUF_NUMB(72u));
-  #endif    /* (USB_CFG_DTC == USB_CFG_ENABLE) || (USB_CFG_HCDC_MULTI == USB_CFG_ENABLE) */
-        break;
-
-        case USB_CFG_HCDC_BULK_IN2:
-            pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(72u));
-        break;
-
-        case USB_CFG_HCDC_BULK_OUT2:
-            pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(104u));
-        break;
-#endif /* defined(USB_CFG_HCDC_USE) */
-
-#if defined(USB_CFG_HMSC_USE)
-        case USB_PIPE1:
-        case USB_PIPE2:
-        case USB_PIPE3:
-        case USB_PIPE4:
-        case USB_PIPE5:
-  #if USB_CFG_DTC == USB_CFG_ENABLE
-            pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(8u));
-  #else     /* USB_CFG_DTC == USB_CFG_ENABLE */
-            pipe_buf = (USB_BUF_SIZE(2048u) | USB_BUF_NUMB(8u));
-  #endif    /* USB_CFG_DTC == USB_CFG_ENABLE */
-        break;
-#endif /* defined(USB_CFG_HMSC_USE) */
-
-#if defined(USB_CFG_PCDC_USE)
-        case USB_CFG_PCDC_BULK_IN:
-  #if USB_CFG_DTC == USB_CFG_ENABLE
-            pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(8u));
-  #else     /* USB_CFG_DTC == USB_CFG_ENABLE */
-            pipe_buf = (USB_BUF_SIZE(2048u) | USB_BUF_NUMB(8u));
-  #endif    /* USB_CFG_DTC == USB_CFG_ENABLE */
-        break;
-
-        case USB_CFG_PCDC_BULK_OUT:
-  #if USB_CFG_DTC == USB_CFG_ENABLE
-            pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(36u));
-  #else     /* USB_CFG_DTC == USB_CFG_ENABLE */
-            pipe_buf = (USB_BUF_SIZE(2048u) | USB_BUF_NUMB(72u));
-  #endif    /* USB_CFG_DTC == USB_CFG_ENABLE */
-        break;
-#endif  /* defined(USB_CFG_PCDC_USE) */
-
-#if defined(USB_CFG_PMSC_USE)
-        case USB_CFG_PMSC_BULK_IN:
-  #if USB_CFG_DTC == USB_CFG_ENABLE
-            pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(8u));
-  #else     /* USB_CFG_DTC == USB_CFG_ENABLE */
-            pipe_buf = (USB_BUF_SIZE(2048u) | USB_BUF_NUMB(8u));
-  #endif    /* USB_CFG_DTC == USB_CFG_ENABLE */
-        break;
-
-        case USB_CFG_PMSC_BULK_OUT:
-  #if USB_CFG_DTC == USB_CFG_ENABLE
-            pipe_buf = (USB_BUF_SIZE(1024u) | USB_BUF_NUMB(36u));
-  #else     /* USB_CFG_DTC == USB_CFG_ENABLE */
-            pipe_buf = (USB_BUF_SIZE(2048u) | USB_BUF_NUMB(72u));
-  #endif    /* USB_CFG_DTC == USB_CFG_ENABLE */
-        break;
-#endif  /* defined(USB_CFG_PMSC_USE) */
-
-#if defined(USB_CFG_PVND_USE) || defined(USB_CFG_HVND_USE)
-        case USB_PIPE1:
-            pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(8u));
-        break;
-        case USB_PIPE2:
-            pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(24u));
-        break;
-        case USB_PIPE3:
-            pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(40u));
-        break;
-        case USB_PIPE4:
-            pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(56u));
-        break;
-        case USB_PIPE5:
-            pipe_buf = (USB_BUF_SIZE(512u) | USB_BUF_NUMB(72u));
-        break;
-#endif  /* defined(USB_CFG_PVND_USE) || defined(USB_CFG_HVND_USE) */
-
-        case USB_PIPE6:
-            pipe_buf = (USB_BUF_SIZE(64u) | USB_BUF_NUMB(4u));
-        break;
-
-        case USB_PIPE7:
-            pipe_buf = (USB_BUF_SIZE(64u) | USB_BUF_NUMB(5u));
-        break;
-
-        case USB_PIPE8:
-            pipe_buf = (USB_BUF_SIZE(64u) | USB_BUF_NUMB(6u));
-        break;
-
-        case USB_PIPE9:
-            pipe_buf = (USB_BUF_SIZE(64u) | USB_BUF_NUMB(7u));
-        break;
-
-        default:
-            /* Error */
-        break;
-    }
-
-    return pipe_buf;
-} /* End of function usb_cstd_get_pipe_buf_value() */
-
-#endif /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
 
 /******************************************************************************
  End  Of File

@@ -12,8 +12,6 @@ peripheral modules to different modules. Event linking allows direct cooperation
 between the modules without CPU intervention.
 
 A configuration option for this exists in "r_config\r_elc_rx_config.h".
-An original copy of the configuration file is stored in 
-"r_elc_rx\ref\r_elc_rx_config_reference.h".
 
 
 Features
@@ -29,13 +27,10 @@ r_elc_rx
 +---doc
 |   |
 |   +-- ja
-|   |   +-- r01an3066jj0121-rx.pdf
+|   |   +-- r01an3066jj{VERSION_NUMBER}-rx-elc.pdf
 |   |
 |   +-- en
-|       +-- r01an3066ej0121-rx.pdf
-|
-+---ref
-|       r_elc_rx_config_reference.h
+|       +-- r01an3066ej{VERSION_NUMBER}-rx-elc.pdf
 |
 +---src
     +-- r_elc_rx.c
@@ -52,6 +47,10 @@ r_elc_rx
         |   +-- r_elc_rx130.c
         |   +-- r_elc_rx130_private.h
         |
+        +-- rx140
+        |   +-- r_elc_rx140.c
+        |   +-- r_elc_rx140_private.h
+        |
         +-- rx230
         |   +-- r_elc_rx230.c
         |   +-- r_elc_rx230_private.h
@@ -60,9 +59,24 @@ r_elc_rx
         |   +-- r_elc_rx231.c
         |   +-- r_elc_rx231_private.h
         |
+        +-- rx23w
+        |   +-- r_elc_rx23w.c
+        |   +-- r_elc_rx23w_private.h
+        |
+        +-- rx23e-b
+        |   +-- r_elc_rx23e-b.c
+        |   +-- r_elc_rx23e-b_private.h
+        |
         +-- rx65n
-            +-- r_elc_rx65n.c
-            +-- r_elc_rx65n_private.h
-   
+        |   +-- r_elc_rx65n.c
+        |   +-- r_elc_rx65n_private.h
+        |
+        +---rx260
+        |   +-- r_elc_rx260.c
+        |   +-- r_elc_rx260_private.h
+        |
+        +---rx261
+            +-- r_elc_rx261.c
+            +-- r_elc_rx261_private.h
 r_config
     r_elc_rx_config.h

@@ -20,20 +20,19 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup generic_level_module GENERIC_LEVEL (Mesh Generic Level Model)
+ * \defgroup generic_level_module Generic Level Model (GENERIC_LEVEL)
+ * \ingroup generics_models
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
- *  Mesh Generic Level Model (GENERIC_LEVEL) module to the Application.
+ * \brief This section describes the interfaces & APIs offered by the EtherMind
+ * Mesh Generic Level Model (GENERIC_LEVEL) module to the Application.
  */
-
-
 
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup generic_level_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Generic Level Model Layer.
  */
 
 /**
@@ -64,14 +63,14 @@ typedef API_RESULT (* MS_GENERIC_LEVEL_SERVER_CB)
  * Generic Level Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_GENERIC_LEVEL_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -79,8 +78,17 @@ typedef API_RESULT (* MS_GENERIC_LEVEL_CLIENT_CB)
 /** \} */
 
 /**
+ * \defgroup generic_level_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Generic Level Model Layer.
+ */
+
+/**
  *  \defgroup generic_level_structures Structures
  *  \{
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Generic Level Model Layer.
  */
 
 /**
@@ -91,7 +99,7 @@ typedef struct MS_generic_level_set_struct
     /**
      * The target value of the Generic Level state.
      *
-     * The Generic Level state is a 16-bit signed integer (2’s complement) representing
+     * The Generic Level state is a 16-bit signed integer (2's complement) representing
      * the state of an element.
      */
     UINT16 level;
@@ -215,25 +223,33 @@ typedef struct MS_generic_move_set_struct
 
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup generic_level_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Generic Level Model APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Generic Level Model Layer to the Application.
  */
+
 /**
  * \defgroup generic_level_ser_api_defs Generic Level Server API Definitions
  * \{
- * This section describes the Generic Level Server APIs.
+ * \brief This section describes the EtherMind Mesh Generic Level Server
+ * Model APIs.
+ */
+
+/**
+ * \name Generic Level Server Interfaces
+ * \{
  */
 
 /**
  *  \brief API to initialize Generic_Level Server model
  *
  *  \par Description
- *  This is to initialize Generic_Level Server model and to register with Acess layer.
+ *  This is to initialize Generic_Level Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -265,6 +281,8 @@ API_RESULT MS_generic_level_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -274,21 +292,31 @@ API_RESULT MS_generic_level_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
+/** \} */
+
 /** \} */
 
 /**
  * \defgroup generic_level_cli_api_defs Generic Level Client API Definitions
  * \{
- * This section describes the Generic Level Client APIs.
+ * \brief This section describes the EtherMind Mesh Generic Level Client
+ * Model APIs.
+ */
+
+/**
+ * \name Generic Level Client Interfaces
+ * \{
  */
 
 /**
  *  \brief API to initialize Generic_Level Client model
  *
  *  \par Description
- *  This is to initialize Generic_Level Client model and to register with Acess layer.
+ *  This is to initialize Generic_Level Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -325,6 +353,21 @@ API_RESULT MS_generic_level_client_get_model_handle
            );
 
 /**
+ *  \brief API to set Generic_Level client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Generic_Level client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_generic_level_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
+           );
+
+/**
  *  \brief API to send acknowledged commands
  *
  *  \par Description
@@ -342,6 +385,28 @@ API_RESULT MS_generic_level_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+/** \} */
+
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup generic_level_defines
+ * \{
+ */
+
+/**
+ * \defgroup generic_level_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Generic Level Model Layer.
+ */
+
+/**
+ * \name Generic Level Client Macros
+ * \{
+ */
 
 /**
  *  \brief API to get the Generic Level state of an element.
@@ -369,7 +434,7 @@ API_RESULT MS_generic_level_client_send_reliable_pdu
  *  to a new absolute value.
  *  The response to the Generic Level Set message is a Generic Level Status message.
  *
- *  \param [in] param Generic Level Set message
+ *  \param [in] param Generic Level Set message parameter \ref MS_GENERIC_LEVEL_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -388,7 +453,7 @@ API_RESULT MS_generic_level_client_send_reliable_pdu
  *  Generic Level Set Unacknowledged is an unacknowledged message used to set
  *  the Generic Level state of an element to a new absolute value.
  *
- *  \param [in] param Generic Level Set message
+ *  \param [in] param Generic Level Set message parameter \ref MS_GENERIC_LEVEL_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -409,7 +474,7 @@ API_RESULT MS_generic_level_client_send_reliable_pdu
  *  value with a sequence of messages that are part of a transaction.
  *  The response to the Generic Delta Set message is a Generic Level Status message.
  *
- *  \param [in] param Generic Delta Set message
+ *  \param [in] param Generic Delta Set message parameter \ref MS_GENERIC_DELTA_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -428,7 +493,7 @@ API_RESULT MS_generic_level_client_send_reliable_pdu
  *  Generic Delta Set Unacknowledged is an unacknowledged message used to set the Generic Level state of an element
  *  by a relative value.
  *
- *  \param [in] param Generic Delta Set message
+ *  \param [in] param Generic Delta Set message parameter \ref MS_GENERIC_DELTA_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -449,7 +514,7 @@ API_RESULT MS_generic_level_client_send_reliable_pdu
  *  the Generic Level state of an element with a defined transition speed.
  *  The response to the Generic Move Set message is a Generic Level Status message.
  *
- *  \param [in] param Generic Move Set message
+ *  \param [in] param Generic Move Set message parameter \ref MS_GENERIC_MOVE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -469,7 +534,7 @@ API_RESULT MS_generic_level_client_send_reliable_pdu
  *  Generic Move Set Unacknowledged is an unacknowledged message used to start a process
  *  of changing the Generic Level state of an element with a defined transition speed.
  *
- *  \param [in] param Generic Move Set message
+ *  \param [in] param Generic Move Set message parameter \ref MS_GENERIC_MOVE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -481,7 +546,11 @@ API_RESULT MS_generic_level_client_send_reliable_pdu
             0xFFFFFFFF\
         )
 /** \} */
+
 /** \} */
+
+/** \} */
+
 /** \} */
 
 #endif /*_H_MS_GENERIC_LEVEL_API_ */

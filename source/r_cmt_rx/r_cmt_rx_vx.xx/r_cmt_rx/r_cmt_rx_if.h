@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_cmt_rx_if.h
@@ -45,6 +32,27 @@
 *         : 15.08.2019 4.20    Added support for RX72M.
 *         : 25.11.2019 4.30    Added support RX13T, RX66N, RX72N.
 *         : 29.11.2019 4.31    Fixed issues in power_on() and power_off().
+*         : 31.03.2020 4.40    Added support for RX23E-A.
+*         : 29.05.2020 4.50    Added support BLE for RX23W; CMT2, CMT3 are protected for RX23W.
+*         : 30.06.2020 4.60    Changed revision to reflect demo upgrade.
+*         : 31.08.2020 4.70    Added condition for _RI_TRACE_TIMER macro
+*                              Fixed warning when using RI600V4 with device has 2 CMT channels
+*         : 31.03.2021 4.80    Added support for RX671.
+*         : 15.04.2021 4.90    Added support for RX140.
+*         : 13.09.2021 5.00    Added demo for RX671.
+*         : 14.03.2022 5.10    Added support for RX66T-48pin.
+*         : 31.03.2022 5.20    Added support for RX660.
+*         : 28.06.2022 5.30    Updated demo projects.
+*         : 27.12.2022 5.40    Updated macro definition enable and disable nested interrupt for CMT.
+*         : 31.03.2023 5.50    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023 5.60    Added support for RX23E-B.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 5.70    Added support for RX260, RX261.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 15.03.2025 5.71    Updated disclaimer.
+*         : 23.06.2025 5.72    Removed doc folder and updated .rcpc file in FITDemos.
+*         : 30.10.2025 5.80    Added support for RX14T.
 ***********************************************************************************************************************/
 #ifndef CMT_HEADER_FILE
 #define CMT_HEADER_FILE
@@ -62,8 +70,8 @@ Macro definitions
 #endif
 
 /* Version Number of API. */
-#define CMT_RX_VERSION_MAJOR            (4)
-#define CMT_RX_VERSION_MINOR            (31)
+#define CMT_RX_VERSION_MAJOR            (5)
+#define CMT_RX_VERSION_MINOR            (80)
 
 /* This define is used with the R_CMT_Control() function if not channel needs to input. */
 #define CMT_RX_NO_CHANNEL               (0xFFFFFFFF)
@@ -107,13 +115,72 @@ typedef enum
 /***********************************************************************************************************************
 Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
-bool R_CMT_CreatePeriodic(uint32_t frequency_hz, void (* callback)(void * pdata), uint32_t * channel);
-bool R_CMT_CreatePeriodicAssignChannelPriority(uint32_t frequency_hz, void (* callback)(void * pdata), uint32_t channel, cmt_priority_t priority);
-bool R_CMT_CreateOneShot(uint32_t period_us, void (* callback)(void * pdata), uint32_t * channel);
-bool R_CMT_CreateOneShotAssignChannelPriority(uint32_t period_us, void (* callback)(void * pdata), uint32_t channel, cmt_priority_t priority);
-bool R_CMT_Control(uint32_t channel, cmt_commands_t command, void * pdata);
-bool R_CMT_Stop(uint32_t channel);
-uint32_t R_CMT_GetVersion(void);
+/******************************************************************************
+ * Function Name: R_CMT_CreatePeriodic
+ * Description  : .
+ * Arguments    : frequency_hz
+ *              : pdata
+ *              : channel
+ * Return Value : .
+ *****************************************************************************/
+bool R_CMT_CreatePeriodic (uint32_t frequency_hz, void (* callback)(void * pdata), uint32_t * channel);
+
+/******************************************************************************
+ * Function Name: R_CMT_CreatePeriodicAssignChannelPriority
+ * Description  : .
+ * Arguments    : frequency_hz
+ *              : pdata
+ *              : channel
+ *              : priority
+ * Return Value : .
+ *****************************************************************************/
+bool R_CMT_CreatePeriodicAssignChannelPriority (uint32_t frequency_hz, void (* callback)(void * pdata), uint32_t channel, cmt_priority_t priority);
+
+/******************************************************************************
+ * Function Name: R_CMT_CreateOneShot
+ * Description  : .
+ * Arguments    : period_us
+ *              : pdata
+ *              : channel
+ * Return Value : .
+ *****************************************************************************/
+bool R_CMT_CreateOneShot (uint32_t period_us, void (* callback)(void * pdata), uint32_t * channel);
+
+/******************************************************************************
+ * Function Name: R_CMT_CreateOneShotAssignChannelPriority
+ * Description  : .
+ * Arguments    : period_us
+ *              : pdata
+ *              : channel
+ *              : priority
+ * Return Value : .
+ *****************************************************************************/
+bool R_CMT_CreateOneShotAssignChannelPriority (uint32_t period_us, void (* callback)(void * pdata), uint32_t channel, cmt_priority_t priority);
+
+/******************************************************************************
+ * Function Name: R_CMT_Control
+ * Description  : .
+ * Arguments    : channel
+ *              : command
+ *              : pdata
+ * Return Value : .
+ *****************************************************************************/
+bool R_CMT_Control (uint32_t channel, cmt_commands_t command, void * pdata);
+
+/******************************************************************************
+ * Function Name: R_CMT_Stop
+ * Description  : .
+ * Argument     : channel
+ * Return Value : .
+ *****************************************************************************/
+bool R_CMT_Stop (uint32_t channel);
+
+/******************************************************************************
+ * Function Name: R_CMT_GetVersion
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
+uint32_t R_CMT_GetVersion (void);
 
 #endif /* CMT_HEADER_FILE */
 

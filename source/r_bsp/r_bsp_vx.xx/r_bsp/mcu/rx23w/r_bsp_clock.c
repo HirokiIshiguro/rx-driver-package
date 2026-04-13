@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : r_bsp_clock.c
 * Description  : Contains clock specific routines
@@ -24,6 +11,11 @@
 * History : DD.MM.YYYY Version  Description
 *         : 29.03.2019 1.00     First Release
 *         : 26.07.2019 1.01     Modified comment of API function to Doxygen style.
+*         : 30.11.2021 2.00     Changed compile switch of clock settings by the following new macro definitions.
+*                               - BSP_CFG_HOCO_OSCILLATE_ENABLE
+*                               Added the bsp_clkout_initial_configure function.
+*                               Added comments for when use simulator.
+*         : 26.02.2025 2.01     Changed the disclaimer.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -60,7 +52,7 @@ Private global variables and functions
  */
 void R_BSP_ConfigClockSetting(void)
 {
-#if BSP_CFG_CLOCK_SOURCE == 1
+#if BSP_CFG_HOCO_OSCILLATE_ENABLE == 1
 #if BSP_CFG_HOCO_FREQUENCY == 3
 
     volatile uint16_t tmp_clock = 0;
@@ -80,7 +72,8 @@ void R_BSP_ConfigClockSetting(void)
     /* WAIT_LOOP */
     while(1 != SYSTEM.OSCOVFSR.BIT.HCOVF)
     {
-        /* The delay period needed is to make sure that the HOCO has stopped. */
+        /* The delay period needed is to make sure that the HOCO has stopped.
+           If you use simulator, the flag is not set to 1, resulting in an infinite loop. */
         R_BSP_NOP();
     }
 
@@ -107,16 +100,20 @@ void R_BSP_ConfigClockSetting(void)
     /* Protect on. */
     SYSTEM.PRCR.WORD = 0xA500;
     
-#endif /* BSP_CFG_CLOCK_SOURCE == 1 */
+#endif /* BSP_CFG_HOCO_OSCILLATE_ENABLE == 1 */
 #endif /* BSP_CFG_HOCO_FREQUENCY == 3 */
 
     operating_frequency_set();
     usb_lpc_clock_source_select();
 
+#if BSP_CFG_CLKOUT_OUTPUT != 0
+    bsp_clkout_initial_configure();
+#endif /* BSP_CFG_CLKOUT_OUTPUT != 0 */
+
     /* Protect off. */
     SYSTEM.PRCR.WORD = 0xA50B;
     
-#if BSP_CFG_CLOCK_SOURCE != 1
+#if BSP_CFG_HOCO_OSCILLATE_ENABLE == 0
 #if (0x00000100 == (BSP_CFG_OFS1_REG_VALUE & 0x00000100))
 
     /* Stop HOCO. */

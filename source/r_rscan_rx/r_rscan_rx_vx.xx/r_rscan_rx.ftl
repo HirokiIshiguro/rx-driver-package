@@ -1,10 +1,9 @@
 <#--
-  Copyright(C) 2017 Renesas Electronics Corporation
-  RENESAS ELECTRONICS CONFIDENTIAL AND PROPRIETARY
-  This program must be used solely for the purpose for which it was furnished 
-  by Renesas Electronics Corporation. No part of this program may be reproduced
-  or disclosed to others, in any form, without the prior written permission of 
-  Renesas Electronics Corporation.
+/***********************************************************************************************************************
+* Copyright (c) 2017 - 2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 -->
 <#-- = DECLARE FUNCTION INFORMATION HERE =================== -->
 <#assign Function_Base_Name = "R_CAN_PinSet">
@@ -29,7 +28,10 @@ void ${Function_Name}()
     PORT${pin.portNum}.PODR.BIT.B${pin.pinBitNum} = 1U;
     MPC.${pin.assignedPinName}PFS.BYTE = 0x${pin.pinMPC}U;
     PORT${pin.portNum}.PDR.BIT.B${pin.pinBitNum} = 1U;
+    <#if headerInfo.device?contains("R5F5140")>
+    <#else>
     PORT${pin.portNum}.DSCR.BIT.B${pin.pinBitNum} = 1U;
+    </#if>
     PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 1U;
     <#elseif pin.pinName?contains("CRXD")>
     PORT${pin.portNum}.PODR.BIT.B${pin.pinBitNum} = 0U;

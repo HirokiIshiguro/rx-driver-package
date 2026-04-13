@@ -5,7 +5,7 @@ r_tfat_driver_rx
 Overview
 --------
 This memory driver interface connects TFAT and Device Drivers(USB etc).
-TFAT is a FAT file system which just requres small memory.
+TFAT is a FAT file system which just requires small memory.
 TFAT is based on FatFs.
 <br/>
 Please refer to the
@@ -30,22 +30,25 @@ r_tfat_driver_rx
 +---doc
 |   |
 |   +---en
-|   |   r20an0335ej0200-rx-tfat.pdf
+|   |   r20an0335ej0262-rx-tfat.pdf
 |   +---ja
-|       r20an0335jj0200-rx-tfat.pdf
+|       r20an0335jj0262-rx-tfat.pdf
 +---src
-|   |   r_tfat_drv_if.c
-|   |   r_tfat_drv_if_dev.h
-|   |
-|   +---device
-|       |
-|       +---sdmem
-|       |      r_tfat_drv_if_sdmem.c
-|       +---usb
-|       |      r_tfat_drv_if_usb.c
-|       +---usb_mini
-|              r_tfat_drv_if_usb_mini.c
-|
-+---ref
-          r_tfat_driver_rx_config_reference.h
+    |   r_tfat_drv_if.c
+    |   r_tfat_drv_if_dev.h
+    |
+    +---device
+        |
+        +---sdmem
+        |      r_tfat_drv_if_sdmem.c
+        +---spi_sdmem
+        |      r_tfat_drv_if_spi_sdmem.c
+        +---usb
+        |      r_tfat_drv_if_usb.c
+        +---usb_mini
+        |      r_tfat_drv_if_usb_mini.c
+        +---mmc
+        |      r_tfat_drv_if_mmc.c
+        +---serial_flash
+               r_tfat_drv_if_flash.c
 

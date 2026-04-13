@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2015 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2015 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx23t.h
@@ -23,6 +10,9 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 30.09.2015 1.00    First Release
+*         : 07.04.2023 2.00    Added P36 and P37 for RX23T 64-pin, 52-pin, and 48-pin,
+*                              Corrected the "Total of pins".
+*         : 15.03.2025 5.11    Updated disclaimer.
 ***********************************************************************************************************************/
 #ifndef GPIO_RX23T
 #define GPIO_RX23T
@@ -44,11 +34,11 @@ Macro definitions
 #define GPIO_INFO_NUM_PORTS                 (15)    /* Includes PORTE for proper indexing */
 
 #if (BSP_PACKAGE_PINS == 64)
-    #define GPIO_INFO_NUM_PINS              (49)
+    #define GPIO_INFO_NUM_PINS              (51)
 #elif (BSP_PACKAGE_PINS == 52)
-    #define GPIO_INFO_NUM_PINS              (40)
+    #define GPIO_INFO_NUM_PINS              (42)
 #elif (BSP_PACKAGE_PINS == 48)
-    #define GPIO_INFO_NUM_PINS              (36)
+    #define GPIO_INFO_NUM_PINS              (38)
 #else
     #error "r_gpio_rx does not have information about this RX23T package. Please update r_gpio_rx23t.h"
 #endif
@@ -93,17 +83,17 @@ typedef enum
 /* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
 typedef enum
 {
-    GPIO_PORT0_PIN_MASK = 0x07,    /* Available pins: P00 to P02 */
-    GPIO_PORT1_PIN_MASK = 0x03,    /* Available pins: P10, P11 */
-    GPIO_PORT2_PIN_MASK = 0x1C,    /* Available pins: P22 to P24 */
-    GPIO_PORT3_PIN_MASK = 0x0F,    /* Available pins: P30 to P33 */
-    GPIO_PORT4_PIN_MASK = 0xFF,    /* Available pins: P40 to P47 */
-    GPIO_PORT7_PIN_MASK = 0x7F,    /* Available pins: P70 to P76 */
-    GPIO_PORT9_PIN_MASK = 0x1E,    /* Available pins: P91 to P94 */
-    GPIO_PORTA_PIN_MASK = 0x3C,    /* Available pins: PA2 to PA5 */
-    GPIO_PORTB_PIN_MASK = 0xFF,    /* Available pins: PB0 to PB7 */
-    GPIO_PORTD_PIN_MASK = 0xF8,    /* Available pins: PD3 to PD7 */
-    GPIO_PORTE_PIN_MASK = 0x04,    /* Available pins: PE2 */
+    GPIO_PORT0_PIN_MASK = 0x07,    /* Available pins: P00 to P02           */
+    GPIO_PORT1_PIN_MASK = 0x03,    /* Available pins: P10, P11             */
+    GPIO_PORT2_PIN_MASK = 0x1C,    /* Available pins: P22 to P24           */
+    GPIO_PORT3_PIN_MASK = 0xCF,    /* Available pins: P30 to P33, P36, P37 */
+    GPIO_PORT4_PIN_MASK = 0xFF,    /* Available pins: P40 to P47           */
+    GPIO_PORT7_PIN_MASK = 0x7F,    /* Available pins: P70 to P76           */
+    GPIO_PORT9_PIN_MASK = 0x1E,    /* Available pins: P91 to P94           */
+    GPIO_PORTA_PIN_MASK = 0x3C,    /* Available pins: PA2 to PA5           */
+    GPIO_PORTB_PIN_MASK = 0xFF,    /* Available pins: PB0 to PB7           */
+    GPIO_PORTD_PIN_MASK = 0xF8,    /* Available pins: PD3 to PD7           */
+    GPIO_PORTE_PIN_MASK = 0x04,    /* Available pins: PE2                  */
 } gpio_pin_bit_mask_t;
 
 /* This enumerator has each available GPIO pin on this MCU. This list will change depending on the MCU chosen. */
@@ -121,6 +111,8 @@ typedef enum
     GPIO_PORT_3_PIN_1 = 0x0301,
     GPIO_PORT_3_PIN_2 = 0x0302,
     GPIO_PORT_3_PIN_3 = 0x0303,
+    GPIO_PORT_3_PIN_6 = 0x0306,
+    GPIO_PORT_3_PIN_7 = 0x0307,
     GPIO_PORT_4_PIN_0 = 0x0400,
     GPIO_PORT_4_PIN_1 = 0x0401,
     GPIO_PORT_4_PIN_2 = 0x0402,
@@ -180,17 +172,17 @@ typedef enum
 /* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
 typedef enum
 {
-    GPIO_PORT0_PIN_MASK = 0x04,    /* Available pins: P02 */
-    GPIO_PORT1_PIN_MASK = 0x03,    /* Available pins: P10, P11 */
-    GPIO_PORT2_PIN_MASK = 0x1C,    /* Available pins: P22 to P24 */
-    GPIO_PORT3_PIN_MASK = 0x08,    /* Available pins: P33 */
-    GPIO_PORT4_PIN_MASK = 0xFF,    /* Available pins: P40 to P47 */
-    GPIO_PORT7_PIN_MASK = 0x7F,    /* Available pins: P70 to P76 */
-    GPIO_PORT9_PIN_MASK = 0x18,    /* Available pins: P93, P94 */
+    GPIO_PORT0_PIN_MASK = 0x04,    /* Available pins: P02           */
+    GPIO_PORT1_PIN_MASK = 0x03,    /* Available pins: P10, P11      */
+    GPIO_PORT2_PIN_MASK = 0x1C,    /* Available pins: P22 to P24    */
+    GPIO_PORT3_PIN_MASK = 0xC8,    /* Available pins: P33, P36, P37 */
+    GPIO_PORT4_PIN_MASK = 0xFF,    /* Available pins: P40 to P47    */
+    GPIO_PORT7_PIN_MASK = 0x7F,    /* Available pins: P70 to P76    */
+    GPIO_PORT9_PIN_MASK = 0x18,    /* Available pins: P93, P94      */
     GPIO_PORTA_PIN_MASK = 0x2C,    /* Available pins: PA2, PA3, PA5 */
-    GPIO_PORTB_PIN_MASK = 0xFF,    /* Available pins: PB0 to PB7 */
-    GPIO_PORTD_PIN_MASK = 0x78,    /* Available pins: PD3 to PD6 */
-    GPIO_PORTE_PIN_MASK = 0x04,    /* Available pins: PE2 */
+    GPIO_PORTB_PIN_MASK = 0xFF,    /* Available pins: PB0 to PB7    */
+    GPIO_PORTD_PIN_MASK = 0x78,    /* Available pins: PD3 to PD6    */
+    GPIO_PORTE_PIN_MASK = 0x04,    /* Available pins: PE2           */
 } gpio_pin_bit_mask_t;
 
 /* This enumerator has each available GPIO pin on this MCU. This list will change depending on the MCU chosen. */
@@ -203,6 +195,8 @@ typedef enum
     GPIO_PORT_2_PIN_3 = 0x0203,
     GPIO_PORT_2_PIN_4 = 0x0204,
     GPIO_PORT_3_PIN_3 = 0x0303,
+    GPIO_PORT_3_PIN_6 = 0x0306,
+    GPIO_PORT_3_PIN_7 = 0x0307,
     GPIO_PORT_4_PIN_0 = 0x0400,
     GPIO_PORT_4_PIN_1 = 0x0401,
     GPIO_PORT_4_PIN_2 = 0x0402,
@@ -244,6 +238,7 @@ typedef enum
 {
     GPIO_PORT_1 = 0x0100,
     GPIO_PORT_2 = 0x0200,
+    GPIO_PORT_3 = 0x0300,
     GPIO_PORT_4 = 0x0400,
     GPIO_PORT_7 = 0x0700,
     GPIO_PORT_9 = 0x0900,
@@ -256,15 +251,16 @@ typedef enum
 /* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
 typedef enum
 {
-    GPIO_PORT1_PIN_MASK = 0x03,    /* Available pins: P10, P11 */
+    GPIO_PORT1_PIN_MASK = 0x03,    /* Available pins: P10, P11   */
     GPIO_PORT2_PIN_MASK = 0x1C,    /* Available pins: P22 to P24 */
+    GPIO_PORT3_PIN_MASK = 0xC0,    /* Available pins: P36, P37   */
     GPIO_PORT4_PIN_MASK = 0xFF,    /* Available pins: P40 to P47 */
     GPIO_PORT7_PIN_MASK = 0x7F,    /* Available pins: P70 to P76 */
-    GPIO_PORT9_PIN_MASK = 0x18,    /* Available pins: P93, P94 */
-    GPIO_PORTA_PIN_MASK = 0x0C,    /* Available pins: PA2, PA3 */
+    GPIO_PORT9_PIN_MASK = 0x18,    /* Available pins: P93, P94   */
+    GPIO_PORTA_PIN_MASK = 0x0C,    /* Available pins: PA2, PA3   */
     GPIO_PORTB_PIN_MASK = 0x7F,    /* Available pins: PB0 to PB6 */
     GPIO_PORTD_PIN_MASK = 0x78,    /* Available pins: PD3 to PD6 */
-    GPIO_PORTE_PIN_MASK = 0x04,    /* Available pins: PE2 */
+    GPIO_PORTE_PIN_MASK = 0x04,    /* Available pins: PE2        */
 } gpio_pin_bit_mask_t;
 
 /* This enumerator has each available GPIO pin on this MCU. This list will change depending on the MCU chosen. */
@@ -275,6 +271,8 @@ typedef enum
     GPIO_PORT_2_PIN_2 = 0x0202,
     GPIO_PORT_2_PIN_3 = 0x0203,
     GPIO_PORT_2_PIN_4 = 0x0204,
+    GPIO_PORT_3_PIN_6 = 0x0306,
+    GPIO_PORT_3_PIN_7 = 0x0307,
     GPIO_PORT_4_PIN_0 = 0x0400,
     GPIO_PORT_4_PIN_1 = 0x0401,
     GPIO_PORT_4_PIN_2 = 0x0402,

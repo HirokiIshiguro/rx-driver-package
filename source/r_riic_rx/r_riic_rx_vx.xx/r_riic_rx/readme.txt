@@ -12,14 +12,13 @@ The RIIC is in compliance with single master mode of the XP I2C-bus (Inter-IC-Bu
 The driver supports one channels available on the mcu.
 The driver can be reducedin size by removing code used for parameter checking orfor unused channels.
 These configuration options can be found in "r_config\r_riic_rx_config.h".
-An original copy of the configuration file is stored in "r_riic_rx\ref\r_riic_rx_config_reference.h".
 
 Features
 --------
 * Master transmission, master reception, slave transmission, and slave reception.
 * Multi-master configuration which is that communication is arbitrated between multiple masters and a single slave.
 * Communication mode can be normal or fast mode and the maximum communication rate is 400 kbps at a maximum. 
-  However channel 0 of RX64M, RX65N, RX66N, RX71M, RX72M and RX72N supports fast mode plus and the maximum communication rate is 1 Mbps.
+  However channel 0 of RX64M, RX65N, RX66N, RX671, RX71M, RX72M and RX72N supports fast mode plus and the maximum communication rate is 1 Mbps.
 
 File Structure
 --------------
@@ -34,10 +33,6 @@ r_riic_rx
 |   |
 |   +---ja
 |       r01an1692jj{VERSION_NUMBER}-rx-riic.pdf
-|
-+---ref
-|       r_riic_rx_config_reference.h
-|       r_riic_rx_pin_config_reference.h
 |
 +---src
     |   r_riic_rx.c
@@ -61,6 +56,14 @@ r_riic_rx
         |      r_riic_rx130.c
         |      r_riic_rx130_private.h
         |
+        +---rx140
+        |      r_riic_rx140.c
+        |      r_riic_rx140_private.h
+        |
+	+---rx14t
+        |      r_riic_rx14t.c
+        |      r_riic_rx14t_private.h
+        |
         +---rx13t
         |      r_riic_rx13t.c
         |      r_riic_rx13t_private.h
@@ -72,6 +75,14 @@ r_riic_rx
         +---rx231
         |      r_riic_rx231.c
         |      r_riic_rx231_private.h
+        |
+        +---rx23e-a
+        |      r_riic_rx23e_a.c
+        |      r_riic_rx23e_a_private.h
+        |
+        +---rx23e-b
+        |      r_riic_rx23e_b.c
+        |      r_riic_rx23e_b_private.h
         |
         +---rx23t
         |      r_riic_rx23t.c
@@ -89,6 +100,18 @@ r_riic_rx
         |      r_riic_rx24u.c
         |      r_riic_rx24u_private.h
         |
+        +---rx260
+        |      r_riic_rx260.c
+        |      r_riic_rx260_private.h
+        |
+        +---rx261
+        |      r_riic_rx261.c
+        |      r_riic_rx261_private.h
+        |
+        +---rx26t
+        |      r_riic_rx26t.c
+        |      r_riic_rx26t_private.h
+        |
         +---rx64m
         |      r_riic_rx64m.c
         |      r_riic_rx64m_private.h
@@ -97,6 +120,10 @@ r_riic_rx
         |      r_riic_rx65n.c
         |      r_riic_rx65n_private.h
         |
+        +---rx660
+        |      r_riic_rx660.c
+        |      r_riic_rx660_private.h
+        |
         +---rx66t
         |      r_riic_rx66t.c
         |      r_riic_rx66t_private.h
@@ -104,6 +131,10 @@ r_riic_rx
         +---rx66n
         |      r_riic_rx66n.c
         |      r_riic_rx66n_private.h
+        |
+        +---rx671
+        |      r_riic_rx671.c
+        |      r_riic_rx671_private.h
         |
         +---rx71m
         |       r_riic_rx71m.c

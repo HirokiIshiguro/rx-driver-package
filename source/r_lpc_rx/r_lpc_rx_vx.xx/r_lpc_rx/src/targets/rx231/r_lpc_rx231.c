@@ -1,21 +1,8 @@
 /***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+* Copyright (c) 2016 - 2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /*********************************************************************************************************************
  * File Name    : r_lpc_rx231.c
  * Description  : Implementation of the LPC module for the RX231
@@ -25,6 +12,8 @@
  *         : 01.10.2016 1.00    First Release
  *         : 01.04.2019 1.41    Added "WAIT_LOOP" keyword.
  *         : 14.11.2019 2.00    Added support for GNUC and ICCRX.
+ *         : 10.06.2020 2.01    Added support for atomic control.
+ *         : 15.03.2025 2.51    Updated disclaimer.
  **********************************************************************************************************************/
 
 /*********************************************************************************************************************
@@ -209,19 +198,35 @@ lpc_err_t lpc_operating_mode_set (lpc_operating_mode_t e_mode)
  ********************************************************************************************************************/
 lpc_err_t lpc_low_power_mode_configure (lpc_low_power_mode_t e_mode)
 {
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+    bsp_int_ctrl_t int_ctrl;
+#endif
+
     switch (e_mode)
     {
         case LPC_LP_SLEEP:
             R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
             SYSTEM.SBYCR.BIT.SSBY = 0;      /* Move to Sleep on R_BSP_WAIT();DSLPE also needs to be cleared */
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+            R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+#endif
             SYSTEM.MSTPCRC.BIT.DSLPE = 0;   /* Move to Sleep on R_BSP_WAIT() */
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+            R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
+#endif
             R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
         break;
         
         case LPC_LP_DEEP_SLEEP:
             R_BSP_RegisterProtectDisable(BSP_REG_PROTECT_LPC_CGC_SWR);
             SYSTEM.SBYCR.BIT.SSBY = 0;      /* Move to DeepSleep on R_BSP_WAIT(). DSLPE also needs to be set */
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+            R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_DISABLE, &int_ctrl);
+#endif
             SYSTEM.MSTPCRC.BIT.DSLPE = 1;   /* Move to DeepSleep on R_BSP_WAIT() */
+#if ((R_BSP_VERSION_MAJOR == 5) && (R_BSP_VERSION_MINOR >= 30)) || (R_BSP_VERSION_MAJOR >= 6) 
+            R_BSP_InterruptControl(BSP_INT_SRC_EMPTY, BSP_INT_CMD_FIT_INTERRUPT_ENABLE, &int_ctrl);
+#endif
             R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
         break;
 

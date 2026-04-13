@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
   Purpose: Module Description File (MDF) Example (Schema Version 2.0)
            This is a description of a sample FIT module configuration file
@@ -48,7 +53,7 @@ Using USB PIPE5</description>
             <constraint display="4 bytes of data in double quotation marks">/^"((.?){4})"$/.test('${USB_CFG_PMSC_REVISION}')</constraint>
             <description></description>
         </property>
-        <property id="USB_CFG_PMSC_TRANS_COUNT" display="Setting the number of the data blocks transferred at one time (512bytes * n)" default="64" type="textbox">
+        <property id="USB_CFG_PMSC_TRANS_COUNT" display="Setting the number of the data blocks transferred at one time (512bytes * n)" default="8" type="textbox">
             <constraint display="Value must be in the range 0-65536">("${USB_CFG_PMSC_TRANS_COUNT}" &gt;= 0) &amp;&amp; ("${USB_CFG_PMSC_TRANS_COUNT}" &lt;= 65536)</constraint>
             <description></description>
         </property>

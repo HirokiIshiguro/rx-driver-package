@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
+<!--
+/***********************************************************************************************************************
+* Copyright (c) 2016 - 2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+-->
 <refinfo>
 
     <!-- multiple versions permitted -->
@@ -8,18 +14,24 @@
         <product>RXC</product>
         <version>2.07.00</version>
         <version>3.01.00</version>
+        <version>3.03.00</version>
+        <version>3.07.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
         <version>4.08.04.201803</version>
         <version>4.08.04.201902</version>
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202411</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
         <product>ICCRX</product>
         <version>4.10.01</version>
         <version>4.12.01</version>
+        <version>4.20.01</version>
+        <version>5.10.01</version>		
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -40,11 +52,11 @@
     <package>
         <type>fitmodule</type>
         <name>r_pdc_rx</name>
-        <version>2.05</version>
-        <zipsource>r_pdc_rx_v2.05.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_pdc_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.50</version>
+            <version>7.52</version>
         </dependency>
         <application>connectivity</application>
         <desc>PDC driver</desc>

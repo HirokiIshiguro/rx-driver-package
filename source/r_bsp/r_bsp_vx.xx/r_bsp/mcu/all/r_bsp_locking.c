@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : r_bsp_locking.c
 * Description  : This implements a locking mechanism that can be used by all code. The locking is done atomically so
@@ -28,6 +15,8 @@
 *                               Fixed coding style.
 *         : 26.07.2019 2.01     Modified comment of API function to Doxygen style.
 *         : 10.12.2019 2.02     Modified comment.
+*         : 31.05.2024 2.03     Fixed coding style.
+*         : 26.02.2025 2.04     Changed the disclaimer.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -70,7 +59,7 @@ Private global variables and functions
  * semaphore or mutex. If used improperly locks can lead to deadlock in the user's system.
  * Users can override the default locking mechanisms.
  */
-bool R_BSP_SoftwareLock (BSP_CFG_USER_LOCKING_TYPE * const plock)
+bool R_BSP_SoftwareLock(BSP_CFG_USER_LOCKING_TYPE * const plock)
 {
 #if BSP_CFG_USER_LOCKING_ENABLED == 0
     bool ret = false;
@@ -105,7 +94,7 @@ bool R_BSP_SoftwareLock (BSP_CFG_USER_LOCKING_TYPE * const plock)
 #else
     /* User is going to handle the locking themselves. */
     return BSP_CFG_USER_LOCKING_SW_LOCK_FUNCTION(plock);
-#endif
+#endif /* BSP_CFG_USER_LOCKING_ENABLED == 0 */
 } /* End of function R_BSP_SoftwareLock() */
 
 /**********************************************************************************************************************
@@ -117,7 +106,7 @@ bool R_BSP_SoftwareLock (BSP_CFG_USER_LOCKING_TYPE * const plock)
  * @retval false Failure, lock could not be released.
  * @details This function releases a lock that was previously acquired using the R_BSP_SoftwareLock() function.
  */
-bool R_BSP_SoftwareUnlock (BSP_CFG_USER_LOCKING_TYPE * const plock)
+bool R_BSP_SoftwareUnlock(BSP_CFG_USER_LOCKING_TYPE * const plock)
 {
 #if BSP_CFG_USER_LOCKING_ENABLED == 0
     /* Set lock back to unlocked. */
@@ -149,7 +138,7 @@ bool R_BSP_SoftwareUnlock (BSP_CFG_USER_LOCKING_TYPE * const plock)
  * using. For example, if the user is not using the CRC peripheral then they could delete the BSP_LOCK_CRC entry. The 
  * user will save 4-bytes per deleted entry.
  */
-bool R_BSP_HardwareLock (mcu_lock_t const hw_index)
+bool R_BSP_HardwareLock(mcu_lock_t const hw_index)
 {
 #if BSP_CFG_USER_LOCKING_ENABLED == 0
     /* Pass actual lock to software lock function. */
@@ -174,7 +163,7 @@ bool R_BSP_HardwareLock (mcu_lock_t const hw_index)
  * not using. For example, if the user is not using the CRC peripheral then they could delete the BSP_LOCK_CRC entry. 
  * The user will save 4-bytes per deleted entry.
  */
-bool R_BSP_HardwareUnlock (mcu_lock_t const hw_index)
+bool R_BSP_HardwareUnlock(mcu_lock_t const hw_index)
 {
 #if BSP_CFG_USER_LOCKING_ENABLED == 0
     /* Pass actual lock to software unlock function. */

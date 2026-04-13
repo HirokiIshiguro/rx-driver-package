@@ -1,25 +1,12 @@
-/**********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+/***********************************************************************************************************************
+* Copyright (c) 2019 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-**********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /**********************************************************************************************************************
 * System Name  : SDHI Driver
 * File Name    : r_sdhi_dev.c
-* Version      : 2.06
+* Version      : 2.20
 * Device       : RX72N
 * Abstract     : API & Sub module
 * Tool-Chain   : For RX72N Group e2_studio
@@ -31,6 +18,10 @@
 /**********************************************************************************************************************
 * History      : DD.MM.YYYY Version Description
 *              : 22.11.2019 2.06    First Release
+*              : 27.12.2022 2.10    Updated slash format of included header file paths for Linux compatibility.
+*              : 15.03.2025 2.12    Updated disclaimer.
+*              : 30.10.2025 2.13    Modified comment of API function to Doxygen style.
+*              : 28.11.2025 2.20    Added support for Nested interrupt.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -40,8 +31,8 @@ Includes <System Includes> , "Project Includes"
 #if defined(BSP_MCU_RX72N)
 
 #include "r_sdhi_rx_if.h"
-#include ".\src\r_sdhi_rx_private.h"
-#include ".\src\targets\rx72n\r_sdhi_rx_target.h"
+#include "./src/r_sdhi_rx_private.h"
+#include "./src/targets/rx72n/r_sdhi_rx_target.h"
 
 /**********************************************************************************************************************
 Macro definitions
@@ -67,6 +58,11 @@ Private global variables and functions
 R_BSP_PRAGMA_STATIC_INTERRUPT(r_sdhi_dev_sbfai_isr, VECT(SDHI, SBFAI))
 R_BSP_ATTRIB_STATIC_INTERRUPT void r_sdhi_dev_sbfai_isr(void)
 {
+#if (SDHI_CFG_CH0_EN_SBFAI_NESTED_INT == 1)
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     sdhi_sdhndl_t   * p_hndl = 0;
     uint32_t channel = 0;
 
@@ -173,7 +169,7 @@ sdhi_status_t r_sdhi_dev_finalize(uint32_t channel)
  * @param[in] channel
  *             Channel number : SDHI channel number to be used (starting from 0)
  * @param[in] select
- *             Specify interrupt arguments. See section 3.8 in application note for details.
+ *             Specify interrupt arguments. See section R_SDHI_DisableIcuInt() in application note for details.
  * @retval    SDHI_SUCCESS Successful operation
  * @retval    SDHI_ERR     General error
  * @details   Makes settings to the ICU controller registers.\n 
@@ -264,12 +260,12 @@ sdhi_status_t R_SDHI_DisableIcuInt(uint32_t channel, uint32_t select)
  * @param[in] channel
  *             Channel number : SDHI channel number to be used (starting from 0)
  * @param[in] select
- *             Specify interrupt arguments. See section 3.7 in application note for details.
+ *             Specify interrupt arguments. See section R_SDHI_EnableIcuInt() in application note for details.
  * @retval    SDHI_SUCCESS Successful operation
  * @retval    SDHI_ERR     General error
  * @details   Makes settings to the ICU controller registers. \n 
  *            Makes settings to the SDHI's interrupt source property register (IPR). The setting values are defined by
- *            #define SDHI_CHx_INT_LEVRL and #define SDHI_CFG_CHx_INT_LEVEL_DMADTC.\n 
+ *            \#define SDHI_CHx_INT_LEVRL and \#define SDHI_CFG_CHx_INT_LEVEL_DMADTC.\n 
  *            Sets the SDHI interrupt request enable register (IEN) to enable interrupts.
  * @note      Before running this function, initialization processing by the R_SDHI_Open() function is required.
  */
@@ -505,6 +501,11 @@ sdhi_status_t r_sdhi_check_clksel(uint32_t channel)
  */
 void R_SDHI_IntHandler0(void * vect)
 {
+#if (SDHI_CFG_CH0_EN_NESTED_INT == 1)
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
     sdhi_sdhndl_t   * p_hndl = 0;
     uint32_t          int_isr = 0;
     uint32_t          channel = 0;

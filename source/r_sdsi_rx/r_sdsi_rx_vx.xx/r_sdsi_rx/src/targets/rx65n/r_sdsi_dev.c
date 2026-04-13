@@ -1,25 +1,12 @@
-/**********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+/***********************************************************************************************************************
+* Copyright (c) 2016 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2016(2019) Renesas Electronics Corporation. All rights reserved.    
-**********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /**********************************************************************************************************************
 * System Name  : SDSI Driver
 * File Name    : r_sdsi_dev.c
-* Version      : 2.02
+* Version      : 2.06
 * Device       : RX65N
 * Abstract     : API & Sub module
 * Tool-Chain   : -
@@ -35,6 +22,9 @@
 *              :                    Fixed to correspond to Renesas coding rule.
 *              : 04.04.2019 2.02    Added support for GNUC and ICCRX.
 *                                   Fixed coding style.
+*              : 27.12.2022 2.03    Updated slash format of included header file paths for Linux compatibility.
+*              : 15.03.2025 2.05    Updated disclaimer.
+*              : 30.10.2025 2.06    Changed the comment of API functions to the doxygen style.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -44,7 +34,7 @@ Includes <System Includes> , "Project Includes"
 #if defined(BSP_MCU_RX65N)
 
 #include "r_sdsi_rx_if.h"
-#include ".\src\r_sdsi_rx_private.h"
+#include "./src/r_sdsi_rx_private.h"
 
 #if (SDSI_CFG_CH0_INT_LEVEL < 1) || (SDSI_CFG_CH0_INT_LEVEL > 15)
     #error "ERROR !!! You must set (1) - (15) in SDSI_CFG_CH0_INT_LEVEL."
@@ -1154,13 +1144,19 @@ sdsi_status_t r_sdsi_dev_update_direct_trans_adr(uint32_t channel)
 } /* End of function r_sdsi_dev_update_direct_trans_adr() */
 
 /**********************************************************************************************************************
-* Function Name: R_SDSI_IntHandler0
-* Description  : Checks the relevant elements (without masked) and call a callback function.
-* Arguments    : uint32_t           channel              ;   SDSI Channel No.
-* Return Value : None
-*----------------------------------------------------------------------------------------------------------------------
-* Notes        : None
-**********************************************************************************************************************/
+ * Function Name: R_SDSI_IntHandler0
+ *****************************************************************************************************************/ /**
+ * @brief      This function is the interrupt handler
+ * @param[in]  *vect
+ *              vector table
+ * @details    This is the interrupt handler of the SDSI FIT module. \n
+ *             It is incorporated into the system as a processing routine for interrupt sources
+ *             supported by the SDSI. \n
+ *             When a callback function for the command processing status flag (INTSR1 register),
+ *             Card detect interrupts (CDFEN, CDREN), or DMA transfer end interrupt (DTEEN) has been registered,
+ *             the appropriate callback function is called by this function.
+ * @note       Before running this function, initialization processing by the R_SDSI_Open() function is required.
+ */
 void R_SDSI_IntHandler0(void * vect)
 {
     sdsi_hndl_t   * p_hndl  = 0;

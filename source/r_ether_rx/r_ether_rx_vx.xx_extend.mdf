@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
+/*
+* Copyright (C) 2014 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
   Purpose: Module Description File (MDF) Example (Schema Version 2.0)
            This is a description of a sample FIT module configuration file
@@ -95,6 +100,9 @@
           <channelConfiguration>
             <config>API</config>
           </channelConfiguration>
+          <pin name="CLKOUT25M">
+            <pinConfiguration config="AUTO"/>
+          </pin>
           <pin name="REF50CK0">
             <pinConfiguration config="AUTO"/>
           </pin>
@@ -141,7 +149,7 @@
             <pinConfiguration config="AUTO"/>
           </pin>
         </channel>
-        <channel number="ETHERC1_MII" group="RX64M,RX651,RX65N,RX71M,RX72M,RX72N,RX66N">
+        <channel number="ETHERC1_MII" group="RX64M,RX651,RX65N,RX71M,RX72M,RX72N">
           <constraint display="Channel only valid for MII mode" actionOnFail="disable">${ETHER_CFG_MODE_SEL} == ${ETHER_CFG_MODE_SEL.0}</constraint>
           <channelConfiguration>
             <config>API</config>
@@ -219,11 +227,14 @@
             <pinConfiguration config="AUTO"/>
           </pin>
         </channel>
-        <channel number="ETHERC1_RMII" group="RX64M,RX651,RX65N,RX71M,RX72M,RX72N,RX66N">
+        <channel number="ETHERC1_RMII" group="RX64M,RX651,RX65N,RX71M,RX72M,RX72N">
           <constraint display="Channel only valid for RMII mode" actionOnFail="disable">${ETHER_CFG_MODE_SEL} == ${ETHER_CFG_MODE_SEL.1}</constraint>
           <channelConfiguration>
             <config>API</config>
           </channelConfiguration>
+          <pin name="CLKOUT25M">
+            <pinConfiguration config="AUTO"/>
+          </pin>
           <pin name="REF50CK1">
             <pinConfiguration config="AUTO"/>
           </pin>
@@ -288,7 +299,8 @@
 Specify a value between 0 and 31.
 
 Please set the value 30 ETHER_CFG_CH0_PHY_ADDRESS when use default setting of the RSK+RX65N/RSK+RX65N_2MB.
-Please set the value 0 ETHER_CFG_CH0_PHY_ADDRESS when use default setting of the RSK+RX64M/RSK+RX71M/RSK+RX72M/RSK+RX72N.</description>
+Please set the value 0 ETHER_CFG_CH0_PHY_ADDRESS when use default setting of the RSK+RX64M/RSK+RX71M/RSK+RX72N.
+Please set the value 1 ETHER_CFG_CH0_PHY_ADDRESS when use default setting of the RSK+RX72M.</description>
         </property>
         <property id="ETHER_CFG_CH1_PHY_ADDRESS" display="PHY-LSI address setting for ETHER1" default="1" type="textbox">
             <constraint display="Only RX64M, RX71M, RX72M and RX72N supported" actionOnFail="disable">"${Device.group}" == "RX64M" || "${Device.group}" == "RX71M" || "${Device.group}" == "RX72M" || "${Device.group}" == "RX72N"</constraint>
@@ -298,7 +310,8 @@ Please set the value 0 ETHER_CFG_CH0_PHY_ADDRESS when use default setting of the
 
 Specify a value between 0 and 31.
 
-Please set the value 1 ETHER_CFG_CH1_PHY_ADDRESS when use default setting of the RSK+RX64M/RSK+RX71M/RSK+RX72M/RSK+RX72N.</description>
+Please set the value 1 ETHER_CFG_CH1_PHY_ADDRESS when use default setting of the RSK+RX64M/RSK+RX71M/RSK+RX72N.
+Please set the value 2 ETHER_CFG_CH1_PHY_ADDRESS when use default setting of the RSK+RX72M.</description>
         </property>
         <property id="ETHER_CFG_EMAC_RX_DESCRIPTORS" display="The number of Rx descriptors" default="1" type="textbox">
             <constraint display="Value must be an integer">testInteger("${ETHER_CFG_EMAC_RX_DESCRIPTORS}")</constraint>
@@ -350,9 +363,8 @@ This must be set to a value in the range 1 to 15.</description>
 0 = The access of the register of PHY uses ETHER0.
 1 = The access of the register of PHY uses ETHER1.
 
-Please set the value 0 ETHER_CFG_CH0_PHY_ACCESS when use default setting of the RSK+RX63N.
-Please set the value 0 ETHER_CFG_CH0_PHY_ACCESS when use default setting of the RSK+RX65N/RSK+RX65N_2MB.
-Please set the value 1 ETHER_CFG_CH0_PHY_ACCESS when use default setting of the RSK+RX64M/RSK+RX71M/RSK+RX72M/RSK+RX72N.</description>
+Please set the value 0 ETHER_CFG_CH0_PHY_ACCESS when use default setting of the RSK+RX63N/RSK+RX65N/RSK+RX65N_2MB/RSK+RX72M.
+Please set the value 1 ETHER_CFG_CH0_PHY_ACCESS when use default setting of the RSK+RX64M/RSK+RX71M/RSK+RX72N.</description>
         </property>
         <property id="ETHER_CFG_CH1_PHY_ACCESS" display="The register bus of PHY1 for ETHER0/1" default="1" type="combobox">
             <option id="ETHER_CFG_CH1_PHY_ACCESS.0" display="Use ETHER0" value="0"/>
@@ -362,7 +374,8 @@ Please set the value 1 ETHER_CFG_CH0_PHY_ACCESS when use default setting of the 
 0 = The access of the register of PHY uses ETHER0.
 1 = The access of the register of PHY uses ETHER1.
 
-Please set the value 1 ETHER_CFG_CH1_PHY_ACCESS when use default setting of the RSK+RX64M/RSK+RX71M/RSK+RX72M/RSK+RX72N.</description>
+Please set the value 0 ETHER_CFG_CH1_PHY_ACCESS when use default setting of the RSK+RX72M.
+Please set the value 1 ETHER_CFG_CH1_PHY_ACCESS when use default setting of the RSK+RX64M/RSK+RX71M/RSK+RX72N.</description>
         </property>
         <property id="ETHER_CFG_PHY_MII_WAIT" display="The access timing of MII/RMII register" default="8" type="textbox">
             <constraint display="Value must be an integer">testInteger("${ETHER_CFG_PHY_MII_WAIT}")</constraint>
@@ -399,6 +412,13 @@ When 1 is specified, link-up and link-down correspond respectively to the rise a
             <description>Definition of whether or not to use KSZ8041NL of the Micrel Inc.
  0 = unused (the KSZ8041 is not used.)
  1 = use (the KSZ8041 is used.)</description>
+        </property>
+        <property id="ETHER_CFG_USE_PHY_ICS1894_32" display="Use ICS1894-32 of the Renesas Electronics Corporation" default="0" type="combobox">
+            <option id="ETHER_CFG_USE_PHY_ICS1894_32.0" display="Unused" value="0"/>
+            <option id="ETHER_CFG_USE_PHY_ICS1894_32.1" display="Used" value="1"/>
+            <description>Definition of whether or not to use ICS1894-32 of the Renesas Electronics Corporation.
+ 0 = unused (the ICS1894_32 is not used.)
+ 1 = use (the ICS1894_32 is used.)</description>
         </property>
         <property id="ETHER_CFG_NON_BLOCKING" display="Use non blocking" default="0" type="combobox">
             <option id="ETHER_CFG_NON_BLOCKING.0" display="Unused" value="0"/>

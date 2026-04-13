@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2014 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_cmtw_rx_if.h
@@ -34,6 +21,16 @@
 *         : 20.05.2019 2.00    Added support for GNUC and ICCRX.
 *         : 15.08.2019 2.10    Added support for RX72M
 *         : 30.12.2019 2.20    Added support RX66N, RX72N.
+*         : 30.06.2020 2.30    Changed revision to reflect demo upgrade.
+*         : 31.03.2021 2.40    Added support RX671.
+*         : 13.09.2021 2.50    Added the demo for RX671.
+*         : 22.11.2021 2.60    Added support for RX660.
+*         : 28.06.2022 2.70    Updated demo projects.
+*         : 15.08.2022 2.80    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 2.90    Added support Nested Interrupt.
+*         : 15.03.2025 2.91    Updated disclaimer.
+*         : 23.06.2025 2.92    Removed doc folder and updated .rcpc file in FITDemos.
 ***********************************************************************************************************************/
 #ifndef CMTW_RX_IF_H
 #define CMTW_RX_IF_H
@@ -55,7 +52,7 @@ Macro definitions
 
 /* Version Number of API. */
 #define CMTW_RX_VERSION_MAJOR       (02)
-#define CMTW_RX_VERSION_MINOR       (20)
+#define CMTW_RX_VERSION_MINOR       (92)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -213,15 +210,15 @@ Exported global variables
 /***********************************************************************************************************************
 Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
-cmtw_err_t  R_CMTW_Open(cmtw_channel_t          channel,
+cmtw_err_t  R_CMTW_Open (cmtw_channel_t          channel,
                         cmtw_channel_settings_t *pconfig,
                         void                    (* const pcallback)(void *pdata));
 
-cmtw_err_t  R_CMTW_Control(cmtw_channel_t   channel,
-                           cmtw_cmd_t       cmd);
+cmtw_err_t  R_CMTW_Control (cmtw_channel_t   channel,
+                            cmtw_cmd_t       cmd);
 
-cmtw_err_t  R_CMTW_Close(cmtw_channel_t channel);
+cmtw_err_t  R_CMTW_Close (cmtw_channel_t channel);
 
-uint32_t    R_CMTW_GetVersion(void);
+uint32_t    R_CMTW_GetVersion (void);
 
 #endif  /* CMTW_RX_IF_H */

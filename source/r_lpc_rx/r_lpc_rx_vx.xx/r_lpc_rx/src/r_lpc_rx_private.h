@@ -1,30 +1,24 @@
 /***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+* Copyright (c) 2016 - 2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_lpc_rx_private.h
- * Version      : 1.0
+ * Version      : 2.51
  * Description  : The LPC module configures the MCU for the different operating and low power modes.
  *                This file is the LPC module's interface header file and should be included by the application that
  *                intends to use the API.
  ************************************************************************************************************************
  * History : DD.MM.YYYY Version Description
  *           01.10.2016 1.0     Initial Release
+ *           31.07.2021 2.03    Add lpc_snooze_mode_configure() function declaration for rx140
+ *           31.12.2021 2.04    Delete lpc_operating_mode_set() and lpc_return_clock_switch()
+ *                              function declaration for rx660.
+ *           29.05.2023 2.30    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *           28.06.2024 2.40    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *           15.03.2025 2.51    Updated disclaimer.
+ *           30.10.2025 2.60    Added support for RX14T.
  ***********************************************************************************************************************/
 #ifndef R_LPC_RX_PRIVATE_H
     #define R_LPC_RX_PRIVATE_H
@@ -44,12 +38,51 @@
 /***********************************************************************************************************************
  Public Functions
  ***********************************************************************************************************************/
+#ifndef LPC_INVALID_OPERATING_MODE
+/**********************************************************************************************************************
+ * Function Name: lpc_operating_mode_set
+ * Description  : .
+ * Argument     : e_mode
+ * Return Value : .
+ *********************************************************************************************************************/
 lpc_err_t lpc_operating_mode_set (lpc_operating_mode_t e_mode);
+#endif
+/**********************************************************************************************************************
+ * Function Name: lpc_low_power_mode_configure
+ * Description  : .
+ * Argument     : e_mode
+ * Return Value : .
+ *********************************************************************************************************************/
 lpc_err_t lpc_low_power_mode_configure (lpc_low_power_mode_t e_mode);
+
+/**********************************************************************************************************************
+ * Function Name: lpc_lowpower_activate
+ * Description  : .
+ * Argument     : pcallback
+ * Return Value : .
+ *********************************************************************************************************************/
 lpc_err_t lpc_lowpower_activate (lpc_callback_set_t pcallback);
+
+#ifndef BSP_MCU_RX14T
+/**********************************************************************************************************************
+ * Function Name: lpc_return_clock_switch
+ * Description  : .
+ * Arguments    : e_clock_source
+ *              : enable
+ * Return Value : .
+ *********************************************************************************************************************/
 lpc_err_t lpc_return_clock_switch (lpc_clock_switch_t e_clock_source, bool enable);
+#endif /* BSP_MCU_RX14T */
 
-
+#ifdef LPC_VALID_SNOOZE_MODE
+/**********************************************************************************************************************
+ * Function Name: lpc_snooze_mode_configure
+ * Description  : .
+ * Arguments    : snooze_mode
+ * Return Value : .
+ *********************************************************************************************************************/
+lpc_err_t lpc_snooze_mode_configure (lpc_snooze_mode_t * snooze_mode);
+#endif
 #endif /* R_LPC_RX_PRIVATE_H */
 /***********************************************************************************************************************
  * End of File

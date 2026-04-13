@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : r_bsp_config_reference.h
 * Device(s)    : RX110
@@ -61,6 +48,45 @@
 *                              Modified comment for added support of Renesas RTOS (RI600V4 or RI600PX).
 *                              Added the following macro definition.
 *                                - BSP_CFG_RENESAS_RTOS_USED
+*         : 29.01.2021 3.03    Added the following macro definition.
+*                                - BSP_CFG_SCI_UART_TERMINAL_ENABLE
+*                                - BSP_CFG_SCI_UART_TERMINAL_CHANNEL
+*                                - BSP_CFG_SCI_UART_TERMINAL_BITRATE
+*                                - BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY
+*         : 26.02.2021 3.04    Added a comment for Azure RTOS to BSP_CFG_RTOS_USED.
+*         : 30.11.2021 4.00    Added the following macro definitions.
+*                                - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE
+*                                - BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE
+*                                - BSP_CFG_HOCO_OSCILLATE_ENABLE
+*                                - BSP_CFG_LOCO_OSCILLATE_ENABLE
+*                                - BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE
+*                                - BSP_CFG_CLKOUT_SOURCE
+*                                - BSP_CFG_CLKOUT_DIV
+*                                - BSP_CFG_CLKOUT_OUTPUT
+*                                - BSP_CFG_CONFIGURATOR_VERSION
+*                                - BSP_CFG_CPLUSPLUS
+*                              Changed initial value of the following macro definitions.
+*                                - BSP_CFG_MCU_PART_GROUP
+*                                - BSP_CFG_MCU_PART_SERIES
+*         : 11.02.2022 4.01    Changed initial value of the following macro definitions.
+*                                - BSP_CFG_SWINT_UNIT1_ENABLE
+*         : 28.02.2023 4.02    Modified comment.
+*         : 21.11.2023 4.03    Added the following macro definitions.
+*                                - BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE
+*                                - BSP_CFG_MEMORY_BUS1_PRIORITY
+*                                - BSP_CFG_MEMORY_BUS2_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS2_PRIORITY
+*                                - BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY
+*         : 27.11.2024 4.04    Changed comment of BSP_CFG_RTC_ENABLE.
+*         : 26.02.2025 4.05    Changed the disclaimer.
+*         : 28.05.2025 4.06    Added the following macro definitions.
+*                                - BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE
+*                                - BSP_CFG_LOW_LEVEL_INTERFACE_SBRK_ENABLE
+*                                - BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE
+*                                - BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE
+*                                - BSP_CFG_USER_ENTER_CRITICAL_FUNCTION
+*                                - BSP_CFG_USER_EXIT_CRITICAL_FUNCTION
 ***********************************************************************************************************************/
 
 #ifndef R_BSP_CONFIG_REF_HEADER_FILE
@@ -123,17 +149,16 @@ Configuration Options
 #define BSP_CFG_MCU_PART_MEMORY_SIZE    (0x5)
 
 /* Group name.
-   Character(s) = Value for macro = Description
-   10           = 0x0             = RX110 Group
-   11           = 0x1             = RX111 Group
+   Character(s) = Description
+   10           = RX110 Group
 */
-#define BSP_CFG_MCU_PART_GROUP          (0x0)
+#define BSP_CFG_MCU_PART_GROUP          "RX110"
 
 /* Series name.
-   Character(s) = Value for macro = Description
-   51           = 0x0             = RX100 Series
+   Character(s) = Description
+   51           = RX100 Series
 */
-#define BSP_CFG_MCU_PART_SERIES         (0x0)
+#define BSP_CFG_MCU_PART_SERIES         "RX100"
 
 /* Memory type.
    Character(s) = Value for macro = Description
@@ -215,6 +240,36 @@ Configuration Options
 /* 4th ID Code section, address 0xFFFFFFAC. From MSB to LSB: ID code 12, ID code 13, ID code 14, ID code 15. */
 #define BSP_CFG_ID_CODE_LONG_4          (0xFFFFFFFF)
 
+/* Select whether to oscillate the Main Clock Oscillator.
+   0 = Stop Oscillating the Main Clock.
+   1 = Enable oscillating the Main Clock. (default)
+*/
+#define BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE    (1)
+
+/* Select whether to oscillate the Sub Clock Oscillator.
+   0 = Stop Oscillating the Sub Clock. (default)
+   1 = Enable Oscillating the Sub Clock.
+*/
+#define BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE     (0)
+
+/* Select whether to oscillate the High Speed On-Chip Oscillator (HOCO).
+   0 = Stop Oscillating the HOCO. (default)
+   1 = Enable Oscillating the HOCO.
+*/
+#define BSP_CFG_HOCO_OSCILLATE_ENABLE          (0)
+
+/* Select whether to oscillate the Low Speed On-Chip Oscillator (LOCO).
+   0 = Stop Oscillating the LOCO. (default)
+   1 = Enable Oscillating the LOCO.
+*/
+#define BSP_CFG_LOCO_OSCILLATE_ENABLE          (0)
+
+/* Select whether to oscillate the IWDT-Dedicated On-Chip Oscillator (IWDT).
+   0 = Stop Oscillating the IWDT Clock. (default)
+   1 = Enable Oscillating the IWDT Clock.
+*/
+#define BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE    (0)
+
 /* Clock source select (CKSEL).
    0 = Low Speed On-Chip Oscillator  (LOCO)
    1 = High Speed On-Chip Oscillator (HOCO)
@@ -229,10 +284,20 @@ Configuration Options
 */
 #define BSP_CFG_MAIN_CLOCK_SOURCE       (0)
 
-/* The sub-clock oscillation control for using the RTC.
-   When '1' is selected, the registers related to RTC are initialized and the sub-clock oscillator is operated.
+/* Configure clock source of clock output(CLKOUT) pin (CKOSEL).
+   Available clock sources:
+   0 = LOCO
+   1 = HOCO
+   2 = Main clock oscillator (default)
+   3 = Sub-clock oscillator
+ */
+#define BSP_CFG_CLKOUT_SOURCE           (2)
+
+/* Defines whether to use the RTC or not.
+   This setting will initialize the RTC related registers.
    0 = The RTC is not to be used.
    1 = The RTC is to be used.
+   When using RTC FIT or RTC CG, the Smart Configurator sets this to "1". Set it to "1" when using RTC.
 */
 #define BSP_CFG_RTC_ENABLE              (0)
 
@@ -282,6 +347,23 @@ Configuration Options
    Available divisors = /1 (no division), /2, /4, /8, /16, /32, /64
 */
 #define BSP_CFG_FCK_DIV                 (1)
+
+/* CLKOUT Output Frequency Division Ratio Select. (CKODIV)
+   Values
+   0 = x1/1
+   1 = x1/2 (default)
+   2 = x1/4
+   3 = x1/8
+   4 = x1/16
+ */
+#define BSP_CFG_CLKOUT_DIV              (1)
+
+/* Configure clock output(CLKOUT) pin (CKOSTP).
+   Values
+   0 = CLKOUT pin output stopped. (Fixed to the low level) (default)
+   1 = CLKOUT pin output enabled.
+ */
+#define BSP_CFG_CLKOUT_OUTPUT           (0)
 
 /* Main Clock Oscillator Wait Time (MOSCWTCR).
    Set these bits to select the oscillation stabilization wait time of the main clock oscillator.
@@ -351,6 +433,7 @@ Configuration Options
    2 = embOS is used.(This is not available.)
    3 = MicroC_OS is used.(This is not available.)
    4 = Renesas ITRON OS (RI600V4 or RI600PX) is used.
+   5 = Azure RTOS is used.
 */
 #define BSP_CFG_RTOS_USED               (0)
 
@@ -448,6 +531,11 @@ Configuration Options
 */
 #define BSP_CFG_CONFIGURATOR_SELECT                 (0)
 
+/* Version number of Smart Configurator.
+   This macro definition is updated by Smart Configurator.
+*/
+#define BSP_CFG_CONFIGURATOR_VERSION                (100)
+
 /* For some BSP functions, it is necessary to ensure that, while these functions are executing, interrupts from other 
    FIT modules do not occur. By controlling the IPL, these functions disable interrupts that are at or below the 
    specified interrupt priority level.
@@ -463,7 +551,7 @@ Configuration Options
    1 = Software interrupt is used.
    NOTE: When this macro is set to 1, the software interrupt is initialized in bsp startup routine. 
 */
-#define BSP_CFG_SWINT_UNIT1_ENABLE    (1)
+#define BSP_CFG_SWINT_UNIT1_ENABLE    (0)
 
 /* Software Interrupt Task Buffer Number.
    For software interrupt, this value is number of buffering user tasks.
@@ -481,6 +569,120 @@ Configuration Options
          It is possible to dynamically change the IPR.
 */
 #define BSP_CFG_SWINT_IPR_INITIAL_VALUE     (0x1)
+
+/* This macro is used for serial terminal on the board selected by smart configurator.
+   0 = SCI UART Terminal is disabled.
+   1 = SCI UART Terminal is enabled.
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_ENABLE         (0)
+
+/* This macro is channel number for serial terminal.
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_CHANNEL        (1)
+
+/* This macro is bit-rate for serial terminal.
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_BITRATE        (115200)
+
+/* This macro is interrupt priority for serial terminal.
+   0(low) - 15(high)
+*/
+#define BSP_CFG_SCI_UART_TERMINAL_INTERRUPT_PRIORITY   (15)
+
+/* This macro is used for C++ project and updated by Smart Configurator.
+   0 = This project is a C project.(Not a C++ project).
+   1 = This project is a C++ project.
+*/
+#define BSP_CFG_CPLUSPLUS             (0)
+
+/* Select whether to enable bus priority initialization.
+   0 = Bus priority initialization is disabled.
+   1 = Bus priority initialization is enabled.
+*/
+#define BSP_CFG_BUS_PRIORITY_INITIALIZE_ENABLE      (0)
+
+/* Select the priority order for memory bus 1 (RAM).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS1_PRIORITY                (0)
+
+/* Select the priority order for memory bus 2 (ROM).
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_MEMORY_BUS2_PRIORITY                (0)
+
+/* Select the priority order for internal peripheral bus 1.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS1_PRIORITY   (0)
+
+/* Select the priority order for internal peripheral bus 2.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS2_PRIORITY   (0)
+
+/* Select the priority order for internal peripheral bus 6.
+   0 = The order of priority is fixed.
+   1 = The order of priority is toggled.
+*/
+#define BSP_CFG_INTERNAL_PERIPHERAL_BUS6_PRIORITY   (0)
+
+/* Defines whether to enable the following low-level interface functions for standard Input/Output in the BSP.
+   CCRX: open, close, write, read, lseek
+   GCC: write, read, close, lseek, fstat, isatty
+   0: Disables low-level interface functions for standard Input/Output in the BSP.
+   1: Enables low-level interface functions for standard Input/Output in the BSP.
+   NOTE: If you disable this setting and use the low-level interface functions, 
+         please implement these low-level interface functions yourself.
+   NOTE: This setting is available only when using CCRX and GCC.
+*/
+#define BSP_CFG_LOW_LEVEL_INTERFACE_STDIO_ENABLE   (1)
+
+/* Defines whether to enable the low-level interface functions (sbrk) for memory management in the BSP.
+   0: Disables the low-level interface function (sbrk) for memory management in the BSP.
+   1: Enables the low-level interface function (sbrk) for memory management in the BSP.
+   NOTE: If you disable this setting and use the low-level interface functions(sbrk),
+         please implement these low-level interface functions yourself.
+   NOTE: This setting is available only when using CCRX and GCC.
+*/
+#define BSP_CFG_LOW_LEVEL_INTERFACE_SBRK_ENABLE   (1)
+
+/* Defines whether to enable the low-level interface functions (errno_addr, wait_sem, signal_sem) 
+   for the reentrant library in the BSP.
+   0: Disables the low-level interface functions (errno_addr, wait_sem, signal_sem) for the reentrant library 
+      in the BSP.
+   1: Enables the low-level interface functions (errno_addr, wait_sem, signal_sem) for the reentrant library 
+      in the BSP.
+   NOTE: If you disable this setting and use the low-level interface functions
+         (errno_addr, wait_sem, signal_sem), please implement these low-level interface functions yourself.
+   NOTE: This setting is available only when using CCRX.
+*/
+#define BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE   (1)
+
+/* Defines whether to use user functions for exclusive control of wait_sem and signal_sem.
+   0 = Use default exclusive control with wait_sem and signal_sem.
+   1 = Use user function for exclusive control with wait_sem and signal_sem.
+   NOTE: This setting is available when BSP_CFG_LOW_LEVEL_INTERFACE_REENTRANT_LIB_ENABLE is 1 and CCRX is used.
+   NOTE: If you enable this setting, you must implement the functions used by 
+         BSP_CFG_USER_ENTER_CRITICAL_FUNCTION and BSP_CFG_USER_EXIT_CRITICAL_FUNCTION.
+   NOTE: This setting is available only when using CCRX.
+*/
+#define BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE       (0)
+
+/* BSP_CFG_USER_ENTER_CRITICAL_FUNCTION defines the name of the function you want to call to 
+   disable interrupts when using the exclusion controls with wait_sem and signal_sem.
+   BSP_CFG_USER_EXIT_CRITICAL_FUNCTION defines the name of the function you want to call to 
+   enable interrupts after processing when using the exclusion controls with wait_sem and signal_sem.
+   If desired, users can redirect the mutual exclusion functions to their own functions, replacing 
+   the my_... function names with the names of their own functions.
+   NOTE: This setting is available when BSP_CFG_USER_EXCLUSIVE_CONTROL_ENABLE is 1.
+*/
+#define BSP_CFG_USER_ENTER_CRITICAL_FUNCTION     my_enter_critical_function
+#define BSP_CFG_USER_EXIT_CRITICAL_FUNCTION      my_exit_critical_function
 
 #endif /* R_BSP_CONFIG_REF_HEADER_FILE */
 

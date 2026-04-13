@@ -1,24 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
- * applicable laws, including copyright laws. 
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the 
- * following link:
- * http://www.renesas.com/disclaimer 
- *
- * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.    
- ***********************************************************************************************************************/
+/*
+* Copyright (C) 2016 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : phy.h
- * Version      : 1.01
+ * Version      : 1.24
  * Description  : Ethernet PHY device driver
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -27,6 +14,8 @@
  *         : 16.12.2014 1.01     Deleted header file include.
  *         : 22.11.2019 1.20     Added the macro of the phy register
  *                               Added PMGI API function
+ *         : 20.11.2021 1.22     Correction of ETHER_CFG_USE_PHY_ICS1894_32.
+ *         : 20.03.2025 1.24     Changed the disclaimer in program sources
  ***********************************************************************************************************************/
 
 /* Guards against multiple inclusion */
@@ -58,6 +47,11 @@
 #ifdef ETHER_CFG_USE_PHY_KSZ8041NL
     #define PHY_REG_PHY_CONTROL_1           (0x1E)
 #endif /* MICREL_KSZ8041NL */
+
+/* Vendor Specific PHY Registers */
+#ifdef ETHER_CFG_USE_PHY_ICS1894_32
+    #define PHY_REG_20_EXTENDED_CONTROL     (0x14)
+#endif /* RENESAS_ELECTRONICS_CORP_ICS1894_32 */
 
 /* Basic Mode Control Register Bit Definitions */
     #define PHY_CONTROL_RESET               (1 << 15)
@@ -126,11 +120,11 @@ typedef enum LinkStatE
 /***********************************************************************************************************************
  Exported global functions (to be accessed by other files)
  ***********************************************************************************************************************/
- #if (ETHER_CFG_NON_BLOCKING == 0)
+#if (ETHER_CFG_NON_BLOCKING == 0)
 int16_t phy_init (uint32_t channel);
 void phy_start_autonegotiate (uint32_t channel, uint8_t pause);
-int16_t phy_set_autonegotiate (uint32_t channel, uint16_t *pline_speed_duplex, uint16_t *plocal_pause,
-        uint16_t *ppartner_pause);
+int16_t phy_set_autonegotiate (uint32_t channel, uint16_t * pline_speed_duplex, uint16_t * plocal_pause,
+        uint16_t * ppartner_pause);
 int16_t phy_get_link_status (uint32_t channel);
 uint16_t phy_read (uint32_t ether_channel, uint16_t reg_addr);
 void phy_write (uint32_t ether_channel, uint16_t reg_addr, uint16_t data);
