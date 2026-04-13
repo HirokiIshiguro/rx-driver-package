@@ -1,23 +1,10 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2016 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
-* File Name    : r_gpio_rx65N.c
+* File Name    : r_gpio_rx65n.c
 * Description  : Data for r_gpio_rx driver specific to RX65N.
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -25,6 +12,9 @@
 *         : 01.10.2016 1.00    First Release
 *         : 21.07.2017 2.30    Updated for RX65N-2MB.
 *         : 01.02.2019 2.50    Updated for RX65N-64pin.
+*         : 07.04.2023 3.00    Updated for RX65N (with products with 1 Mbyte of code flash memory or less)
+*                                for the g_gpio_dscr_support and g_gpio_dscr2_support structures.
+*         : 15.03.2025 5.11    Updated disclaimer.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -130,7 +120,8 @@ const uint8_t g_gpio_pull_up_support[GPIO_INFO_NUM_PORTS] =
     0x00,    // PH: -
     0x2F,    // PJ: PJ0 to PJ3, PJ5
 };
-
+#if (BSP_CFG_MCU_PART_MEMORY_SIZE == 0xC) || (BSP_CFG_MCU_PART_MEMORY_SIZE == 0xE)
+/* Products with at least 1.5 Mbytes of code flash memory */
 const uint8_t g_gpio_dscr_support[GPIO_INFO_NUM_PORTS] =
 {
     0x07,    // P0: P00 to P02
@@ -176,6 +167,55 @@ const uint8_t g_gpio_dscr2_support[GPIO_INFO_NUM_PORTS] =
     0x00,    // PH: -
     0x07,    // PJ: PJ0 to PJ2
 };
+#else
+/* Products with 1 Mbyte of code flash memory or less */
+const uint8_t g_gpio_dscr_support[GPIO_INFO_NUM_PORTS] =
+{
+    0x07,    // P0: P00 to P02
+    0x00,    // P1: -
+    0x80,    // P2: P27
+    0x00,    // P3: -
+    0x00,    // P4: -
+    0x47,    // P5: P50 to P52, P56
+    0x00,    // P6: -
+    0x00,    // P7: -
+    0x00,    // P8: -
+    0x0F,    // P9: P90 to P93
+    0xFF,    // PA: PA0 to PA7
+    0xFF,    // PB: PB0 to PB7
+    0xFF,    // PC: PC0 to PC7
+    0xFF,    // PD: PD0 to PD7
+    0xFF,    // PE: PE0 to PE7
+    0x00,    // PF: -
+    0x00,    // PG: -
+    0x00,    // PH: -
+    0x00,    // PJ: -
+};
+
+const uint8_t g_gpio_dscr2_support[GPIO_INFO_NUM_PORTS] =
+{
+    0x07,    // P0: P00 to P02
+    0x00,    // P1: -
+    0x80,    // P2: P27
+    0x03,    // P3: P30 to P31
+    0x00,    // P4: -
+    0x7F,    // P5: P50 to P56
+    0x00,    // P6: -
+    0xF9,    // P7: P70, P73 to P77
+    0x0F,    // P8: P80 to P83
+    0x0F,    // P9: P90 to P93
+    0xFF,    // PA: PA0 to PA7
+    0xFF,    // PB: PB0 to PB7
+    0xFF,    // PC: PC0 to PC7
+    0xFF,    // PD: PD0 to PD7
+    0xFF,    // PE: PE0 to PE7
+    0x00,    // PF: -
+    0x00,    // PG: -
+    0x00,    // PH: -
+    0x00,    // PJ: -
+};
+#endif
+
 
 #endif
 

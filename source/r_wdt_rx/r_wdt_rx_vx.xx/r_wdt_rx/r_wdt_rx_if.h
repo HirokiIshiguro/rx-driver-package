@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2016 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.    
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_wdt_rx_if.h
@@ -33,6 +20,17 @@
 *           28.06.2019 2.10    Added support for RX23W
 *           15.08.2019 2.20    Added support for RX72M
 *           30.12.2019 2.30    Added support RX66N, RX72N.
+*           30.06.2020 2.40    Changed revision to reflect demo upgrade.
+*           31.03.2021 2.50    Added support RX671.
+*           13.09.2021 2.60    Added RX671 demo.
+*           14.03.2022 2.70    Added support for RX66T-48Pin.
+*           31.03.2022 2.80    Added support for RX660.
+*           28.06.2022 2.90    Updated demo projects
+*           15.08.2022 3.00    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           28.06.2024 3.10    Added support for RX260, RX261.
+*           15.03.2025 3.11    Updated disclaimer.
+*           23.06.2025 3.12    Removed doc folder and updated .rcpc file in FITDemos.
 ***********************************************************************************************************************/
 
 #ifndef WDT_RX_IF_H
@@ -55,8 +53,8 @@ Macro definitions
 #endif
 
 /* Version Number of API. */
-#define WDT_RX_VERSION_MAJOR   (2)
-#define WDT_RX_VERSION_MINOR   (30)
+#define WDT_RX_VERSION_MAJOR   (3)
+#define WDT_RX_VERSION_MINOR   (12)
 
 #define OFS0_WDT_DISABLED              (0x00020000)
 
@@ -133,10 +131,10 @@ typedef struct st_wdt_config                  // WDT configuration options used 
     wdt_window_start_t     window_start;      // Window start position
     wdt_window_end_t       window_end;        // Window end position
     wdt_timeout_control_t  timeout_control;   // Reset or NMI output when time-out
- } wdt_config_t;
+}   wdt_config_t;
 
 
- /* Control() DEFINITIONS */
+/* Control() DEFINITIONS */
 
 typedef enum e_wdt_cmd                 // Command used in Control and GetStatus function
 {
@@ -149,9 +147,9 @@ typedef enum e_wdt_cmd                 // Command used in Control and GetStatus 
 Public Functions
 ***********************************************************************************************************************/
 #if ((BSP_CFG_OFS0_REG_VALUE & OFS0_WDT_DISABLED) == OFS0_WDT_DISABLED) /* Register start mode */
-wdt_err_t    R_WDT_Open(void * const p_cfg);
+wdt_err_t    R_WDT_Open (void * const p_cfg);
 #endif
-wdt_err_t    R_WDT_Control(wdt_cmd_t const cmd, uint16_t * p_status);
-uint32_t     R_WDT_GetVersion(void);
+wdt_err_t    R_WDT_Control (wdt_cmd_t const cmd, uint16_t * p_status);
+uint32_t     R_WDT_GetVersion (void);
 
 #endif /* WDT_RX_IF_H */

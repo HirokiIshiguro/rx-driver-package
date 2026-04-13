@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_usb_hreg_abs.c
+ * Version      : 1.44
  * Description  : Call USB Host register access function 
  ***********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -31,6 +19,9 @@
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
+ *         : 30.10.2022 1.41 USBX HMSC is supported.
+ *         : 01.03.2025 1.44 Change Disclaimer.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -244,39 +235,31 @@ uint16_t usb_hstd_chk_attach (usb_utr_t *ptr)
 
     usb_hstd_read_lnst(ptr, buf);
 
-    if (USB_UNDECID == (uint16_t) (buf[1] & USB_RHST))
+    if (USB_FS_JSTS == (buf[0] & USB_LNST))
     {
-        if (USB_FS_JSTS == (buf[0] & USB_LNST))
-        {
-            /* High/Full speed device */
-            USB_PRINTF0(" Detect FS-J\n");
+        /* High/Full speed device */
+        USB_PRINTF0(" Detect FS-J\n");
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
-            usb_hstd_set_hse(ptr, g_usb_hstd_hs_enable[ptr->ip]);
+        usb_hstd_set_hse(ptr, g_usb_hstd_hs_enable[ptr->ip]);
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
-            return USB_ATTACHF;
-        }
-        else if (USB_LS_JSTS == (buf[0] & USB_LNST))
-        {
-            /* Low speed device */
-            USB_PRINTF0(" Attach LS device\n");
+        return USB_ATTACHF;
+    }
+    else if (USB_LS_JSTS == (buf[0] & USB_LNST))
+    {
+        /* Low speed device */
+        USB_PRINTF0(" Attach LS device\n");
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
-            usb_hstd_set_hse(ptr, USB_HS_DISABLE);
+        usb_hstd_set_hse(ptr, USB_HS_DISABLE);
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
-            return USB_ATTACHL;
-        }
-        else if (USB_SE0 == (buf[0] & USB_LNST))
-        {
-            USB_PRINTF0(" Detach device\n");
-        }
-        else
-        {
-            USB_PRINTF0(" Attach unknown speed device\n");
-        }
+        return USB_ATTACHL;
+    }
+    else if (USB_SE0 == (buf[0] & USB_LNST))
+    {
+        USB_PRINTF0(" Detach device\n");
     }
     else
     {
-        USB_PRINTF0(" Already device attached\n");
-        return USB_OK;
+            USB_PRINTF0(" Attach unknown speed device\n");
     }
     return USB_DETACH;
 }
@@ -530,8 +513,8 @@ void usb_hstd_bus_reset (usb_utr_t *ptr)
         }
     }
 
-    /* 30ms wait */
-    usb_cpu_delay_xms((uint16_t) 30);
+    /* 100ms wait */
+    usb_cpu_delay_xms((uint16_t) 100);
 }
 /******************************************************************************
  End of function usb_hstd_bus_reset
@@ -607,13 +590,13 @@ uint16_t usb_hstd_support_speed_check (usb_utr_t *ptr)
         break;
         case USB_LSMODE :
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T)\
-    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N)
+    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671)
             conn_inf = USB_LSCONNECT;
 #else   /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T)\
-    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) */
+    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671) */
             conn_inf = USB_NOCONNECT;
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX72T)\
-    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) */
+    || defined (BSP_MCU_RX72M) || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671) */
         break;
         case USB_HSPROC :
             conn_inf = USB_NOCONNECT;
@@ -955,10 +938,10 @@ usb_regadr_t usb_hstd_get_usb_ip_adr (uint16_t ipnum)
         ptr = (usb_regadr_t)&USBA;
 
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
-#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)
+#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
         ptr = (usb_regadr_t)&USB1;
 
-#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) */
+#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671) */
     }
 #endif /* USB_NUM_USBIP == 2 */
     else

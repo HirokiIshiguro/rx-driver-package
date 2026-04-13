@@ -1,21 +1,8 @@
 /***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
- * No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
- * applicable laws, including copyright laws. 
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO 
- * THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the 
- * following link:
- * http://www.renesas.com/disclaimer 
- *
- * Copyright (C) 2013(2019) Renesas Electronics Corporation. All rights reserved.
- **********************************************************************************************************************/
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_sci_iic_private.h
  * Description  : Functions for using SCI_IIC on RX devices. 
@@ -45,6 +32,14 @@
  *         : 30.07.2019 2.43     RX72M support added.
  *         : 30.10.2019 2.44     RX13T support added.
  *         : 22.11.2019 2.45     RX66N, RX72N support added.
+ *         : 10.03.2020 2.46     RX23E-A support added.
+ *         : 30.06.2021 2.48     RX671 support added.
+ *         : 31.07.2021 2.49     RX140 support added.
+ *         : 15.06.2022 2.60     RX26T support added.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *         : 29.05.2023 2.70     RX23E-B support added.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+ *         : 15.03.2025 2.81     Updated disclaimer
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef SCI_IIC_PRIVATE_H
@@ -839,10 +834,10 @@
 
 /* Channel select not changed. */
     #if ( (0 == SCI_IIC_CFG_CH0_INCLUDED) && (0 == SCI_IIC_CFG_CH1_INCLUDED) && (0 == SCI_IIC_CFG_CH2_INCLUDED) \
-       && (0 == SCI_IIC_CFG_CH3_INCLUDED) && (0 == SCI_IIC_CFG_CH4_INCLUDED) && (0 == SCI_IIC_CFG_CH5_INCLUDED) \
-       && (0 == SCI_IIC_CFG_CH6_INCLUDED) && (0 == SCI_IIC_CFG_CH7_INCLUDED) && (0 == SCI_IIC_CFG_CH8_INCLUDED) \
-       && (0 == SCI_IIC_CFG_CH9_INCLUDED) && (0 == SCI_IIC_CFG_CH10_INCLUDED) && (0 == SCI_IIC_CFG_CH11_INCLUDED) \
-       && (0 == SCI_IIC_CFG_CH12_INCLUDED) )
+        && (0 == SCI_IIC_CFG_CH3_INCLUDED) && (0 == SCI_IIC_CFG_CH4_INCLUDED) && (0 == SCI_IIC_CFG_CH5_INCLUDED) \
+        && (0 == SCI_IIC_CFG_CH6_INCLUDED) && (0 == SCI_IIC_CFG_CH7_INCLUDED) && (0 == SCI_IIC_CFG_CH8_INCLUDED) \
+        && (0 == SCI_IIC_CFG_CH9_INCLUDED) && (0 == SCI_IIC_CFG_CH10_INCLUDED) && (0 == SCI_IIC_CFG_CH11_INCLUDED) \
+        && (0 == SCI_IIC_CFG_CH12_INCLUDED) )
         #error "ERROR - SCI_IIC_CFG_CHx_INCLUDED (x is 0 to 12) is all 0.- Parameter error in r_sci_iic_rx_config.h."
     #endif
 
@@ -950,9 +945,9 @@
 /*----------------------------------------------------------------------------*/
 /*  Condition bit.                                                            */
 /*----------------------------------------------------------------------------*/
-    #define SCI_IIC_STAREQ              ((uint8_t)(1))
-    #define SCI_IIC_RSTAREQ             ((uint8_t)(2))
-    #define SCI_IIC_STPREQ              ((uint8_t)(4))
+    #define SCI_IIC_STAREQ              ((uint8_t)(1)) /* A start condition is generated */
+    #define SCI_IIC_RSTAREQ             ((uint8_t)(2)) /* A restart condition is generated */
+    #define SCI_IIC_STPREQ              ((uint8_t)(4)) /* A stop condition is generated */
 
 /*----------------------------------------------------------------------------*/
 /*  I2C Interrupt Mode Select (IICINTM bit).                                  */
@@ -968,8 +963,8 @@
 /*----------------------------------------------------------------------------*/
 /*  ACK Transmission Data bit (IICACKT bit).                                  */
 /*----------------------------------------------------------------------------*/
-    #define SCI_IIC_ACK_TRANS           ((uint8_t)(0))
-    #define SCI_IIC_NACK_TRANS          ((uint8_t)(1))
+    #define SCI_IIC_ACK_TRANS           ((uint8_t)(0)) /* ACK Transmission */
+    #define SCI_IIC_NACK_TRANS          ((uint8_t)(1)) /* NACK transmission and reception of ACK/NACK */
 
 /*----------------------------------------------------------------------------*/
 /*  ACK Reception Data Flag (IICACKR bit).                                    */
@@ -979,27 +974,28 @@
 /*----------------------------------------------------------------------------*/
 /*  SSDA/SSCL Output Select (IICSDAS bit/ IICSCLS bit).                       */
 /*----------------------------------------------------------------------------*/
-    #define SCI_IIC_CLOCK_OUTPUT        ((uint8_t)(0))
-    #define SCI_IIC_CON_OUTPUT          ((uint8_t)(1))
-    #define SCI_IIC_LOW_OUTPUT          ((uint8_t)(2))
-    #define SCI_IIC_HI_Z_OUTPUT         ((uint8_t)(3))
+    #define SCI_IIC_CLOCK_OUTPUT        ((uint8_t)(0)) /* Serial data/clock output */
+    #define SCI_IIC_CON_OUTPUT          ((uint8_t)(1)) /* Generate a start, restart, or stop condition */
+    #define SCI_IIC_LOW_OUTPUT          ((uint8_t)(2)) /* Output the low level on the SSDA/SSCL pin */
+    #define SCI_IIC_HI_Z_OUTPUT         ((uint8_t)(3)) /* Place the SSDA/SSCL pin in the high-impedance state */
 
 /*----------------------------------------------------------------------------*/
 /*  Transimitted/Received Data Transfer Direction bit (SDIR bit).             */
 /*----------------------------------------------------------------------------*/
-    #define SCI_IIC_LSB_FIRST           ((uint8_t)(0))
-    #define SCI_IIC_MSB_FIRST           ((uint8_t)(1))
+    #define SCI_IIC_LSB_FIRST           ((uint8_t)(0)) /* Transfer with LSB first */
+
+    #define SCI_IIC_MSB_FIRST           ((uint8_t)(1)) /* Transfer with MSB first */
 
 /*----------------------------------------------------------------------------*/
 /*  Define register setting.                                                  */
 /*----------------------------------------------------------------------------*/
 /* Common registers setting */
     #define SCI_IIC_IICSTIF_CLEAR       ((uint8_t)(0))
-    #define SCI_IIC_ST_CON_GENERATED    ((uint8_t)(0x51))
-    #define SCI_IIC_RST_CON_GENERATED   ((uint8_t)(0x52))
-    #define SCI_IIC_SP_CON_GENERATED    ((uint8_t)(0x54))
+    #define SCI_IIC_ST_CON_GENERATED    ((uint8_t)(0x51)) /* ST setting */
+    #define SCI_IIC_RST_CON_GENERATED   ((uint8_t)(0x52)) /* RST setting */
+    #define SCI_IIC_SP_CON_GENERATED    ((uint8_t)(0x54)) /* SP setting */
 
-    #define SCI_IIC_ONESHOT_WAIT        ((uint8_t)(40))
+    #define SCI_IIC_ONESHOT_WAIT        ((uint8_t)(40)) /* OneShot wait */
 
 /* Base register of PCR used to calculate all PCR register addresses. This is constant for all supported MCUs. */
     #define SCI_IIC_PRV_PCR_BASE_REG ((uint8_t volatile *)(&MPC.PWPR.BYTE-95))
@@ -1019,7 +1015,7 @@
 /*----------------------------------------------------------------------------*/
 /*  Define int zero.                                                          */
 /*----------------------------------------------------------------------------*/
-    #define INT_ZERO 0
+    #define INT_ZERO (0)
 
 /***********************************************************************************************************************
  Typedef definitions
@@ -1091,7 +1087,7 @@ typedef enum
 typedef struct
 {
     sci_iic_api_event_t event_type; /* Event */
-    sci_iic_return_t    (*proc) (sci_iic_info_t *); /* handler */
+    sci_iic_return_t   (* proc)(sci_iic_info_t *); /* handler */
 } sci_iic_mtx_t;
 
 /***********************************************************************************************************************

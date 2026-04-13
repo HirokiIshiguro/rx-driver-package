@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_usb_basic_define.h
+ * Version      : 1.44
  * Description  : USB common macro define header
  ***********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -33,6 +21,9 @@
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2021 1.31 RX671 is added.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 01.03.2025 1.44 Change Disclaimer.
  ***********************************************************************************************************************/
 
 #ifndef R_USB_BASIC_DEFINE_H
@@ -94,7 +85,12 @@
  **********************************************************************************************************************/
 /* Version Number of API. */
 #define USB_VERSION_MAJOR   (1)
-#define USB_VERSION_MINOR   (30)
+#define USB_VERSION_MINOR   (44)
+
+#if (BSP_CFG_RTOS_USED == 5)	/* Azure RTOS */
+#define	R_USB_FS0_BASE	(0xA0000)
+#define R_USB_HS0_BASE	(0xA0200)
+#endif /* (BSP_CFG_RTOS_USED == 5) */
 
 #define CLSDATASIZE         (512u)              /* Transfer data size for Standard Request */
 #if (BSP_CFG_RTOS_USED != 0)                    /* Use RTOS */
@@ -260,21 +256,24 @@
  Macro definitions
  ******************************************************************************/
 /* The number of USBIP */
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)\
+ || defined(BSP_MCU_RX671)
     #define USB_NUM_USBIP           (2u)
 
-#else   /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) */
+#else   /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)\
+ || defined(BSP_MCU_RX671) */
     #define USB_NUM_USBIP           (1u)
 
-#endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) */
+#endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)\
+ || defined(BSP_MCU_RX671) */
 
 /* USB module definition */
 #define USB_M0  (USB0)
-#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)
+#if defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
 /*    #define USB_M1  (USB1) */
 #define USB_M1  (*(struct st_usb0    R_BSP_VOLATILE_EVENACCESS *)0xA0200)
 
-#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) */
+#endif  /* defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671) */
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
     #define USB_M1  (USBA)
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
@@ -363,6 +362,23 @@
 
 #define USB_CFG_FS              (1)
 #define USB_CFG_HS              (2)
+
+#define USB_CFG_BUSWAIT_0       (0x0f00u)
+#define USB_CFG_BUSWAIT_1       (0x0f01u)
+#define USB_CFG_BUSWAIT_2       (0x0f02u)
+#define USB_CFG_BUSWAIT_3       (0x0f00u)
+#define USB_CFG_BUSWAIT_4       (0x0f04u)
+#define USB_CFG_BUSWAIT_5       (0x0f05u)
+#define USB_CFG_BUSWAIT_6       (0x0f06u)
+#define USB_CFG_BUSWAIT_7       (0x0f07u)
+#define USB_CFG_BUSWAIT_8       (0x0f08u)
+#define USB_CFG_BUSWAIT_9       (0x0f09u)
+#define USB_CFG_BUSWAIT_10      (0x0f0au)
+#define USB_CFG_BUSWAIT_11      (0x0f0bu)
+#define USB_CFG_BUSWAIT_12      (0x0f0cu)
+#define USB_CFG_BUSWAIT_13      (0x0f0du)
+#define USB_CFG_BUSWAIT_14      (0x0f0eu)
+#define USB_CFG_BUSWAIT_15      (0x0f0fu)
 
 /******************************************************************************
  USB specification define
@@ -540,6 +556,7 @@
 #define USB_FIFO2BUF                        (0x0000u)   /* FIFO --> buffer */
 #define USB_EPNUMFIELD                      (0x000Fu)   /* Endpoint number select */
 #define USB_MAX_EP_NO                       (15u)       /* EP0 EP1 ... EP15 */
+#define USB_ENDPOINT_DIRECTION              (0x0080U) /* EndPoint Address direction */
 
 #define USB_BUF_SIZE(x)                     ((uint16_t)(((x) / 64u) - 1u) << 10u)
 #define USB_BUF_NUMB(x)                     (x)

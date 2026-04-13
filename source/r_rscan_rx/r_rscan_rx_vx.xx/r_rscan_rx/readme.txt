@@ -5,13 +5,13 @@ r_rscan_rx
 
 Document Number 
 ---------------
-R01AN2805EU0200
-R01AN2805JU0200
+R01AN2805EU0292
+R01AN2805JU0292
 
 
 Version
 -------
-v2.00
+v2.92
 
 
 Overview
@@ -37,9 +37,7 @@ order they are sent. Note that any FIFO usage is optional and are not required f
 normal operation.
 
 The driver can be reduced in size by removing code used for parameter checking. 
-This configuration option can be found in "r_config\r_rscan_rx_config.h". An 
-original copy of the configuration file is stored in 
-"r_rscan_rx\ref\r_rscan_rx_config_reference.h".
+This configuration option can be found in "r_config\r_rscan_rx_config.h".
 
 
 Features
@@ -51,16 +49,22 @@ Features
 
 Supported MCUs
 --------------
-* RX230, RX231 Group
-* RX24T-512 Group
+* RX140 Group
+* RX231 Group
+* RX24T Group
 * RX24U Group
+* RX23E-A Group
+* RX23E-B Group
 
 
 Boards Tested On
 ----------------
+* RSKRX140
 * RSKRX231
 * RSKRX24T
 * RSKRX24U
+* RSSKRX23E-A
+* RSSKRX23E-B
 
 
 Limitations
@@ -75,7 +79,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp    
+* r_bsp
 
 
 How to add to your project
@@ -92,9 +96,9 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.01
-* GCC for Renesas RX 4.8.4
-* IAR C/C++ Compiler for Renesas RX 4.11.1
+* Renesas RX v3.07.00
+* GCC for Renesas RX 8.03.00.202411
+* IAR C/C++ Compiler for Renesas RX 5.10.01
 
 
 File Structure
@@ -105,12 +109,9 @@ r_rscan_rx
   |
   +---doc
   |   +-- en 
-  |   |   r01an2805eu0200-rx-rscan.pdf
+  |   |   r01an2805eu{VERSION_NUMBER}-rx-rscan.pdf
   |   +-- ja
-  |       r01an2805ju0200-rx-rscan.pdf
-  |
-  +---ref
-  |     r_rscan_rx_config_reference.h
+  |       r01an2805ju{VERSION_NUMBER}-rx-rscan.pdf
   |
   +---src
         r_rscan_rx.c
@@ -118,4 +119,5 @@ r_rscan_rx
    
 r_config
     r_rscan_rx_config.h
-
+    
+r_rscan_rx.ftl

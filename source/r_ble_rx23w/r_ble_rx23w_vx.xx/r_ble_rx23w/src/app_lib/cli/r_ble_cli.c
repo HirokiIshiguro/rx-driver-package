@@ -1,24 +1,11 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2019-2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
+
 /***********************************************************************************************************************
  * File Name: r_ble_cli.c
- * Version : 1.0
  * Description : Command Line Interface Library.
  **********************************************************************************************************************/
 #include <stdio.h>
@@ -68,6 +55,7 @@ static uint16_t matched_strlen(const char *p_str1, const char *p_str2)
         return 0;
     }
 
+    /* WAIT_LOOP */
     while (('\0' != p_str1[i]) && ('\0' != p_str2[i]))
     {
         if (p_str1[i] != p_str2[i])
@@ -102,6 +90,7 @@ static void split_line(char *p_line, int *p_argc, char *p_argv[])
         (*p_argc) += 1;
         p_tp = strtok(NULL, " ");
 
+        /* WAIT_LOOP */
         while (NULL != p_tp)
         {
             p_argv[*p_argc] = p_tp;
@@ -133,8 +122,10 @@ static void cmd_full_match(int argc, char *p_argv[],
     *p_found_cmd = NULL;
     *p_cmd_pos   = 0;
 
+    /* WAIT_LOOP */
     for (uint16_t a = 0; a < argc; a++)
     {
+        /* WAIT_LOOP */
         for (uint16_t c = 0; c < len; c++)
         {
             if ((strncmp(p_cmds[c]->p_name, p_argv[a], strlen(p_argv[a])) == 0) &&
@@ -177,10 +168,12 @@ static void cmd_part_match(int argc, char *p_argv[],
     *p_num_of_found_cmds = 0;
     *p_cmd_pos = 0;
 
+    /* WAIT_LOOP */
     for (uint16_t a = 0; a < argc; a++)
     {
         bool found = false;
 
+        /* WAIT_LOOP */
         for (uint16_t c = 0; c < len; c++)
         {
             if ((argc - 1) == a)
@@ -222,6 +215,7 @@ static bool push_chars(const char *p_str, size_t len)
 {
     bool pushed = true;
 
+    /* WAIT_LOOP */
     for (uint16_t i = 0; i < len; i++)
     {
         if (gs_line_pos < (BLE_CLI_LINE_LEN - 1))
@@ -364,7 +358,7 @@ static void key_history(uint8_t data)
             break;
         }
 
-    } while (num_of_skip <= (BLE_CLI_NUM_OF_HISTORY - 1));
+    } while (num_of_skip <= (BLE_CLI_NUM_OF_HISTORY - 1)); /* WAIT_LOOP */
 }
 
 /*********************************************************************************************************************
@@ -397,6 +391,7 @@ static void key_complement(void) // @suppress("Function length")
 
     if (0 == argc)
     {
+        /* WAIT_LOOP */
         for (uint16_t i = 0; i < gs_num_of_cmds; i++)
         {
             p_found_cmds[i] = gsp_cmds[i];
@@ -415,6 +410,7 @@ static void key_complement(void) // @suppress("Function length")
         {
             const st_ble_cli_cmd_t *p_cmd = p_found_cmds[0];
 
+            /* WAIT_LOOP */
             for (uint16_t i = 0; i < p_cmd->num_of_cmds; i++)
             {
                 p_found_cmds[i] = p_cmd->p_cmds[i];
@@ -441,6 +437,7 @@ static void key_complement(void) // @suppress("Function length")
     /* Find common characteristic string in the found commands. */
     size_t matched_len = strlen(p_found_cmds[0]->p_name);
 
+    /* WAIT_LOOP */
     for (uint16_t i = 1; i < num_of_found_cmds; i++)
     {
         uint16_t len = matched_strlen(p_found_cmds[0]->p_name,
@@ -471,6 +468,7 @@ static void key_complement(void) // @suppress("Function length")
     {
         R_BLE_CLI_Printf("\n");
 
+        /* WAIT_LOOP */
         for (uint16_t i = 0; i < num_of_found_cmds; i++)
         {
             R_BLE_CLI_Printf("%s ", p_found_cmds[i]->p_name);
@@ -630,7 +628,18 @@ ble_status_t R_BLE_CLI_RegisterCmds(const st_ble_cli_cmd_t * const p_cmds[], uin
     return BLE_SUCCESS;
 }
 
+ble_status_t R_BLE_CLI_RegisterEventCb(ble_cli_event_cb_t cb)
+{
+    console_register_event_cb(cb);
+    return BLE_SUCCESS;
+}
+
 void R_BLE_CLI_Process(void) // @suppress("API function naming")
+{
+    (void)R_BLE_CLI_Process_With_Retval();
+}
+
+bool R_BLE_CLI_Process_With_Retval(void) // @suppress("API function naming")
 {
     uint8_t data;
     bool escape;
@@ -640,13 +649,13 @@ void R_BLE_CLI_Process(void) // @suppress("API function naming")
 
     if (false == ret)
     {
-        return;
+        return false;
     }
 
     /* During abort callback is exist, only Ctrl-C and Ctrl-D is accepted. */
     if ((NULL != gs_cmd_abort) && (KEY_CTRLC != data) && (KEY_CTRLD != data))
     {
-        return;
+        return false;
     }
 
     if (escape)
@@ -679,12 +688,14 @@ void R_BLE_CLI_Process(void) // @suppress("API function naming")
             case KEY_CTRLD:
             {
                 key_abort();
+                return true;
             } break;
 
             case KEY_LF:
             case KEY_CR:
             {
                 key_execute();
+                return true;
             } break;
 
             case KEY_BS:
@@ -708,6 +719,8 @@ void R_BLE_CLI_Process(void) // @suppress("API function naming")
             }
         }
     }
+
+    return false;
 }
 
 void R_BLE_CLI_SetCmdComp(void) // @suppress("API function naming")
@@ -718,6 +731,18 @@ void R_BLE_CLI_SetCmdComp(void) // @suppress("API function naming")
         R_BLE_CLI_Printf("\n");
         R_BLE_CLI_Printf("%s ", BLE_PRV_CLI_PROMPT);
     }
+}
+
+void R_BLE_CLI_PrintUnrecognized(void)
+{
+    R_BLE_CLI_Printf("%s: unrecognized operands\n", gs_lines[gs_line_idx]);
+    R_BLE_CLI_SetCmdComp();
+}
+
+void R_BLE_CLI_PrintError(ble_status_t ret)
+{
+    R_BLE_CLI_Printf("command error. result : 0x%04x\n", ret);
+    R_BLE_CLI_SetCmdComp();
 }
 
 #else /* (BLE_CFG_CMD_LINE_EN == 1) && (BLE_CFG_HCI_MODE_EN == 0) */
@@ -740,12 +765,27 @@ ble_status_t R_BLE_CLI_RegisterCmds(const st_ble_cli_cmd_t * const p_cmds[], uin
     return BLE_ERR_UNSUPPORTED;
 }
 
+ble_status_t R_BLE_CLI_RegisterEventCb(ble_cli_event_cb_t cb)
+{
+    (void)cb;
+    return BLE_ERR_UNSUPPORTED;
+}
+
 void R_BLE_CLI_Process(void)
 {
 }
 
 void R_BLE_CLI_SetCmdComp(void)
 {
+}
+
+void R_BLE_CLI_PrintUnrecognized(void)
+{
+}
+
+void R_BLE_CLI_PrintError(ble_status_t ret)
+{
+    (void)ret;
 }
 
 #endif /* (BLE_CFG_CMD_LINE_EN == 1) && (BLE_CFG_HCI_MODE_EN == 0) */

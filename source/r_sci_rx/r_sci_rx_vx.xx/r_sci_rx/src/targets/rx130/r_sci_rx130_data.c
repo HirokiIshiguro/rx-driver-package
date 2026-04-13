@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2016 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /**********************************************************************************************************************
 * File Name    : r_sci_rx130_data.c
@@ -24,6 +11,11 @@
 *           27.05.2016 1.00    Initial Release.
 *           07.03.2017 2.00    Added RX130-512KB support.
 *           20.05.2019 3.00    Added support for GNUC and ICCRX.
+*           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
+*           31.03.2021 3.80    Updated macro definition enable and disable TXI, RXI, ERI, TEI.
+*           31.03.2022 4.40    Added receive flag when using DTC/DMAC.
+*                              Updated channel variables in struct st_sci_ch_rom.
+*           15.03.2025 5.41    Updated disclaimer
 ***********************************************************************************************************************/
 
 /*****************************************************************************
@@ -103,7 +95,17 @@ const sci_ch_rom_t  ch0_rom = {(volatile struct st_sci12 R_BSP_EVENACCESS_SFR *)
                                 &ICU.IER[IER_SCI0_TXI0].BYTE,
                                 &ICU.IER[IER_SCI0_TEI0].BYTE,
                                 &ICU.IER[IER_SCI0_ERI0].BYTE,
-                                BIT6_MASK, BIT7_MASK, BIT0_MASK, BIT1_MASK
+                                SCI_BIT6, SCI_BIT7, SCI_BIT0, SCI_BIT1
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                , SCI_CFG_CH0_TX_DTC_DMACA_ENABLE
+                                , SCI_CFG_CH0_RX_DTC_DMACA_ENABLE
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+                                , DTCE_SCI0_TXI0
+                                , DTCE_SCI0_RXI0
+                                /* Casting to uint8_t type is valid */
+                                , (uint8_t)SCI_CH0
+                                #endif
                                 };
 /* channel control block */
 sci_ch_ctrl_t   ch0_ctrl = {&ch0_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
@@ -111,6 +113,9 @@ sci_ch_ctrl_t   ch0_ctrl = {&ch0_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , true, 0, 0, false
                             #endif
                             , BSP_PCLKB_HZ
+                            #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                            , true, 0, 0, 0, 0, 0
+                            #endif
                            };
 #endif
 
@@ -129,7 +134,17 @@ const sci_ch_rom_t  ch1_rom = {(volatile struct st_sci12 R_BSP_EVENACCESS_SFR *)
                                 &ICU.IER[IER_SCI1_TXI1].BYTE,
                                 &ICU.IER[IER_SCI1_TEI1].BYTE,
                                 &ICU.IER[IER_SCI1_ERI1].BYTE,
-                                BIT2_MASK, BIT3_MASK, BIT4_MASK, BIT5_MASK
+                                SCI_BIT2, SCI_BIT3, SCI_BIT4, SCI_BIT5
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                , SCI_CFG_CH1_TX_DTC_DMACA_ENABLE
+                                , SCI_CFG_CH1_RX_DTC_DMACA_ENABLE
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+                                , DTCE_SCI1_TXI1
+                                , DTCE_SCI1_RXI1
+                                /* Casting to uint8_t type is valid */
+                                , (uint8_t)SCI_CH1
+                                #endif
                                 };
 /* channel control block */
 sci_ch_ctrl_t   ch1_ctrl = {&ch1_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
@@ -137,6 +152,9 @@ sci_ch_ctrl_t   ch1_ctrl = {&ch1_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , true, 0, 0, false
                             #endif
                             , BSP_PCLKB_HZ
+                            #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                            , true, 0, 0, 0, 0, 0
+                            #endif
                            };
 #endif
 
@@ -155,7 +173,17 @@ const sci_ch_rom_t  ch5_rom = {(volatile struct st_sci12 R_BSP_EVENACCESS_SFR *)
                                 &ICU.IER[IER_SCI5_TXI5].BYTE,
                                 &ICU.IER[IER_SCI5_TEI5].BYTE,
                                 &ICU.IER[IER_SCI5_ERI5].BYTE,
-                                BIT6_MASK, BIT7_MASK, BIT0_MASK, BIT1_MASK
+                                SCI_BIT6, SCI_BIT7, SCI_BIT0, SCI_BIT1
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                , SCI_CFG_CH5_TX_DTC_DMACA_ENABLE
+                                , SCI_CFG_CH5_RX_DTC_DMACA_ENABLE
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+                                , DTCE_SCI5_TXI5
+                                , DTCE_SCI5_RXI5
+                                /* Casting to uint8_t type is valid */
+                                , (uint8_t)SCI_CH5
+                                #endif
                                 };
 /* channel control block */
 sci_ch_ctrl_t   ch5_ctrl = {&ch5_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
@@ -163,9 +191,11 @@ sci_ch_ctrl_t   ch5_ctrl = {&ch5_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , true, 0, 0, false
                             #endif
                             , BSP_PCLKB_HZ
+                            #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                            , true, 0, 0, 0, 0, 0
+                            #endif
                            };
 #endif
-
 
 #if SCI_CFG_CH6_INCLUDED
 
@@ -181,7 +211,17 @@ const sci_ch_rom_t  ch6_rom = {(volatile struct st_sci12 R_BSP_EVENACCESS_SFR *)
                                 &ICU.IER[IER_SCI6_TXI6].BYTE,
                                 &ICU.IER[IER_SCI6_TEI6].BYTE,
                                 &ICU.IER[IER_SCI6_ERI6].BYTE,
-                                BIT2_MASK, BIT3_MASK, BIT4_MASK, BIT5_MASK
+                                SCI_BIT2, SCI_BIT3, SCI_BIT4, SCI_BIT5
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                , SCI_CFG_CH6_TX_DTC_DMACA_ENABLE
+                                , SCI_CFG_CH6_RX_DTC_DMACA_ENABLE
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+                                , DTCE_SCI6_TXI6
+                                , DTCE_SCI6_RXI6
+                                /* Casting to uint8_t type is valid */
+                                , (uint8_t)SCI_CH6
+                                #endif
                                 };
 /* channel control block */
 sci_ch_ctrl_t   ch6_ctrl = {&ch6_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
@@ -189,6 +229,9 @@ sci_ch_ctrl_t   ch6_ctrl = {&ch6_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , true, 0, 0, false
                             #endif
                             , BSP_PCLKB_HZ
+                            #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                            , true, 0, 0, 0, 0, 0
+                            #endif
                            };
 #endif
 
@@ -207,7 +250,17 @@ const sci_ch_rom_t  ch8_rom = {(volatile struct st_sci12 R_BSP_EVENACCESS_SFR *)
                                 &ICU.IER[IER_SCI8_TXI8].BYTE,
                                 &ICU.IER[IER_SCI8_TEI8].BYTE,
                                 &ICU.IER[IER_SCI8_ERI8].BYTE,
-                                BIT6_MASK, BIT7_MASK, BIT0_MASK, BIT1_MASK
+                                SCI_BIT6, SCI_BIT7, SCI_BIT0, SCI_BIT1
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                , SCI_CFG_CH8_TX_DTC_DMACA_ENABLE
+                                , SCI_CFG_CH8_RX_DTC_DMACA_ENABLE
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+                                , DTCE_SCI8_TXI8
+                                , DTCE_SCI8_RXI8
+                                /* Casting to uint8_t type is valid */
+                                , (uint8_t)SCI_CH8
+                                #endif
                                 };
 /* channel control block */
 sci_ch_ctrl_t   ch8_ctrl = {&ch8_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
@@ -215,6 +268,9 @@ sci_ch_ctrl_t   ch8_ctrl = {&ch8_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , true, 0, 0, false
                             #endif
                             , BSP_PCLKB_HZ
+                            #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                            , true, 0, 0, 0, 0, 0
+                            #endif
                            };
 #endif
 
@@ -233,7 +289,17 @@ const sci_ch_rom_t  ch9_rom = {(volatile struct st_sci12 R_BSP_EVENACCESS_SFR *)
                                 &ICU.IER[IER_SCI9_TXI9].BYTE,
                                 &ICU.IER[IER_SCI9_TEI9].BYTE,
                                 &ICU.IER[IER_SCI9_ERI9].BYTE,
-                                BIT2_MASK, BIT3_MASK, BIT4_MASK, BIT5_MASK
+                                SCI_BIT2, SCI_BIT3, SCI_BIT4, SCI_BIT5
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                , SCI_CFG_CH9_TX_DTC_DMACA_ENABLE
+                                , SCI_CFG_CH9_RX_DTC_DMACA_ENABLE
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+                                , DTCE_SCI9_TXI9
+                                , DTCE_SCI9_RXI9
+                                /* Casting to uint8_t type is valid */
+                                , (uint8_t)SCI_CH9
+                                #endif
                                 };
 /* channel control block */
 sci_ch_ctrl_t   ch9_ctrl = {&ch9_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
@@ -241,9 +307,11 @@ sci_ch_ctrl_t   ch9_ctrl = {&ch9_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                             , true, 0, 0, false
                             #endif
                             , BSP_PCLKB_HZ
+                            #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                            , true, 0, 0, 0, 0, 0
+                            #endif
                            };
 #endif
-
 
 #if SCI_CFG_CH12_INCLUDED
 
@@ -259,7 +327,17 @@ const sci_ch_rom_t  ch12_rom = {(volatile struct st_sci12 R_BSP_EVENACCESS_SFR *
                                 &ICU.IER[IER_SCI12_TXI12].BYTE,
                                 &ICU.IER[IER_SCI12_TEI12].BYTE,
                                 &ICU.IER[IER_SCI12_ERI12].BYTE,
-                                BIT6_MASK, BIT7_MASK, BIT0_MASK, BIT1_MASK
+                                SCI_BIT6, SCI_BIT7, SCI_BIT0, SCI_BIT1
+                                #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                                , SCI_CFG_CH12_TX_DTC_DMACA_ENABLE
+                                , SCI_CFG_CH12_RX_DTC_DMACA_ENABLE
+                                #endif
+                                #if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+                                , DTCE_SCI12_TXI12
+                                , DTCE_SCI12_RXI12
+                                /* Casting to uint8_t type is valid */
+                                , (uint8_t)SCI_CH12
+                                #endif
                                 };
 /* channel control block */
 sci_ch_ctrl_t   ch12_ctrl = {&ch12_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
@@ -267,6 +345,9 @@ sci_ch_ctrl_t   ch12_ctrl = {&ch12_rom, SCI_MODE_OFF, 0, NULL, NULL, NULL, true
                              , true, 0, 0, false
                              #endif
                              , BSP_PCLKB_HZ
+                             #if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+                            , true, 0, 0, 0, 0, 0
+                            #endif
                             };
 #endif
 

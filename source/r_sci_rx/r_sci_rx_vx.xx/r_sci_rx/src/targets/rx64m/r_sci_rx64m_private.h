@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2016 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_sci_rx64m.h
@@ -23,6 +10,11 @@
 * History : DD.MM.YYYY Version Description
 *           05.04.2016 1.00    Initial Release.
 *           20.05.2019 3.00    Added support for GNUC and ICCRX.
+*           25.08.2020 3.60    Added feature using DTC/DMAC in SCI transfer.
+*           31.03.2021 3.80    Updated macro definition enable and disable TXI, RXI, ERI, TEI.
+*           31.03.2022 4.40    Added receive flag when using DTC/DMAC.
+*                              Updated channel variables in struct st_sci_ch_rom.
+*           15.03.2025 5.41    Updated disclaimer
 ***********************************************************************************************************************/
 
 #ifndef SCI_RX64M_H
@@ -73,19 +65,37 @@ Macro definitions
 #define SCI_SSR_CLR_MASK          (0xC0U)     /* SSR register cleare mask (11000000b) */
 
 /* Macros to enable and disable ICU interrupts */
-#define ENABLE_RXI_INT      (*hdl->rom->icu_rxi |= hdl->rom->rxi_en_mask)
-#define DISABLE_RXI_INT     (*hdl->rom->icu_rxi &= (uint8_t)~hdl->rom->rxi_en_mask)
-#define ENABLE_TXI_INT      (*hdl->rom->icu_txi |= hdl->rom->txi_en_mask)
-#define DISABLE_TXI_INT     (*hdl->rom->icu_txi &= (uint8_t)~hdl->rom->txi_en_mask)
+#define ENABLE_RXI_INT      (R_BSP_BIT_SET(hdl->rom->icu_rxi, hdl->rom->rxi_bit_num))
+#define DISABLE_RXI_INT     (R_BSP_BIT_CLEAR(hdl->rom->icu_rxi, hdl->rom->rxi_bit_num))
+#define ENABLE_TXI_INT      (R_BSP_BIT_SET(hdl->rom->icu_txi, hdl->rom->txi_bit_num))
+#define DISABLE_TXI_INT     (R_BSP_BIT_CLEAR(hdl->rom->icu_txi, hdl->rom->txi_bit_num))
 
-#define ENABLE_ERI_INT      (*hdl->rom->icu_grp |= hdl->rom->eri_ch_mask)
-#define DISABLE_ERI_INT     (*hdl->rom->icu_grp &= ~hdl->rom->eri_ch_mask)
-#define ENABLE_TEI_INT      (*hdl->rom->icu_grp |= hdl->rom->tei_ch_mask)
-#define DISABLE_TEI_INT     (*hdl->rom->icu_grp &= ~hdl->rom->tei_ch_mask)
+#define ENABLE_ERI_INT      (R_BSP_BIT_SET((uint8_t*)(hdl->rom->icu_grp) + (hdl->rom->eri_bit_num >> 3), hdl->rom->eri_bit_num & 7))
+#define DISABLE_ERI_INT     (R_BSP_BIT_CLEAR((uint8_t*)(hdl->rom->icu_grp) + (hdl->rom->eri_bit_num >> 3), hdl->rom->eri_bit_num & 7))
+#define ENABLE_TEI_INT      (R_BSP_BIT_SET((uint8_t*)(hdl->rom->icu_grp) + (hdl->rom->tei_bit_num >> 3), hdl->rom->tei_bit_num & 7))
+#define DISABLE_TEI_INT     (R_BSP_BIT_CLEAR((uint8_t*)(hdl->rom->icu_grp) + (hdl->rom->tei_bit_num >> 3), hdl->rom->tei_bit_num & 7))
+
 
 /*****************************************************************************
 Typedef definitions
 ******************************************************************************/
+
+typedef struct st_scif_fifo_ctrl
+{
+    uint8_t     *p_tx_buf;            /* user's buffer */
+    uint8_t     *p_rx_buf;            /* user's buffer */
+    uint16_t    tx_cnt;             /* bytes remaining to add to FIFO */
+    uint16_t    rx_cnt;             /* bytes waiting to receive from FIFO */
+#if (TX_DTC_DMACA_ENABLE) || (RX_DTC_DMACA_ENABLE)
+    uint8_t     *p_tx_fraction_buf;
+    uint8_t     *p_rx_fraction_buf;
+    uint16_t    tx_fraction;
+    uint16_t    rx_fraction;
+#endif
+    uint16_t    total_length;       /* used for DTC in txi_handler */
+} sci_fifo_ctrl_t;
+
+/* CHANNEL CONTROL BLOCK */
 
 /* ROM INFO */
 
@@ -100,8 +110,8 @@ typedef struct st_sci_ch_rom    /* SCI ROM info for channel control block */
 #endif
     bsp_int_src_t                   eri_vector;
     bsp_int_cb_t                    eri_isr;
-    uint32_t                        tei_ch_mask;    /* ICU IR and IEN mask */
-    uint32_t                        eri_ch_mask;    /* ICU IR and IEN mask */
+    uint32_t                        tei_bit_num;    /* ICU IR and IEN bit number */
+    uint32_t                        eri_bit_num;    /* ICU IR and IEN bit number */
     volatile  uint8_t R_BSP_EVENACCESS_SFR  *ipr_rxi;       /* ptr to IPR register */
     volatile  uint8_t R_BSP_EVENACCESS_SFR  *ipr_txi;       /* ptr to IPR register */
     volatile  uint8_t R_BSP_EVENACCESS_SFR  *ir_rxi;        /* ptr to RXI IR register */
@@ -114,8 +124,28 @@ typedef struct st_sci_ch_rom    /* SCI ROM info for channel control block */
     volatile  uint8_t R_BSP_EVENACCESS_SFR  *icu_rxi;       /* ptr to ICU register */
     volatile  uint8_t R_BSP_EVENACCESS_SFR  *icu_txi;
     volatile  uint32_t R_BSP_EVENACCESS_SFR *icu_grp;
-    uint8_t                         rxi_en_mask;    /* ICU enable/disable rxi mask */
-    uint8_t                         txi_en_mask;    /* ICU enable/disable txi mask */
+    uint8_t                         rxi_bit_num;    /* ICU enable/disable rxi bit number */
+    uint8_t                         txi_bit_num;    /* ICU enable/disable txi bit number */
+    /*
+        * In case using DTC/DMAC
+     */
+#if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+    uint8_t                         dtc_dmaca_tx_enable;
+    uint8_t                         dtc_dmaca_rx_enable;
+#endif
+#if ((TX_DTC_DMACA_ENABLE & 0x01) || (RX_DTC_DMACA_ENABLE & 0x01))
+    dtc_activation_source_t         dtc_tx_act_src;
+    dtc_activation_source_t         dtc_rx_act_src;
+#endif
+#if ((TX_DTC_DMACA_ENABLE & 0x02) || (RX_DTC_DMACA_ENABLE & 0x02))
+    dmaca_activation_source_t       dmaca_tx_act_src;
+    dmaca_activation_source_t       dmaca_rx_act_src;
+    uint8_t                         dmaca_tx_channel;
+    uint8_t                         dmaca_rx_channel;
+#endif
+#if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+    uint8_t                         chan;
+#endif
 } sci_ch_rom_t;
 
 
@@ -149,6 +179,14 @@ typedef struct st_sci_ch_ctrl       /* SCI channel control (for handle) */
     bool            tx_dummy;       /* transmit dummy byte, not buffer */
 #endif
     uint32_t        pclk_speed;     /* saved peripheral clock speed for break generation */
+#if ((TX_DTC_DMACA_ENABLE || RX_DTC_DMACA_ENABLE))
+    bool                            rx_idle;
+    uint8_t                         qindex_app_tx;
+    uint8_t                         qindex_int_tx;
+    uint8_t                         qindex_app_rx;
+    uint8_t                         qindex_int_rx;
+    sci_fifo_ctrl_t                 queue[2];
+#endif
 } sci_ch_ctrl_t;
 
 

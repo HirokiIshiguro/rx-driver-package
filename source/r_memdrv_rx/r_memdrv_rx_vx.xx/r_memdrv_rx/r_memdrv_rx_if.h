@@ -1,38 +1,32 @@
-/************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/***********************************************************************************************************************
+* Copyright (c) 2018 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
-*************************************************************************************************/
-/************************************************************************************************
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+/***********************************************************************************************************************
 * File Name    : r_memdrv_rx_if.h
-* Version      : 1.01
+* Version      : 1.40
 * Description  : Memory driver header file
-*************************************************************************************************/
-/************************************************************************************************
-* History      : DD.MM.YYYY Version  Description
-*              : 15.12.2018 1.00     Initial Release
-*              : 04.04.2019 1.01     Added support for GNUC and ICCRX.
-*                                    Fixed coding style.
-*              : 22.11.2019 1.02     Modify the parameter type of structure Memory Driver I/F information.
-*************************************************************************************************/
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+* History      : DD.MM.YYYY Version Description
+*              : 15.12.2018 1.00    Initial Release
+*              : 04.04.2019 1.01    Added support for GNUC and ICCRX.
+*                                   Fixed coding style.
+*              : 22.11.2019 1.02    Modify the parameter type of structure Memory Driver I/F information.
+*              : 10.09.2020 1.03    Changed version to 1.03.
+*              : 30.10.2021 1.04    Add the definition of QSPIX.
+*              : 16.03.2023 1.05    Added support for RSCI and QSPIX Memory Mapped Mode.
+*              : 07.06.2023 1.10    Fixed issue that software lock was not released when RSPI communication timeout 
+*                                   occurs, when MEMDRV FIT, RSPI FIT and DMAC/DTC FIT are used together.
+*              : 29.08.2023 1.20    Updated demo projects.
+*              : 20.12.2024 1.30    Updated the data count formulas for RSPI mode and QSPI mode.
+*                                   Added dependency modules to the options in MDF file.
+*                                   Updated demo projects.
+*              : 15.03.2025 1.31    Updated disclaimer.
+*              : 30.10.2025 1.40    Removed doc folder and updated .rcpc file in FITDemos.
+*                                   Updated the code with RSPI byte swap feature.
+***********************************************************************************************************************/
 
 /***********************************************************************************************************************
 Includes <System Includes> , "Project Includes"
@@ -51,7 +45,7 @@ Macro definitions
 #define MEMDRV_IF_H
 /* Version Number of API. */
 #define MEMDRV_VERSION_MAJOR                 (1)
-#define MEMDRV_VERSION_MINOR                 (02)
+#define MEMDRV_VERSION_MINOR                 (40)
 
 /* Define device no. */
 #define MEMDRV_DEV0                          (0)
@@ -79,6 +73,9 @@ Macro definitions
 #define MEMDRV_DRVR_RX_FIT_RSPI              (0x00000100ul)
 #define MEMDRV_DRVR_RX_FIT_QSPI_SMSTR        (0x00000200ul)
 #define MEMDRV_DRVR_RX_FIT_SCI_SPI           (0x00000400ul)
+#define MEMDRV_DRVR_RX_FIT_QSPIX_IAM         (0x00000800ul)
+#define MEMDRV_DRVR_RX_FIT_QSPIX_MMM         (0x00001000ul)
+#define MEMDRV_DRVR_RX_FIT_RSCI_SPI          (0x00002000ul)
 
 /* Definitions of data transfer method */
 #define MEMDRV_TRNS_CPU                      (0x00001000ul)
@@ -90,8 +87,12 @@ Macro definitions
 #define MEMDRV_MODE_DUAL                     ((uint8_t)(0x02))
 #define MEMDRV_MODE_QUAD                     ((uint8_t)(0x03))
 
-#define MEMDRV_TRNS_CMD                      (0x0703)
-#define MEMDRV_TRNS_DATA_CMD                 (0x0203)
+/* Definitions of input/output mode */
+#define MEMDRV_ADDR_4BYTES                   ((uint8_t)(4))
+#define MEMDRV_ADDR_3BYTES                   ((uint8_t)(3))
+
+#define MEMDRV_TRNS_CMD                      (0x0703)       /* data length is 8 bits, CPOL is 1, CHPA is 1 */
+#define MEMDRV_TRNS_DATA_CMD                 (0x0203)       /* data length is 32 bits, CPOL is 1, CHPA is 1 */
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -112,8 +113,12 @@ typedef enum e_memdrv_err
 typedef struct
 {
     uint32_t    cnt;
+    uint32_t    p_addr;
     uint8_t   * p_data;
     uint8_t     io_mode;
+    uint8_t     addr_size;
+    bool        read_after_write;
+    bool        read_in_memory_mapped;
     uint8_t     rsv[3];
 } st_memdrv_info_t;
 /***********************************************************************************************************************

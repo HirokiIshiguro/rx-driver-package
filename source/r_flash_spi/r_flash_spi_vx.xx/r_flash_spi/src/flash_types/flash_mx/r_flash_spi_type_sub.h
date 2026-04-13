@@ -1,38 +1,26 @@
-/************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/***********************************************************************************************************************
+* Copyright (c) 2014 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2008(2009-2014) Renesas Electronics Corporation. All rights reserved.
-*************************************************************************************************/
-/************************************************************************************************
-* File Name    : r_flash_spi_tyep_sub.h
-* Version      : 2.32
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+* File Name    : r_flash_spi_type_sub.h
+* Version      : 3.51
 * Description  : FLASH SPI driver memory type header file
-*************************************************************************************************/
-/************************************************************************************************
-* History      : DD.MM.YYYY Version  Description
-*              : 23.07.2014 2.21     Created
-*              : 29.05.2015 2.32     Revised functions of same as Ver.2.32 of EEPROM SPI FIT module.
-*************************************************************************************************/
-#ifndef __FLASH_SPI_TYPE_SUB_H__
-#define __FLASH_SPI_TYPE_SUB_H__
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+* History      : DD.MM.YYYY Version Description
+*              : 23.07.2014 2.21    Created
+*              : 29.05.2015 2.32    Revised functions of same as Ver.2.32 of EEPROM SPI FIT module.
+*              : 31.12.2021 3.03    Added variable "read_after_write" "read_after_write_add" and
+*                                   "read_after_write_data" for controlling SPI bus.
+*              : 16.03.2023 3.20    Added support for QSPIX Memory Mapped Mode.
+*              : 15.11.2023 3.40    Added support for MX25U6432F.
+*                                   Added features Advanced sector protection supporting for MX66L1G45 and MX25U6432F.
+*              : 15.03.2025 3.51    Updated disclaimer.
+***********************************************************************************************************************/
+#ifndef FLASH_SPI_TYPE_SUB_H
+#define FLASH_SPI_TYPE_SUB_H
 
 
 /************************************************************************************************
@@ -47,8 +35,11 @@ Macro definitions
 #define FLASH_SPI_MX_CMD_SIZE           (uint8_t)(1)    /* Command size(Byte)                       */
 #define FLASH_SPI_MX_STSREG_SIZE        (uint32_t)(1)   /* Status register size(Byte)               */
 #define FLASH_SPI_MX_SCURREG_SIZE       (uint32_t)(1)   /* Security register size (bytes)           */
-#if   (FLASH_SPI_CFG_DEV0_MX25L == 1) || (FLASH_SPI_CFG_DEV0_MX66L == 1) || \
-      (FLASH_SPI_CFG_DEV1_MX25L == 1) || (FLASH_SPI_CFG_DEV1_MX66L == 1)
+#define FLASH_SPI_MX_LKREG_SIZE         (uint32_t)(2)   /* Lock register size (2 bytes)             */
+#define FLASH_SPI_MX_SPBLKREG_SIZE      (uint32_t)(1)   /* SPB lock register size (1 byte)          */
+#define FLASH_SPI_MX_SPBREG_SIZE        (uint32_t)(1)   /* SPB register size (1 byte)               */
+#if   (FLASH_SPI_CFG_DEV0_MX25L == 1) || (FLASH_SPI_CFG_DEV0_MX66L == 1) || (FLASH_SPI_CFG_DEV0_MX25U == 1) || \
+      (FLASH_SPI_CFG_DEV1_MX25L == 1) || (FLASH_SPI_CFG_DEV1_MX66L == 1) || (FLASH_SPI_CFG_DEV1_MX25U == 1)
 #define FLASH_SPI_MX_CFGREG_SIZE        (uint32_t)(1)   /* Configuration register size (1 byte)     */
 #define FLASH_SPI_MX_WSTSREG_SIZE       (uint32_t)(2)   /* Status register size (bytes) for Write   */
 #elif (FLASH_SPI_CFG_DEV0_MX25R == 1) || (FLASH_SPI_CFG_DEV1_MX25R == 1)
@@ -56,6 +47,8 @@ Macro definitions
 #define FLASH_SPI_MX_WSTSREG_SIZE       (uint32_t)(3)   /* Status register size (bytes) for Write   */
 #endif
 #define FLASH_SPI_MX_IDDATA_SIZE        (uint32_t)(3)   /* ID data size (bytes)                     */
+#define TRUE                            (bool)(true)    /* not close SPI bus cycle                  */
+#define FALSE                           (bool)(false)   /* close SPI bus cycle                      */
 
 /*-------- Definitions of device information ---------*/
 /* ==== FLASH device 0 ==== */
@@ -65,7 +58,7 @@ Macro definitions
 #define FLASH_SPI_MX_DEV0_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV0_ADDR_SIZE     (uint8_t)(3)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV0_ADDR_SIZE     FLASH_SPI_ADDR_3BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV0_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV0_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
@@ -79,7 +72,7 @@ Macro definitions
 #define FLASH_SPI_MX_DEV0_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV0_ADDR_SIZE     (uint8_t)(3)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV0_ADDR_SIZE     FLASH_SPI_ADDR_3BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV0_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV0_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
@@ -93,7 +86,7 @@ Macro definitions
 #define FLASH_SPI_MX_DEV0_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV0_ADDR_SIZE     (uint8_t)(3)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV0_ADDR_SIZE     FLASH_SPI_ADDR_3BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV0_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV0_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
@@ -107,7 +100,7 @@ Macro definitions
 #define FLASH_SPI_MX_DEV0_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV0_ADDR_SIZE     (uint8_t)(4)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV0_ADDR_SIZE     FLASH_SPI_ADDR_4BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV0_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV0_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
@@ -121,7 +114,7 @@ Macro definitions
 #define FLASH_SPI_MX_DEV0_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV0_ADDR_SIZE     (uint8_t)(4)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV0_ADDR_SIZE     FLASH_SPI_ADDR_4BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV0_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV0_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
@@ -135,7 +128,7 @@ Macro definitions
 #define FLASH_SPI_MX_DEV0_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV0_ADDR_SIZE     (uint8_t)(4)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV0_ADDR_SIZE     FLASH_SPI_ADDR_4BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV0_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV0_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
@@ -149,7 +142,7 @@ Macro definitions
 #define FLASH_SPI_MX_DEV0_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV0_ADDR_SIZE     (uint8_t)(4)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV0_ADDR_SIZE     FLASH_SPI_ADDR_4BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV0_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV0_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
@@ -163,13 +156,27 @@ Macro definitions
 #define FLASH_SPI_MX_DEV0_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV0_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV0_ADDR_SIZE     (uint8_t)(3)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV0_ADDR_SIZE     FLASH_SPI_ADDR_3BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV0_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV0_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
 #define FLASH_SPI_MX_DEV0_ADDR_MODE     FLASH_SPI_MODE_3BYTE    /* Addressability Mode                  */
 #define FLASH_SPI_DEV0_TYPE             FLASH_SPI_TYPE_MX25R    /* Flash memory type                    */
 #endif  /* (FLASH_SPI_CFG_DEV0_MX25L == 1) && (FLASH_SPI_CFG_DEV0_SIZE_64M == 1) */
+
+#if (FLASH_SPI_CFG_DEV0_MX25U == 1) && (FLASH_SPI_CFG_DEV0_SIZE_64M == 1)
+#define FLASH_SPI_MX_DEV0_MEM_SIZE      (uint32_t)(8388608)     /* 8MByte (64Mbit)                      */
+#define FLASH_SPI_MX_DEV0_SECT_ADDR     (uint32_t)(0xfffff000)  /* Sector address setting               */
+#define FLASH_SPI_MX_DEV0_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
+#define FLASH_SPI_MX_DEV0_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
+#define FLASH_SPI_MX_DEV0_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
+#define FLASH_SPI_MX_DEV0_ADDR_SIZE     FLASH_SPI_ADDR_3BYTES   /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV0_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
+#define FLASH_SPI_MX_DEV0_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
+                                            /* Kind of full-chip erase command that the device supports */
+#define FLASH_SPI_MX_DEV0_ADDR_MODE     FLASH_SPI_MODE_3BYTE    /* Addressability Mode                  */
+#define FLASH_SPI_DEV0_TYPE             FLASH_SPI_TYPE_MX25U    /* Flash memory type                    */
+#endif  /* (FLASH_SPI_CFG_DEV0_MX25U == 1) && (FLASH_SPI_CFG_DEV0_SIZE_64M == 1) */
 
 
 /* ==== FLASH device 1 ==== */
@@ -179,7 +186,7 @@ Macro definitions
 #define FLASH_SPI_MX_DEV1_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV1_ADDR_SIZE     (uint8_t)(3)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV1_ADDR_SIZE     FLASH_SPI_ADDR_3BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV1_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV1_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
@@ -193,7 +200,7 @@ Macro definitions
 #define FLASH_SPI_MX_DEV1_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV1_ADDR_SIZE     (uint8_t)(3)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV1_ADDR_SIZE     FLASH_SPI_ADDR_3BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV1_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV1_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
@@ -207,7 +214,7 @@ Macro definitions
 #define FLASH_SPI_MX_DEV1_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV1_ADDR_SIZE     (uint8_t)(3)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV1_ADDR_SIZE     FLASH_SPI_ADDR_3BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV1_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV1_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
@@ -221,7 +228,7 @@ Macro definitions
 #define FLASH_SPI_MX_DEV1_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV1_ADDR_SIZE     (uint8_t)(4)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV1_ADDR_SIZE     FLASH_SPI_ADDR_4BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV1_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV1_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
@@ -235,7 +242,7 @@ Macro definitions
 #define FLASH_SPI_MX_DEV1_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV1_ADDR_SIZE     (uint8_t)(4)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV1_ADDR_SIZE     FLASH_SPI_ADDR_4BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV1_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV1_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
@@ -249,7 +256,7 @@ Macro definitions
 #define FLASH_SPI_MX_DEV1_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV1_ADDR_SIZE     (uint8_t)(4)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV1_ADDR_SIZE     FLASH_SPI_ADDR_4BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV1_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV1_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
@@ -263,7 +270,7 @@ Macro definitions
 #define FLASH_SPI_MX_DEV1_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV1_ADDR_SIZE     (uint8_t)(4)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV1_ADDR_SIZE     FLASH_SPI_ADDR_4BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV1_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV1_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
@@ -277,13 +284,27 @@ Macro definitions
 #define FLASH_SPI_MX_DEV1_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
 #define FLASH_SPI_MX_DEV1_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
-#define FLASH_SPI_MX_DEV1_ADDR_SIZE     (uint8_t)(3)            /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV1_ADDR_SIZE     FLASH_SPI_ADDR_3BYTES   /* Address size (bytes)                 */
 #define FLASH_SPI_MX_DEV1_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
 #define FLASH_SPI_MX_DEV1_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
                                             /* Kind of full-chip erase command that the device supports */
 #define FLASH_SPI_MX_DEV1_ADDR_MODE     FLASH_SPI_MODE_3BYTE    /* Addressability Mode                  */
 #define FLASH_SPI_DEV1_TYPE             FLASH_SPI_TYPE_MX25R    /* Flash memory type                    */
 #endif  /* (FLASH_SPI_CFG_DEV1_MX25L == 1) && (FLASH_SPI_CFG_DEV1_SIZE_64M == 1) */
+
+#if (FLASH_SPI_CFG_DEV1_MX25U == 1) && (FLASH_SPI_CFG_DEV1_SIZE_64M == 1)
+#define FLASH_SPI_MX_DEV1_MEM_SIZE      (uint32_t)(8388608)     /* 8MByte (64Mbit)                      */
+#define FLASH_SPI_MX_DEV1_SECT_ADDR     (uint32_t)(0xfffff000)  /* Sector address setting               */
+#define FLASH_SPI_MX_DEV1_B32K_ADDR     (uint32_t)(0xffff8000)  /* 32KB Block address setting           */
+#define FLASH_SPI_MX_DEV1_B64K_ADDR     (uint32_t)(0xffff0000)  /* 64KB Block address setting           */
+#define FLASH_SPI_MX_DEV1_PAGE_SIZE     (uint32_t)(256)         /* Page size when writing               */
+#define FLASH_SPI_MX_DEV1_ADDR_SIZE     FLASH_SPI_ADDR_3BYTES   /* Address size (bytes)                 */
+#define FLASH_SPI_MX_DEV1_WP_WHOLE_MEM  (uint8_t)(0x0f)         /* Whole memory WP setting              */
+#define FLASH_SPI_MX_DEV1_FULL_CHIP_ERASE   FLASH_SPI_MODE_C_ERASE
+                                            /* Kind of full-chip erase command that the device supports */
+#define FLASH_SPI_MX_DEV1_ADDR_MODE     FLASH_SPI_MODE_3BYTE    /* Addressability Mode                  */
+#define FLASH_SPI_DEV1_TYPE             FLASH_SPI_TYPE_MX25U    /* Flash memory type                    */
+#endif  /* (FLASH_SPI_CFG_DEV1_MX25U == 1) && (FLASH_SPI_CFG_DEV1_SIZE_64M == 1) */
 
 
 /*------- Definitions of Status Register value -------*/
@@ -311,6 +332,14 @@ Macro definitions
 /*------- Definitions of Secure Register value -------*/
 #define FLASH_SPI_MX_SCUR_E_FAIL        (uint8_t)(0x40)         /* Erase Failed                         */
 #define FLASH_SPI_MX_SCUR_P_FAIL        (uint8_t)(0x20)         /* Program Failed                       */
+#define FLASH_SPI_MX_SCUR_WPSEL         (uint8_t)(0x80)         /* Write Protection Selection bit       */
+
+/*------- Definitions of Lock Register value -------*/
+#define FLASH_SPI_MX_LKR_SPBE          (uint8_t)(0xfd)         /* Solid Protection Mode Lock Bit        */
+#define FLASH_SPI_MX_LKR_SPBLKDN       (uint8_t)(0xbf)         /* SPB Lock Down Bit                     */
+
+/*------- Definitions of SPB Lock Register value -------*/
+#define FLASH_SPI_MX_SPBLKR_SPBLK      (uint8_t)(0x00)         /* SPB Lock Bit                          */
 
 
 /************************************************************************************************
@@ -333,12 +362,12 @@ flash_spi_status_t r_flash_spi_mx_write_di(uint8_t devno);
 flash_spi_status_t r_flash_spi_mx_read_stsreg(uint8_t devno, uint8_t * p_status);
 flash_spi_status_t r_flash_spi_mx_read_configreg(uint8_t devno, uint8_t * p_config);
 flash_spi_status_t r_flash_spi_mx_read_scurreg(uint8_t devno, uint8_t * p_scur);
-flash_spi_status_t r_flash_spi_mx_set_write_protect(uint8_t devno, uint8_t wpsts);
-flash_spi_status_t r_flash_spi_mx_write_configuration(uint8_t devno, flash_spi_reg_info_t * p_reg);
-flash_spi_status_t r_flash_spi_mx_quad_enable(uint8_t devno);
-flash_spi_status_t r_flash_spi_mx_quad_disable(uint8_t devno);
+flash_spi_status_t r_flash_spi_mx_set_write_protect(uint8_t devno, uint8_t wpsts, bool read_after_write);
+flash_spi_status_t r_flash_spi_mx_write_configuration(uint8_t devno, flash_spi_reg_info_t * p_reg, bool read_after_write);
+flash_spi_status_t r_flash_spi_mx_quad_enable(uint8_t devno, bool read_after_write);
+flash_spi_status_t r_flash_spi_mx_quad_disable(uint8_t devno, bool read_after_write);
 flash_spi_status_t r_flash_spi_mx_read(uint8_t devno, flash_spi_info_t * p_flash_spi_info);
-flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t  * p_flash_spi_info);
+flash_spi_status_t r_flash_spi_mx_write_page(uint8_t devno, flash_spi_info_t  * p_flash_spi_info, bool read_after_write_add, bool read_after_write_data);
 flash_spi_status_t r_flash_spi_mx_erase(uint8_t devno, flash_spi_erase_info_t * p_flash_spi_erase_info);
 flash_spi_status_t r_flash_spi_mx_rdid(uint8_t devno, uint8_t * p_data);
 flash_spi_status_t r_flash_spi_mx_polling(uint8_t devno, flash_spi_poll_mode_t mode);
@@ -346,8 +375,10 @@ flash_spi_status_t r_flash_spi_mx_enter_4addr(uint8_t devno);
 flash_spi_status_t r_flash_spi_mx_get_memory_info(uint8_t devno, flash_spi_mem_info_t * p_flash_spi_mem_info);
 flash_spi_status_t r_flash_spi_mx_check_cnt(uint8_t devno, flash_spi_info_t  * p_flash_spi_info);
 uint32_t           r_flash_spi_mx_page_calc(uint8_t devno, flash_spi_info_t  * p_flash_spi_info);
+flash_spi_status_t r_flash_spi_mx_set_write_protect_advanced_sector(uint8_t devno, flash_spi_protect_sector_info_t * flash_spi_protect_sector_info);
+flash_spi_status_t r_flash_spi_mx_erase_write_protect_advanced_sector(uint8_t devno);
 
 
-#endif /* __FLASH_SPI_TYPE_SUB_H__ */
+#endif /* FLASH_SPI_TYPE_SUB_H */
 
 /* End of File */

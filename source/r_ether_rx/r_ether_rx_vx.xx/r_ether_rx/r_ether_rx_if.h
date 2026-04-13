@@ -1,24 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
- * applicable laws, including copyright laws. 
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the 
- * following link:
- * http://www.renesas.com/disclaimer 
- *
- * Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.    
- ***********************************************************************************************************************/
+/*
+* Copyright (C) 2016 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_ether_rx_if.h
- * Version      : 1.20
+ * Version      : 1.24
  * Description  : Ethernet module device driver
  ***********************************************************************************************************************/
 /***********************************************************************************************************************
@@ -42,6 +29,9 @@
  *         :                     Added changes for RX66N.
  *         :                     Deleted supoort for RX63N.
  *         :                     Added support for NON_BLOCKING.
+ *         : 10.09.2020 1.21     Changed minor version to '21'.
+ *         : 20.03.2025 1.24     Changed minor version to '24'.
+ *                               Changed the disclaimer in program sources
  ***********************************************************************************************************************/
 
 /* Guards against multiple inclusion */
@@ -65,9 +55,9 @@
     #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 
- /* Version Number of API. */
+/* Version Number of API. */
     #define ETHER_RX_VERSION_MAJOR  (1)
-    #define ETHER_RX_VERSION_MINOR  (20)
+    #define ETHER_RX_VERSION_MINOR  (24)
 
 /* When using the Read functions, ETHER_NO_DATA is the return value that indicates that no received data. */
     #define ETHER_NO_DATA           (0)
@@ -305,8 +295,8 @@ void R_ETHER_LinkProcess (uint32_t channel);
 ether_return_t R_ETHER_WakeOnLAN (uint32_t channel);
 ether_return_t R_ETHER_CheckWrite (uint32_t channel);
 ether_return_t R_ETHER_Control (ether_cmd_t const cmd, ether_param_t const control);
-ether_return_t R_ETHER_WritePHY(uint32_t channel, uint16_t address, uint16_t data);
-ether_return_t R_ETHER_ReadPHY(uint32_t channel, uint16_t address, uint16_t *p_data);
+ether_return_t R_ETHER_WritePHY (uint32_t channel, uint16_t address, uint16_t data);
+ether_return_t R_ETHER_ReadPHY (uint32_t channel, uint16_t address, uint16_t *p_data);
 uint32_t R_ETHER_GetVersion (void);
 
 #endif  /* R_ETHER_RX_IF_H*/

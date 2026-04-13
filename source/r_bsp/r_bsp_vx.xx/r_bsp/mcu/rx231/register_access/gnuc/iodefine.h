@@ -1,17 +1,8 @@
-                                                                          
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                           
-                                                                          
+/*
+* Copyright (c) 2014(2015-2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /*********************************************************************************
 *
 * Device     : RX/RX200/RX231
@@ -20,19 +11,19 @@
 *
 * Abstract   : Definition of I/O Register.
 *
-* History    : 0.5A (2014-09-18)  [Hardware Manual Revision : 0.50]
-*            : 1.0A (2015-05-18)  [Hardware Manual Revision : 1.00]
-*            : 1.0C (2015-07-21)  [Hardware Manual Revision : 1.00]
-*            : 1.0D (2015-09-02)  [Hardware Manual Revision : 1.00]
-*            : 1.0E (2016-02-05)  [Hardware Manual Revision : 1.00]
-*            : 1.0F (2016-02-26)  [Hardware Manual Revision : 1.00]
-*            : 1.0G (2016-11-10)  [Hardware Manual Revision : 1.00]
-*            : 1.0H (2016-12-06)  [Hardware Manual Revision : 1.00]
-*            : 1.0I (2017-04-24)  [Hardware Manual Revision : 1.00]
+* History    : 0.5A  (2014-09-18)  [Hardware Manual Revision : 0.50]
+*            : 1.0A  (2015-05-18)  [Hardware Manual Revision : 1.00]
+*            : 1.0C  (2015-07-21)  [Hardware Manual Revision : 1.00]
+*            : 1.0D  (2015-09-02)  [Hardware Manual Revision : 1.00]
+*            : 1.0E  (2016-02-05)  [Hardware Manual Revision : 1.00]
+*            : 1.0F  (2016-02-26)  [Hardware Manual Revision : 1.00]
+*            : 1.0G  (2016-11-10)  [Hardware Manual Revision : 1.00]
+*            : 1.0H  (2016-12-06)  [Hardware Manual Revision : 1.00]
+*            : 1.0I  (2017-04-24)  [Hardware Manual Revision : 1.00]
+*            : 1.0J  (2023-03-03)  [Hardware Manual Revision : 1.00]
+*            : 1.00K (2025-02-14)  [Hardware Manual Revision : 1.00]
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
-*
-* Copyright (C) 2017 (2014 - 2016) Renesas Electronics Corporation.
 *
 *********************************************************************************/
 /********************************************************************************/
@@ -8157,7 +8148,8 @@ struct st_ctsu {
 			unsigned short CTSUSPMD : 2;
 			unsigned short CTSUTSOD : 1;
 			unsigned short CTSUDRV : 1;
-			unsigned short  : 3;
+			unsigned short  : 2;
+			unsigned short CTSUCLKSEL1 : 1;
 			unsigned short CTSUTSOC : 1;
 			unsigned short  : 7;
 			unsigned short CTSUICOMP : 1;
@@ -8165,7 +8157,8 @@ struct st_ctsu {
 			unsigned short CTSUICOMP : 1;
 			unsigned short  : 7;
 			unsigned short CTSUTSOC : 1;
-			unsigned short  : 3;
+			unsigned short CTSUCLKSEL1 : 1;
+			unsigned short  : 2;
 			unsigned short CTSUDRV : 1;
 			unsigned short CTSUTSOD : 1;
 			unsigned short CTSUSPMD : 2;

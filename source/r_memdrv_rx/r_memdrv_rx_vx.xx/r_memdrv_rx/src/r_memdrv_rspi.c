@@ -1,30 +1,12 @@
-/************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/***********************************************************************************************************************
+* Copyright (c) 2018 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
-*************************************************************************************************/
-/************************************************************************************************
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+/***********************************************************************************************************************
 * System Name  : MEMDRV  software
 * File Name    : r_memdrv_rspi.c
-* Version      : 1.02
+* Version      : 1.40
 * Device       : -
 * Abstract     : IO I/F module
 * Tool-Chain   : -
@@ -32,19 +14,31 @@
 * H/W Platform : -
 * Description  : MEMDRV I/O file
 * Limitation   : None
-*************************************************************************************************/
-/************************************************************************************************
-* History      : DD.MM.YYYY Version  Description
-*              : 15.12.2018 1.00     Initial Release
-*              : 04.04.2019 1.01     Added support for GNUC and ICCRX.
-*                                    Fixed coding style.
-*              : 22.11.2019 1.02     The module is updated to fix the software issue.
-*                                    When r_memdrv_rspi_write_data function is called, 
-*                                    there are cases when transmit data/receive data are not processed successfully.
-*                                    The issue occurs when the number of transmit is set to a value of 1024 byte.
-*                                    Corrected parameter type of the r_memdrv_rspi_write_data function.
-*                                    Corrected parameter type of the r_memdrv_rspi_read_data function.
-*************************************************************************************************/
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+* History      : DD.MM.YYYY Version Description
+*              : 15.12.2018 1.00    Initial Release
+*              : 04.04.2019 1.01    Added support for GNUC and ICCRX.
+*                                   Fixed coding style.
+*              : 22.11.2019 1.02    The module is updated to fix the software issue.
+*                                   When r_memdrv_rspi_write_data function is called, 
+*                                   there are cases when transmit data/receive data are not processed successfully.
+*                                   The issue occurs when the number of transmit is set to a value of 1024 byte.
+*                                   Corrected parameter type of the r_memdrv_rspi_write_data function.
+*                                   Corrected parameter type of the r_memdrv_rspi_read_data function.
+*              : 10.09.2020 1.03    Modified the RSPI callback function.
+*                                   The module is updated to fix the software issue.
+*                                   In IAR and Big Endian, set the device driver to be used to RSPI and set it to
+*                                   transfer data by Software transfer. If you transfer 4 bytes or more of data
+*                                   with R_MEMDRV_TxData() and R_MEMDRV_RxData(), more data than the specified
+*                                   transfer size will be transferred.
+*              : 16.03.2023 1.05    Fixed coding style.
+*              : 07.06.2023 1.10    Fixed issue that software lock was not released when RSPI communication timeout 
+*                                   occurs, when MEMDRV FIT, RSPI FIT and DMAC/DTC FIT are used together.
+*              : 20.12.2024 1.30    Updated the data count formulas.
+*              : 15.03.2025 1.31    Updated disclaimer.
+*              : 30.10.2025 1.40    Updated the code with RSPI byte swap feature.
+***********************************************************************************************************************/
 
 /************************************************************************************************
 Includes <System Includes> , "Project Includes"
@@ -56,6 +50,19 @@ Includes <System Includes> , "Project Includes"
 #if ((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_RSPI)) || \
     ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_RSPI))
 #include "r_pinset.h"
+
+#if RSPI_LITTLE_ENDIAN == 1
+#if (!defined (RSPI_HARDWARE_BYTE_SWAP_IS_SUPPORTED) && !defined (RSPI_HARDWARE_BYTE_SWAP_IS_NOT_SUPPORTED))
+    #warning "This module should use RSPI byte swap. Please use RSPI module Rev.3.70 or higher."
+#endif /* (!defined (RSPI_HARDWARE_BYTE_SWAP_IS_SUPPORTED) && !defined (RSPI_HARDWARE_BYTE_SWAP_IS_NOT_SUPPORTED)) */
+
+#if defined (RSPI_HARDWARE_BYTE_SWAP_IS_SUPPORTED) \
+|| (defined (RSPI_HARDWARE_BYTE_SWAP_IS_NOT_SUPPORTED) \
+&& ((MEMDRV_CFG_DEV0_MODE_TRNS == MEMDRV_TRNS_CPU) || (MEMDRV_CFG_DEV1_MODE_TRNS == MEMDRV_TRNS_CPU)))
+#define MEMDRV_RSPI_BYTE_SWAP_IS_USED
+#endif /* defined (RSPI_HARDWARE_BYTE_SWAP_IS_SUPPORTED) */
+#endif /* RSPI_LITTLE_ENDIAN == 1 */
+
 /************************************************************************************************
 Macro definitions
 *************************************************************************************************/
@@ -65,7 +72,7 @@ Macro definitions
 #define RSPI_TIMER_MIN_TIME        (100)       /* 100ms             */
 #define RSPI_SECTOR_SIZE           (512)       /* 1 sector size     */
 #define RSPI_TRAN_SIZE             (4)
-#define RSPI_EXCHG_MAX_COUNT       (65532)
+#define RSPI_EXCHG_MAX_COUNT       (65532)     /* The maximum value of type uint16_t divisible by 4 */
 /************************************************************************************************
 Typedef definitions
 *************************************************************************************************/
@@ -92,7 +99,9 @@ static memdrv_err_t         r_memdrv_rspi_wait(uint8_t channel, uint32_t size);
 static void                 r_memdrv_rspi_callback(void *p_data);
 static void                 rspi_init_ports(void);
 
-static memdrv_err_t r_rspi_exchg(uint8_t * p_data, uint16_t size);
+#if defined (MEMDRV_RSPI_BYTE_SWAP_IS_USED)
+static memdrv_err_t r_memdrv_rspi_enable_byte_swap (uint8_t devno);
+#endif /* defined (MEMDRV_RSPI_BYTE_SWAP_IS_USED) */
 static rspi_str_tranmode_t r_memdrv_rspi_set_tran_mode(uint8_t devno);
 static memdrv_err_t r_memdrv_rspi_disable_tx_data_dmac(uint8_t devno,
                                                        st_memdrv_info_t * p_memdrv_info);
@@ -182,6 +191,10 @@ memdrv_err_t r_memdrv_rspi_open(uint8_t devno, st_memdrv_info_t * p_memdrv_info)
     }
 #endif
 
+#if defined (MEMDRV_RSPI_BYTE_SWAP_IS_USED)
+    config.byte_swap = RSPI_BYTE_SWAP_ENABLE;
+#endif /* defined (MEMDRV_RSPI_BYTE_SWAP_IS_USED) */
+
     if (RSPI_SUCCESS != R_RSPI_Open (channel,     
                                &config,     
                                spcmd_cmd_word,    
@@ -247,7 +260,6 @@ memdrv_err_t r_memdrv_rspi_close(uint8_t devno, st_memdrv_info_t * p_memdrv_info
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -1592,7 +1604,6 @@ static memdrv_err_t r_memdrv_rspi_enable_rx_data_dtc(uint8_t devno,
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_HARD                        ;   Hardware error
 *              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
@@ -1657,8 +1668,8 @@ memdrv_err_t r_memdrv_rspi_tx(uint8_t devno, st_memdrv_info_t * p_memdrv_info)
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_HARD                        ;   Hardware error
 *              : MEMDRV_ERR_OTHER                       ;   Other error
+*              : MEMDRV_ERR_HARD                        ;   Hardware error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -1734,14 +1745,22 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
         R_MEMDRV_Log(MEMDRV_DEBUG_ERR_ID, (uint32_t)MEMDRV_ERR_SUB, __LINE__);
         return MEMDRV_ERR_OTHER;
     }
-    r_rspi_exchg(p_memdrv_info->p_data, p_memdrv_info->cnt);
+
+#if defined (MEMDRV_RSPI_BYTE_SWAP_IS_USED)
+        /* Enable RSPI byte swapping */
+        ret_memdrv = r_memdrv_rspi_enable_byte_swap(devno);
+        if (MEMDRV_SUCCESS != ret_memdrv)
+        {
+            return MEMDRV_ERR_OTHER;
+        }
+#endif /* defined (MEMDRV_RSPI_BYTE_SWAP_IS_USED) */
+
     ret_memdrv = r_memdrv_rspi_write_data(channel, p_memdrv_info->cnt, p_memdrv_info->p_data, spcmd_cmd_word);
     if (MEMDRV_SUCCESS != ret_memdrv)
     {
-        r_rspi_exchg(p_memdrv_info->p_data, p_memdrv_info->cnt);
         return MEMDRV_ERR_OTHER;
     }
-    r_rspi_exchg(p_memdrv_info->p_data, p_memdrv_info->cnt);
+
     return MEMDRV_SUCCESS;
 } /* End of function r_memdrv_rspi_tx_data() */
 #elif (MEMDRV_CFG_DEV0_TYPE == 0)  | (MEMDRV_CFG_DEV1_TYPE == 0)
@@ -1752,6 +1771,7 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
     rspi_err_t              ret_drv = RSPI_SUCCESS;
     memdrv_err_t            ret_memdrv = MEMDRV_SUCCESS;
     rspi_cmd_trans_mode_t   mode;
+    st_memdrv_info_t        memdrv_info_dmac_dtc;
 
     uint32_t                bound_cnt = 0;
     uint8_t *               pdsrc = p_memdrv_info->p_data;
@@ -1763,8 +1783,9 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
 
     if (0 != ((uint32_t)(p_memdrv_info->p_data) & MEMDRV_ADDR_BOUNDARY))
     {
-        bound_cnt = (0x00000004 - ((uint32_t)(p_memdrv_info->p_data) & MEMDRV_ADDR_BOUNDARY));
-        txcnt = bound_cnt;
+        bound_cnt          = (0x00000004 - ((uint32_t)(p_memdrv_info->p_data) & MEMDRV_ADDR_BOUNDARY));
+        txcnt              = (txcnt < bound_cnt) ? txcnt : bound_cnt;
+        bound_cnt          = txcnt;
         mode.transfer_mode = RSPI_TRANS_MODE_SW;
 #if RSPI_LITTLE_ENDIAN == 1
     spcmd_cmd_word.word[0] = MEMDRV_TRNS_CMD;
@@ -1792,9 +1813,11 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
         {
             return MEMDRV_ERR_OTHER;
         }
-        pdsrc = (uint8_t *)(p_memdrv_info->p_data + bound_cnt);
-        txcnt = p_memdrv_info->cnt - bound_cnt;
+
+        pdsrc = p_memdrv_info->p_data + txcnt;
+        txcnt = p_memdrv_info->cnt - txcnt;
     }
+
     if (0 != (txcnt & 0xfffffffc))
     {
         txcnt = (txcnt & 0xfffffffc);
@@ -1824,16 +1847,20 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
         {
             if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DMAC)
             {
+                memdrv_info_dmac_dtc.p_data = pdsrc;
+                memdrv_info_dmac_dtc.cnt    = txcnt;
                 if (r_memdrv_rspi_enable_tx_data_dmac(devno,
-                                                      p_memdrv_info) != MEMDRV_SUCCESS)
+                                                      &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
             }
             else if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DTC)
             {
+                memdrv_info_dmac_dtc.p_data = pdsrc;
+                memdrv_info_dmac_dtc.cnt    = txcnt;
                 if (r_memdrv_rspi_enable_tx_data_dtc(devno,
-                                                     p_memdrv_info) != MEMDRV_SUCCESS)
+                                                     &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
@@ -1848,16 +1875,20 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
         {
             if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DMAC)
             {
+                memdrv_info_dmac_dtc.p_data = pdsrc;
+                memdrv_info_dmac_dtc.cnt    = txcnt;
                 if (r_memdrv_rspi_enable_tx_data_dmac(devno,
-                                                      p_memdrv_info) != MEMDRV_SUCCESS)
+                                                      &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
             }
             else if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DTC)
             {
+                memdrv_info_dmac_dtc.p_data = pdsrc;
+                memdrv_info_dmac_dtc.cnt    = txcnt;
                 if (r_memdrv_rspi_enable_tx_data_dtc(devno,
-                                                     p_memdrv_info) != MEMDRV_SUCCESS)
+                                                     &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
@@ -1868,7 +1899,16 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
                 R_BSP_NOP();
             }
         }
-        r_rspi_exchg(pdsrc, txcnt);
+
+#if defined (MEMDRV_RSPI_BYTE_SWAP_IS_USED)
+        /* Enable RSPI byte swapping */
+        ret_memdrv = r_memdrv_rspi_enable_byte_swap(devno);
+        if (MEMDRV_SUCCESS != ret_memdrv)
+        {
+            return ret_memdrv;
+        }
+#endif /* defined (MEMDRV_RSPI_BYTE_SWAP_IS_USED) */
+
         /* Turn 32 digits into 16 digits */
         if (rem_txcnt >= 1)
         {
@@ -1892,16 +1932,63 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
 
         if (MEMDRV_SUCCESS != ret_memdrv)
         {
-            r_rspi_exchg(pdsrc, txcnt);
-            return MEMDRV_ERR_OTHER;
+            if (MEMDRV_DEV0 == devno)
+            {
+                if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DMAC)
+                {
+                    if (r_memdrv_rspi_disable_tx_data_dmac(devno,
+                                                           &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DTC)
+                {
+                    if (r_memdrv_rspi_disable_tx_data_dtc(devno,
+                                                          &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else
+                {
+                    /* CPU transfer */
+                    R_BSP_NOP();
+                }
+            }
+            else
+            {
+                if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DMAC)
+                {
+                    if (r_memdrv_rspi_disable_tx_data_dmac(devno,
+                                                           &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DTC)
+                {
+                    if (r_memdrv_rspi_disable_tx_data_dtc(devno,
+                                                          &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else
+                {
+                    /* CPU transfer */
+                    R_BSP_NOP();
+                }
+            }
+            return ret_memdrv;
         }
-        r_rspi_exchg(pdsrc, txcnt);
+
         if (MEMDRV_DEV0 == devno)
         {
             if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DMAC)
             {
                 if (r_memdrv_rspi_disable_tx_data_dmac(devno,
-                                                       p_memdrv_info) != MEMDRV_SUCCESS)
+                                                       &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
@@ -1909,7 +1996,7 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
             else if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DTC)
             {
                 if (r_memdrv_rspi_disable_tx_data_dtc(devno,
-                                                      p_memdrv_info) != MEMDRV_SUCCESS)
+                                                      &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
@@ -1925,7 +2012,7 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
             if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DMAC)
             {
                 if (r_memdrv_rspi_disable_tx_data_dmac(devno,
-                                                       p_memdrv_info) != MEMDRV_SUCCESS)
+                                                       &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
@@ -1933,7 +2020,7 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
             else if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DTC)
             {
                 if (r_memdrv_rspi_disable_tx_data_dtc(devno,
-                                                      p_memdrv_info) != MEMDRV_SUCCESS)
+                                                      &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
@@ -1946,9 +2033,10 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
         }
         pdsrc = (uint8_t *)(pdsrc + txcnt);
     }
+
     if (0 != ((uint32_t)(p_memdrv_info->cnt - bound_cnt) & MEMDRV_CHK_MULT_OF_4))
     {
-        txcnt = (uint32_t)((p_memdrv_info->cnt - bound_cnt) & MEMDRV_CHK_MULT_OF_4);
+        txcnt              = (uint32_t)((p_memdrv_info->cnt - bound_cnt) & MEMDRV_CHK_MULT_OF_4);
         mode.transfer_mode = RSPI_TRANS_MODE_SW;
 
 #if RSPI_LITTLE_ENDIAN == 1
@@ -1993,7 +2081,6 @@ memdrv_err_t r_memdrv_rspi_tx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
-*              : MEMDRV_ERR_HARD                        ;   Hardware error
 *              : MEMDRV_ERR_OTHER                       ;   Other error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
@@ -2058,9 +2145,9 @@ memdrv_err_t r_memdrv_rspi_rx(uint8_t devno, st_memdrv_info_t * p_memdrv_info)
 *              :    uint8_t   * p_data                  ;   Buffer pointer
 *              :    uint8_t     io_mode                 ;   Single/Dual/Quad
 *              :    uint8_t     rsv[3]                  ;   Reserved
-* Return Value : MEMDRV_SUCCESS                       ;   Successful operation
-*              : MEMDRV_ERR_HARD                      ;   Hardware error
-*              : MEMDRV_ERR_OTHER                     ;   Other error
+* Return Value : MEMDRV_SUCCESS                         ;   Successful operation
+*              : MEMDRV_ERR_OTHER                       ;   Other error
+*              : MEMDRV_ERR_HARD                        ;   Hardware error
 *------------------------------------------------------------------------------------------------
 * Notes        : None
 *************************************************************************************************/
@@ -2137,14 +2224,20 @@ memdrv_err_t r_memdrv_rspi_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
         return MEMDRV_ERR_OTHER;
     }
     
-    r_rspi_exchg(p_memdrv_info->p_data, p_memdrv_info->cnt);
+#if defined (MEMDRV_RSPI_BYTE_SWAP_IS_USED)
+        /* Enable RSPI byte swapping */
+        ret_memdrv = r_memdrv_rspi_enable_byte_swap(devno);
+        if (MEMDRV_SUCCESS != ret_memdrv)
+        {
+            return MEMDRV_ERR_OTHER;
+        }
+#endif /* defined (MEMDRV_RSPI_BYTE_SWAP_IS_USED) */
+
     ret_memdrv = r_memdrv_rspi_read_data(channel, p_memdrv_info->cnt, p_memdrv_info->p_data, spcmd_cmd_word);
     if (MEMDRV_SUCCESS != ret_memdrv)
     {
-        r_rspi_exchg(p_memdrv_info->p_data, p_memdrv_info->cnt);
         return MEMDRV_ERR_OTHER;
     }
-    r_rspi_exchg(p_memdrv_info->p_data, p_memdrv_info->cnt);
 
     return MEMDRV_SUCCESS;
 } /* End of function r_memdrv_rspi_rx_data() */
@@ -2156,6 +2249,7 @@ memdrv_err_t r_memdrv_rspi_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
     rspi_err_t     ret_drv = RSPI_SUCCESS;
     memdrv_err_t   ret_memdrv = MEMDRV_SUCCESS;
     rspi_cmd_trans_mode_t   mode;
+    st_memdrv_info_t        memdrv_info_dmac_dtc;
 
     uint32_t                bound_cnt = 0;
     uint8_t *               pdest = p_memdrv_info->p_data;
@@ -2165,8 +2259,9 @@ memdrv_err_t r_memdrv_rspi_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
 
     if (0 != ((uint32_t)(p_memdrv_info->p_data) & MEMDRV_ADDR_BOUNDARY))
     {
-        bound_cnt = (0x00000004 - ((uint32_t)(p_memdrv_info->p_data) & MEMDRV_ADDR_BOUNDARY));
-        rxcnt = bound_cnt;
+        bound_cnt          = (0x00000004 - ((uint32_t)(p_memdrv_info->p_data) & MEMDRV_ADDR_BOUNDARY));
+        rxcnt              = (rxcnt < bound_cnt) ? rxcnt : bound_cnt;
+        bound_cnt          = rxcnt;
         mode.transfer_mode = RSPI_TRANS_MODE_SW;
 #if RSPI_LITTLE_ENDIAN == 1
     spcmd_cmd_word.word[0] = MEMDRV_TRNS_CMD;
@@ -2195,9 +2290,10 @@ memdrv_err_t r_memdrv_rspi_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
             return MEMDRV_ERR_OTHER;
         }
 
-        pdest = (uint8_t *)(p_memdrv_info->p_data + bound_cnt);
-        rxcnt = p_memdrv_info->cnt - bound_cnt;
+        pdest = p_memdrv_info->p_data + rxcnt;
+        rxcnt = p_memdrv_info->cnt - rxcnt;
     }
+
     if (0 != (rxcnt & 0xfffffffc))
     {
         rxcnt = (rxcnt & 0xfffffffc);
@@ -2227,16 +2323,20 @@ memdrv_err_t r_memdrv_rspi_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
         {
             if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DMAC)
             {
+                memdrv_info_dmac_dtc.p_data = pdest;
+                memdrv_info_dmac_dtc.cnt    = rxcnt;
                 if (r_memdrv_rspi_enable_rx_data_dmac(devno,
-                                                      p_memdrv_info) != MEMDRV_SUCCESS)
+                                                      &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
             }
             else if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DTC)
             {
+                memdrv_info_dmac_dtc.p_data = pdest;
+                memdrv_info_dmac_dtc.cnt    = rxcnt;
                 if (r_memdrv_rspi_enable_rx_data_dtc(devno,
-                                                     p_memdrv_info) != MEMDRV_SUCCESS)
+                                                     &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
@@ -2251,16 +2351,20 @@ memdrv_err_t r_memdrv_rspi_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
         {
             if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DMAC)
             {
+                memdrv_info_dmac_dtc.p_data = pdest;
+                memdrv_info_dmac_dtc.cnt    = rxcnt;
                 if (r_memdrv_rspi_enable_rx_data_dmac(devno,
-                                                      p_memdrv_info) != MEMDRV_SUCCESS)
+                                                      &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
             }
             else if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DTC)
             {
+                memdrv_info_dmac_dtc.p_data = pdest;
+                memdrv_info_dmac_dtc.cnt    = rxcnt;
                 if (r_memdrv_rspi_enable_rx_data_dtc(devno,
-                                                     p_memdrv_info) != MEMDRV_SUCCESS)
+                                                     &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
@@ -2271,7 +2375,16 @@ memdrv_err_t r_memdrv_rspi_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
                 R_BSP_NOP();
             }
         }
-        r_rspi_exchg(pdest, rxcnt);
+
+#if defined (MEMDRV_RSPI_BYTE_SWAP_IS_USED)
+        /* Enable RSPI byte swapping */
+        ret_memdrv = r_memdrv_rspi_enable_byte_swap(devno);
+        if (MEMDRV_SUCCESS != ret_memdrv)
+        {
+            return ret_memdrv;
+        }
+#endif /* defined (MEMDRV_RSPI_BYTE_SWAP_IS_USED) */
+
         /* Turn 32 digits into 16 digits */
         if (rem_rxcnt >= 1)
         {
@@ -2295,17 +2408,63 @@ memdrv_err_t r_memdrv_rspi_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
 
         if (MEMDRV_SUCCESS != ret_memdrv)
         {
-            r_rspi_exchg(pdest, rxcnt);
-            return MEMDRV_ERR_OTHER;
+            if (MEMDRV_DEV0 == devno)
+            {
+                if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DMAC)
+                {
+                    if (r_memdrv_rspi_disable_rx_data_dmac(devno,
+                                                           &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DTC)
+                {
+                    if (r_memdrv_rspi_disable_rx_data_dtc(devno,
+                                                          &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else
+                {
+                    /* CPU transfer */
+                    R_BSP_NOP();
+                }
+            }
+            else
+            {
+                if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DMAC)
+                {
+                    if (r_memdrv_rspi_disable_rx_data_dmac(devno,
+                                                           &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DTC)
+                {
+                    if (r_memdrv_rspi_disable_rx_data_dtc(devno,
+                                                          &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
+                    {
+                        return MEMDRV_ERR_OTHER;
+                    }
+                }
+                else
+                {
+                    /* CPU transfer */
+                    R_BSP_NOP();
+                }
+            }
+            return ret_memdrv;
         }
-        r_rspi_exchg(pdest, rxcnt);
 
         if (MEMDRV_DEV0 == devno)
         {
             if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DMAC)
             {
                 if (r_memdrv_rspi_disable_rx_data_dmac(devno,
-                                                       p_memdrv_info) != MEMDRV_SUCCESS)
+                                                       &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
@@ -2313,7 +2472,7 @@ memdrv_err_t r_memdrv_rspi_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
             else if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DTC)
             {
                 if (r_memdrv_rspi_disable_rx_data_dtc(devno,
-                                                      p_memdrv_info) != MEMDRV_SUCCESS)
+                                                      &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
@@ -2329,7 +2488,7 @@ memdrv_err_t r_memdrv_rspi_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
             if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DMAC)
             {
                 if (r_memdrv_rspi_disable_rx_data_dmac(devno,
-                                                       p_memdrv_info) != MEMDRV_SUCCESS)
+                                                       &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
@@ -2337,7 +2496,7 @@ memdrv_err_t r_memdrv_rspi_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
             else if (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DTC)
             {
                 if (r_memdrv_rspi_disable_rx_data_dtc(devno,
-                                                      p_memdrv_info) != MEMDRV_SUCCESS)
+                                                      &memdrv_info_dmac_dtc) != MEMDRV_SUCCESS)
                 {
                     return MEMDRV_ERR_OTHER;
                 }
@@ -2350,9 +2509,10 @@ memdrv_err_t r_memdrv_rspi_rx_data(uint8_t devno, st_memdrv_info_t * p_memdrv_in
         }
         pdest = (uint8_t *)(pdest + rxcnt);
     }
+
     if (0 != ((uint32_t)(p_memdrv_info->cnt - bound_cnt) & MEMDRV_CHK_MULT_OF_4))
     {
-        rxcnt = ((uint32_t)(p_memdrv_info->cnt - bound_cnt) & MEMDRV_CHK_MULT_OF_4);
+        rxcnt              = ((uint32_t)(p_memdrv_info->cnt - bound_cnt) & MEMDRV_CHK_MULT_OF_4);
         mode.transfer_mode = RSPI_TRANS_MODE_SW;
 
 #if RSPI_LITTLE_ENDIAN == 1
@@ -2578,45 +2738,6 @@ static void r_memdrv_rspi_callback(void *p_data)
 {
     callback_event = (*(rspi_callback_data_t *)p_data).event_code;
     g_transfer_busy = false;
-
-#if (MEMDRV_CFG_DEV0_MODE_TRNS & MEMDRV_TRNS_DTC)  | (MEMDRV_CFG_DEV1_MODE_TRNS & MEMDRV_TRNS_DTC)
-    R_RSPI_IntSpriIerClear(g_rspi_handle);
-    R_RSPI_IntSptiIerClear(g_rspi_handle);
-    if (0 == g_rspi_handle->channel)
-    {
-#if ((MEMDRV_CFG_DEV0_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH0) | \
-    ((MEMDRV_CFG_DEV1_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH0)
-        RSPI0.SPCR.BIT.SPE   = 0;  // Disable RSPI.
-#if RSPI_CFG_REQUIRE_LOCK == 1
-        R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI0));
-#endif
-#endif
-    }
-    else if (1 == g_rspi_handle->channel)
-    {
-#if ((MEMDRV_CFG_DEV0_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH1) | \
-    ((MEMDRV_CFG_DEV1_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH1)
-    {
-        RSPI1.SPCR.BIT.SPE   = 0;  // Disable RSPI.
-#if RSPI_CFG_REQUIRE_LOCK == 1
-        R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI1));
-#endif
-#endif
-    }
-    else if (2 == g_rspi_handle->channel)
-    {
-#if ((MEMDRV_CFG_DEV0_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH2) | \
-    ((MEMDRV_CFG_DEV1_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH2)
-        RSPI2.SPCR.BIT.SPE   = 0;  // Disable RSPI.
-#if RSPI_CFG_REQUIRE_LOCK == 1
-        R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI2));
-#endif
-#endif
-    }
-    else
-    {
-    }
-#endif
 } /* End of function r_memdrv_rspi_callback() */
 
 /*****************************************************************************
@@ -2654,6 +2775,7 @@ static void rspi_init_ports(void)
 *              : rspi_command_word_t  cmd               ;   Consisting of all the RSPI command register settings.
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
 *              : MEMDRV_ERR_OTHER                       ;   Other error
+*              : MEMDRV_ERR_HARD                        ;   Hardware error
 ******************************************************************************/
 static memdrv_err_t r_memdrv_rspi_write_data(uint8_t channel,
                                              uint16_t count,
@@ -2670,10 +2792,20 @@ static memdrv_err_t r_memdrv_rspi_write_data(uint8_t channel,
         count = count >> 2;
     }
 #else
+    #if defined (__ICCRX__)
+    uint16_t cmd_big_endian = 0;
+    cmd_big_endian = (MEMDRV_TRNS_DATA_CMD >> 8);
+    cmd_big_endian |= (MEMDRV_TRNS_DATA_CMD << 8);
+    if (cmd_big_endian == cmd.word[0])
+    {
+        count = count >> 2;
+    }
+    #else
     if (MEMDRV_TRNS_DATA_CMD == cmd.word[1])
     {
         count = count >> 2;
     }
+    #endif
 #endif
     ret_drv = R_RSPI_Write(g_rspi_handle,
                            cmd,
@@ -2690,12 +2822,8 @@ static memdrv_err_t r_memdrv_rspi_write_data(uint8_t channel,
         /* ---- Disable RSPI transmission. ---- */
         R_RSPI_IntSptiIerClear(g_rspi_handle);
         R_RSPI_IntSpriIerClear(g_rspi_handle);
-        g_rspi_handle->channel = channel;
-        if (RSPI_SUCCESS != R_RSPI_Close(g_rspi_handle))
-        {
-            return MEMDRV_ERR_OTHER;
-        }
-        return MEMDRV_ERR_OTHER;
+        R_RSPI_DisableRSPI(g_rspi_handle);
+        return MEMDRV_ERR_HARD;
     }
 
     if (RSPI_EVT_TRANSFER_COMPLETE != callback_event)
@@ -2714,6 +2842,7 @@ static memdrv_err_t r_memdrv_rspi_write_data(uint8_t channel,
 *              : rspi_command_word_t  cmd               ;   Consisting of all the RSPI command register settings.
 * Return Value : MEMDRV_SUCCESS                         ;   Successful operation
 *              : MEMDRV_ERR_OTHER                       ;   Other error
+*              : MEMDRV_ERR_HARD                        ;   Hardware error
 ******************************************************************************/
 static memdrv_err_t r_memdrv_rspi_read_data(uint8_t channel,
                                             uint16_t count,
@@ -2730,10 +2859,20 @@ static memdrv_err_t r_memdrv_rspi_read_data(uint8_t channel,
         count = count >> 2;
     }
 #else
+    #if defined (__ICCRX__)
+    uint16_t cmd_big_endian = 0;
+    cmd_big_endian = (MEMDRV_TRNS_DATA_CMD >> 8);
+    cmd_big_endian |= (MEMDRV_TRNS_DATA_CMD << 8);
+    if (cmd_big_endian == cmd.word[0])
+    {
+        count = count >> 2;
+    }
+    #else
     if (MEMDRV_TRNS_DATA_CMD == cmd.word[1])
     {
         count = count >> 2;
     }
+    #endif
 #endif
     ret_drv = R_RSPI_Read(g_rspi_handle,
                            cmd,
@@ -2750,12 +2889,8 @@ static memdrv_err_t r_memdrv_rspi_read_data(uint8_t channel,
         /* ---- Disable RSPI transmission. ---- */
         R_RSPI_IntSptiIerClear(g_rspi_handle);
         R_RSPI_IntSpriIerClear(g_rspi_handle);
-        g_rspi_handle->channel = channel;
-        if (RSPI_SUCCESS != R_RSPI_Close(g_rspi_handle))
-        {
-            return MEMDRV_ERR_OTHER;
-        }
-        return MEMDRV_ERR_OTHER;
+        R_RSPI_DisableRSPI(g_rspi_handle);
+        return MEMDRV_ERR_HARD;
     }
 
     if (RSPI_EVT_TRANSFER_COMPLETE != callback_event)
@@ -2765,33 +2900,37 @@ static memdrv_err_t r_memdrv_rspi_read_data(uint8_t channel,
     return MEMDRV_SUCCESS;
 } /* End of function r_memdrv_rspi_read_data() */
 
-/*******************************************************************************
-* Function Name: r_rspi_exchg
-* Description  : Exchanges data according to endian for DMAC or DTC.
-* Arguments    : * p_data -
-*                    Pointer of data
-*                size -
-*                    Size of data
-* Return Value : RSPI_SMSTR_SUCCESS -
-*                    Successful operation
-*******************************************************************************/
-static memdrv_err_t r_rspi_exchg(uint8_t * p_data, uint16_t size)
+#if defined (MEMDRV_RSPI_BYTE_SWAP_IS_USED)
+/************************************************************************************************
+* Function Name: r_memdrv_rspi_enable_byte_swap
+* Description  : Enable RSPI byte swapping.
+* Arguments    : uint8_t         devno                  ;   Device No. (MEMDRV_DEVn)
+* Return Value : MEMDRV_SUCCESS                         ;   Successful operation
+*              : MEMDRV_ERR_OTHER                       ;   Other error
+*------------------------------------------------------------------------------------------------
+* Notes        : None
+*************************************************************************************************/
+static memdrv_err_t r_memdrv_rspi_enable_byte_swap(uint8_t devno)
 {
-#if (RSPI_LITTLE_ENDIAN)
-    uint32_t                * p_dataadr;
+    rspi_err_t              ret_drv = RSPI_SUCCESS;
+    uint8_t                 channel = r_memdrv_get_drv_ch(devno);
+    rspi_cmd_byte_swap_t    config;
 
-    p_dataadr = (uint32_t *)p_data;
-    size  = size - (size % 4);
-    do
+    g_rspi_handle->channel = channel;
+    config.byte_swap       = RSPI_BYTE_SWAP_ENABLE;
+
+    /* Enable RSPI byte swapping */
+    ret_drv = R_RSPI_Control(g_rspi_handle,
+                            RSPI_CMD_SET_BYTE_SWAP,
+                            (void *)&config);
+    if (RSPI_SUCCESS != ret_drv)
     {
-        *p_dataadr = R_BSP_REVL(*p_dataadr);
-        p_dataadr  += (RSPI_TRAN_SIZE/sizeof(uint32_t));
-        size       -= RSPI_TRAN_SIZE;
+        return MEMDRV_ERR_OTHER;
     }
-    while(0 != size);      /* WAIT_LOOP */
-#endif /* (RSPI_LITTLE_ENDIAN)  */
+
     return MEMDRV_SUCCESS;
-} /* End of function r_rspi_exchg() */
+} /* End of function r_memdrv_rspi_enable_byte_swap() */
+#endif /* defined (MEMDRV_RSPI_BYTE_SWAP_IS_USED) */
 
 #else
 memdrv_err_t r_memdrv_rspi_open(uint8_t devno, st_memdrv_info_t * p_memdrv_info)
@@ -2863,6 +3002,6 @@ void r_memdrv_rspi_1ms_interval(void)
     R_MEMDRV_Log(MEMDRV_DEBUG_ERR_ID, (uint32_t)MEMDRV_ERR_SUB, __LINE__);
 } /* End of function r_memdrv_rspi_1ms_interval() */
 #endif  /* ((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_RSPI)) || \
-           ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_RSPI))
+           ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_RSPI)) */
 
 /* End of File */

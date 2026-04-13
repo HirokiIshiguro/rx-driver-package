@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : mcu_init.c
 * Description  : Performs initialization common to all MCUs in this Group
@@ -23,6 +10,8 @@
 /**********************************************************************************************************************
 * History : DD.MM.YYYY Version  Description
 *         : 08.04.2019 1.00     First Release
+*         : 20.11.2020 1.01     Added pin setting for RX72M with 100 pin and 144 pin packages.
+*         : 26.02.2025 1.02     Changed the disclaimer.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -89,6 +78,58 @@ Macro definitions
     #define BSP_PRV_PORTG_NE_PIN_MASK     (0x00)
     #define BSP_PRV_PORTH_NE_PIN_MASK     (0xFF)
     #define BSP_PRV_PORTJ_NE_PIN_MASK     (0xD0)
+    #define BSP_PRV_PORTK_NE_PIN_MASK     (0xFF)
+    #define BSP_PRV_PORTL_NE_PIN_MASK     (0xFF)
+    #define BSP_PRV_PORTM_NE_PIN_MASK     (0xFF)
+    #define BSP_PRV_PORTN_NE_PIN_MASK     (0xFF)
+    #define BSP_PRV_PORTQ_NE_PIN_MASK     (0xFF)
+#elif BSP_PACKAGE_PINS == 144
+    /* Refer User's Manual: Hardware Table 22.6. */
+    #define BSP_PRV_PORT0_NE_PIN_MASK     (0xD0)
+    #define BSP_PRV_PORT1_NE_PIN_MASK     (0x03)
+    #define BSP_PRV_PORT2_NE_PIN_MASK     (0x00)
+    #define BSP_PRV_PORT3_NE_PIN_MASK     (0x00)
+    #define BSP_PRV_PORT4_NE_PIN_MASK     (0xE0)
+    #define BSP_PRV_PORT5_NE_PIN_MASK     (0x80)
+    #define BSP_PRV_PORT6_NE_PIN_MASK     (0x00)
+    #define BSP_PRV_PORT7_NE_PIN_MASK     (0x07)
+    #define BSP_PRV_PORT8_NE_PIN_MASK     (0x30)
+    #define BSP_PRV_PORT9_NE_PIN_MASK     (0x30)
+    #define BSP_PRV_PORTA_NE_PIN_MASK     (0x00)
+    #define BSP_PRV_PORTB_NE_PIN_MASK     (0x00)
+    #define BSP_PRV_PORTC_NE_PIN_MASK     (0x00)
+    #define BSP_PRV_PORTD_NE_PIN_MASK     (0x00)
+    #define BSP_PRV_PORTE_NE_PIN_MASK     (0x00)
+    #define BSP_PRV_PORTF_NE_PIN_MASK     (0xFF)
+    #define BSP_PRV_PORTG_NE_PIN_MASK     (0x18)
+    #define BSP_PRV_PORTH_NE_PIN_MASK     (0xFF)
+    #define BSP_PRV_PORTJ_NE_PIN_MASK     (0xF3)
+    #define BSP_PRV_PORTK_NE_PIN_MASK     (0xFF)
+    #define BSP_PRV_PORTL_NE_PIN_MASK     (0xFF)
+    #define BSP_PRV_PORTM_NE_PIN_MASK     (0xFF)
+    #define BSP_PRV_PORTN_NE_PIN_MASK     (0xFF)
+    #define BSP_PRV_PORTQ_NE_PIN_MASK     (0xFF)
+#elif BSP_PACKAGE_PINS == 100
+    /* Refer User's Manual: Hardware Table 22.7. */
+    #define BSP_PRV_PORT0_NE_PIN_MASK     (0xFE)
+    #define BSP_PRV_PORT1_NE_PIN_MASK     (0x0F)
+    #define BSP_PRV_PORT2_NE_PIN_MASK     (0x04)
+    #define BSP_PRV_PORT3_NE_PIN_MASK     (0x00)
+    #define BSP_PRV_PORT4_NE_PIN_MASK     (0xF8)
+    #define BSP_PRV_PORT5_NE_PIN_MASK     (0xB8)
+    #define BSP_PRV_PORT6_NE_PIN_MASK     (0x20)
+    #define BSP_PRV_PORT7_NE_PIN_MASK     (0xFF)
+    #define BSP_PRV_PORT8_NE_PIN_MASK     (0x38)
+    #define BSP_PRV_PORT9_NE_PIN_MASK     (0x30)
+    #define BSP_PRV_PORTA_NE_PIN_MASK     (0xA0)
+    #define BSP_PRV_PORTB_NE_PIN_MASK     (0x04)
+    #define BSP_PRV_PORTC_NE_PIN_MASK     (0x0B)
+    #define BSP_PRV_PORTD_NE_PIN_MASK     (0x39)
+    #define BSP_PRV_PORTE_NE_PIN_MASK     (0xC7)
+    #define BSP_PRV_PORTF_NE_PIN_MASK     (0xFF)
+    #define BSP_PRV_PORTG_NE_PIN_MASK     (0x9B)
+    #define BSP_PRV_PORTH_NE_PIN_MASK     (0xFF)
+    #define BSP_PRV_PORTJ_NE_PIN_MASK     (0xFF)
     #define BSP_PRV_PORTK_NE_PIN_MASK     (0xFF)
     #define BSP_PRV_PORTL_NE_PIN_MASK     (0xFF)
     #define BSP_PRV_PORTM_NE_PIN_MASK     (0xFF)

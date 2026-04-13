@@ -1,15 +1,25 @@
-/********************************************************************************/
-/*                                                                              */
-/* Device     : RX/RX100/RX130                                                  */
-/* File Name  : iodefine.h                                                      */
-/* Abstract   : Definition of I/O Register.                                     */
-/* History    : V0.4   (2016-11-08)  [Hardware Manual Revision : 0.40]          */
-/* History    : V0.4A  (2017-01-18)  [Hardware Manual Revision : 0.40]          */
-/* History    : V2.0   (2017-04-17)  [Hardware Manual Revision : 2.00]          */
-/* Note       : This is a typical example.                                      */
-/*                                                                              */
-/*  Copyright(c) 2017 Renesas Electronics Corp. ,All Rights Reserved.           */
-/*                                                                              */
+/*
+* Copyright (c) 2015(2017-2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
+/*********************************************************************************
+*
+* Device     : RX/RX100/RX130
+*
+* File Name  : iodefine.h
+*
+* Abstract   : Definition of I/O Register.
+*
+* History    : 0.5   (2015-06-30)  [Hardware Manual Revision : 0.50]
+*            : 1.0   (2015-10-05)  [Hardware Manual Revision : 1.00]
+*            : 2.0   (2017-04-17)  [Hardware Manual Revision : 2.00] 
+*            : 2.0A  (2023-03-03)  [Hardware Manual Revision : 2.00] 
+*            : 2.00B (2025-02-14)  [Hardware Manual Revision : 2.00] 
+*
+* NOTE       : THIS IS A TYPICAL EXAMPLE.
+*
+*********************************************************************************/
 /********************************************************************************/
 /*                                                                              */
 /*  DESCRIPTION : Definition of ICU Register                                    */
@@ -528,7 +538,8 @@ struct st_ctsu {
 			unsigned short CTSUICOMP:1;
 			unsigned short :7;
 			unsigned short CTSUTSOC:1;
-			unsigned short :3;
+			unsigned short CTSUCLKSEL1:1;
+			unsigned short :2;
 			unsigned short CTSUDRV:1;
 			unsigned short CTSUTSOD:1;
 			unsigned short CTSUSPMD:2;

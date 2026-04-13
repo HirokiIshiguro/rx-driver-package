@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
 /***********************************************************************************************************************
+* Copyright (c) 2014 - 2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+-->
+<!--
+/***********************************************************************************************************************
   Purpose: Module Description File (MDF) Example (Schema Version 2.0)
            This is a description of a sample FIT module configuration file
 ***********************************************************************************************************************/
@@ -134,6 +141,14 @@ IC0_CH1: Input Capture of CMTW1.CMWICR0 register.</description>
             <constraint display="Value must be in the range 0 ~ 15">("${CMTW_CFG_IPR_IC1_CH1}" &gt;= 0) &amp;&amp; ("${CMTW_CFG_IPR_IC1_CH1}" &lt;= 15)</constraint>
             <description>The interrupt priority level to be used for CMT interrupts.
 IC1_CH1: Input Capture of CMTW1.CMWICR1 register.</description>
+        </property>
+        <property id="CMTW_CFG_EN_NESTED_INT" display="Using CMTW nested interrupt" default="0" type="combobox">
+            <option id="CMTW_CFG_EN_NESTED_INT.0" display="Do not use CMTW nested interrupt" value="0"/>
+            <option id="CMTW_CFG_EN_NESTED_INT.1" display="Use CMTW nested interrupt" value="1"/>
+            <description>Specifies whether to include code for nested interrupt.
+- 0: Disable nested interrupt.
+- 1: Enable nested interrupt.
+(default value = 0)</description>
         </property>
     </configuration>
 </module>

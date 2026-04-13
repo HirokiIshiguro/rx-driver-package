@@ -1,7 +1,7 @@
 /**
  * \file MS_light_xyl_api.h
  *
- * \brief This file defines the Mesh Light Xyl Model Application Interface
+ * \brief This file defines the Mesh Light xyL Model Application Interface
  * - includes Data Structures and Methods for both Server and Client.
  */
 
@@ -20,26 +20,25 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup light_xyl_module LIGHT_XYL (Mesh Light Xyl Model)
+ * \defgroup light_xyl_module Light xyL Model (LIGHT_XYL)
+ * \ingroup lighting_models
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
- *  Mesh Light Xyl Model (LIGHT_XYL) module to the Application.
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
+ *  Mesh Light xyL Model (LIGHT_XYL) module to the Application.
  */
-
-
 
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup light_xyl_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Light xyL Model Layer.
  */
 
 /**
- * Light Xyl Server application Asynchronous Notification Callback.
+ * Light xyL Server application Asynchronous Notification Callback.
  *
- * Light Xyl Server calls the registered callback to indicate events occurred to the
+ * Light xyL Server calls the registered callback to indicate events occurred to the
  * application.
  *
  * \param [in] ctx           Context of the message received for a specific model instance.
@@ -58,20 +57,44 @@ typedef API_RESULT (* MS_LIGHT_XYL_SERVER_CB)
 
         ) DECL_REENTRANT;
 
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
 /**
- * Light Xyl Client application Asynchronous Notification Callback.
+ * Light xyL Setup Server application Asynchronous Notification Callback.
  *
- * Light Xyl Client calls the registered callback to indicate events occurred to the
+ * Light xyL setup Server calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] msg_raw       Uninterpreted/raw received message.
+ * \param [in] req_type      Requested message type.
+ * \param [in] state_params  Model specific state parameters.
+ * \param [in] ext_params    Additional parameters.
+ */
+typedef API_RESULT (* MS_LIGHT_XYL_SETUP_SERVER_CB)
+        (
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT    * ctx,
+            MS_ACCESS_MODEL_REQ_MSG_RAW        * msg_raw,
+            MS_ACCESS_MODEL_REQ_MSG_T          * req_type,
+            MS_ACCESS_MODEL_STATE_PARAMS       * state_params,
+            MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+
+        ) DECL_REENTRANT;
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
+/**
+ * Light xyL Client application Asynchronous Notification Callback.
+ *
+ * Light xyL Client calls the registered callback to indicate events occurred to the
+ * application.
+ *
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_LIGHT_XYL_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -79,8 +102,17 @@ typedef API_RESULT (* MS_LIGHT_XYL_CLIENT_CB)
 /** \} */
 
 /**
+ * \defgroup light_xyl_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind
+ * EtherMind Mesh Light xyL Model Layer.
+ */
+
+/**
  *  \defgroup light_xyl_structures Structures
  *  \{
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Light xyL Model Layer.
  */
 
 /**
@@ -186,7 +218,7 @@ typedef struct MS_light_xyl_target_status_struct
 } MS_LIGHT_XYL_TARGET_STATUS_STRUCT;
 
 /**
- * Light HSL Default Set message parameters.
+ * Light xyL Default Set message parameters.
  */
 typedef struct MS_light_xyl_default_set_struct
 {
@@ -260,25 +292,33 @@ typedef struct MS_light_xyl_range_status_struct
 
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup light_xyl_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Light Xyl Model APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Light xyL Model Layer to the Application.
  */
 /**
- * \defgroup light_xyl_ser_api_defs Light Xyl Server API Definitions
+ * \defgroup light_xyl_ser_api_defs Light xyL Server API Definitions
  * \{
- * This section describes the Light Xyl Server APIs.
+ * \brief This section describes the EtherMind Mesh Light xyL Server
+ * Model APIs.
  */
 
 /**
- *  \brief API to initialize Light_Xyl Server model
+ * \name Light xyL Server Interfaces
+ * \{
+ */
+
+#ifndef MS_MODEL_SERVER_EXTENDED_INTERFACE
+/**
+ *  \brief API to initialize Light_xyL Server model
  *
  *  \par Description
- *  This is to initialize Light_Xyl Server model and to register with Acess layer.
+ *  This is to initialize Light_xyL Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -293,7 +333,7 @@ typedef struct MS_light_xyl_range_status_struct
  *                   After power cycle of an already provisioned node, the model handle will have
  *                   valid value and the same will be reused for registration.
  *
- *  \param [in] appl_cb    Application Callback to be used by the Light_Xyl Server.
+ *  \param [in] xyl_appl_cb    Application Callback to be used by the Light_xyL Server.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -302,8 +342,43 @@ API_RESULT MS_light_xyl_server_init
                /* IN */    MS_ACCESS_ELEMENT_HANDLE    element_handle,
                /* INOUT */ MS_ACCESS_MODEL_HANDLE    * xyl_model_handle,
                /* INOUT */ MS_ACCESS_MODEL_HANDLE    * xyl_setup_model_handle,
-               /* IN */    MS_LIGHT_XYL_SERVER_CB appl_cb
+               /* IN */    MS_LIGHT_XYL_SERVER_CB      xyl_appl_cb
            );
+#else /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+/**
+ *  \brief API to initialize Light_xyL Server model
+ *
+ *  \par Description
+ *  This is to initialize Light_xyL Server model and to register with Access layer.
+ *
+ *  \param [in] element_handle
+ *              Element identifier to be associated with the model instance.
+ *
+ *  \param [in, out] xyl_model_handle
+ *                   Model identifier associated with the Light xyL model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in, out] xyl_setup_model_handle
+ *                   Model identifier associated with the Light xyL Setup model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in] xyl_appl_cb    Application Callback to be used by the Light_xyL Server.
+ *
+ *  \param [in] xyl_setup_appl_cb    Application Callback to be used by the Light_xyL_Setup Server.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_light_xyl_server_init_ext
+           (
+               /* IN */    MS_ACCESS_ELEMENT_HANDLE       element_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE       * xyl_model_handle,
+               /* INOUT */ MS_ACCESS_MODEL_HANDLE       * xyl_setup_model_handle,
+               /* IN */    MS_LIGHT_XYL_SERVER_CB         xyl_appl_cb,
+               /* IN */    MS_LIGHT_XYL_SETUP_SERVER_CB   xyl_setup_appl_cb
+           );
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
 
 /**
  *  \brief API to send reply or to update state change
@@ -316,30 +391,55 @@ API_RESULT MS_light_xyl_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
+#ifndef MS_MODEL_SERVER_EXTENDED_INTERFACE
 API_RESULT MS_light_xyl_server_state_update
            (
                /* IN */ MS_ACCESS_MODEL_REQ_MSG_CONTEXT    * ctx,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
+#else /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+API_RESULT MS_light_xyl_server_state_update_ext
+           (
+               /* IN */ MS_ACCESS_MODEL_REQ_MSG_CONTEXT    * ctx,
+               /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
+               /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
+               /* IN */ UINT16                               remaining_time,
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
+           );
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+/** \} */
+
 /** \} */
 
 /**
- * \defgroup light_xyl_cli_api_defs Light Xyl Client API Definitions
+ * \defgroup light_xyl_cli_api_defs Light xyL Client API Definitions
  * \{
- * This section describes the Light Xyl Client APIs.
+ * \brief This section describes the EtherMind Mesh Light xyL Client
+ * Model APIs.
  */
 
 /**
- *  \brief API to initialize Light_Xyl Client model
+ * \name Light xyL Client Interfaces
+ * \{
+ */
+
+/**
+ *  \brief API to initialize Light_xyL Client model
  *
  *  \par Description
- *  This is to initialize Light_Xyl Client model and to register with Acess layer.
+ *  This is to initialize Light_xyL Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -349,7 +449,7 @@ API_RESULT MS_light_xyl_server_state_update
  *                   After power cycle of an already provisioned node, the model handle will have
  *                   valid value and the same will be reused for registration.
  *
- *  \param [in] appl_cb    Application Callback to be used by the Light_Xyl Client.
+ *  \param [in] appl_cb    Application Callback to be used by the Light_xyL Client.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -361,10 +461,10 @@ API_RESULT MS_light_xyl_client_init
            );
 
 /**
- *  \brief API to get Light_Xyl client model handle
+ *  \brief API to get Light_xyL client model handle
  *
  *  \par Description
- *  This is to get the handle of Light_Xyl client model.
+ *  This is to get the handle of Light_xyL client model.
  *
  *  \param [out] model_handle   Address of model handle to be filled/returned.
  *
@@ -373,6 +473,21 @@ API_RESULT MS_light_xyl_client_init
 API_RESULT MS_light_xyl_client_get_model_handle
            (
                /* OUT */ MS_ACCESS_MODEL_HANDLE  * model_handle
+           );
+
+/**
+ *  \brief API to set Light_xyL client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Light_xyL client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_light_xyl_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
            );
 
 /**
@@ -393,6 +508,28 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+/** \} */
+
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup light_xyl_defines
+ * \{
+ */
+
+/**
+ * \defgroup light_xyl_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Light xyL Model Layer.
+ */
+
+/**
+ * \name Light xyL Client Macros
+ * \{
+ */
 
 /**
  *  \brief API to get the Light xyL Lightness, Light xyL x, and Light xyL y states of an element.
@@ -421,7 +558,7 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
  *  The Light xyL Set is an acknowledged message used to set the Light xyL Lightness, Light xyL x state, and the Light xyL y states of an element.
  *  The response to the Light xyL Set message is a Light xyL Status message.
  *
- *  \param [in] param Light xyL Set message
+ *  \param [in] param Light xyL Set message parameter \ref MS_LIGHT_XYL_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -441,7 +578,7 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
  *  the Light xyL Lightness, Light xyL x, and the Light xyL y states of an
  *  element.
  *
- *  \param [in] param Light xyL Set message
+ *  \param [in] param Light xyL Set message parameter \ref MS_LIGHT_XYL_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -496,7 +633,7 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
  *  Light xyL Default Set is an acknowledged message used to set the Light Lightness Default, the Light xyL x Default, and Light xyL y Default states of an element.
  *  The response to the Light xyL Default Set message is a Light xyL Default Status message.
  *
- *  \param [in] param Light HSL Default Set message
+ *  \param [in] param Light xyL Default Set message parameter \ref MS_LIGHT_XYL_DEFAULT_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -516,7 +653,7 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
  *  set the Light Lightness Default, the Light xyL x Default, and Light xyL y
  *  Default states of an element.
  *
- *  \param [in] param Light HSL Default Set message
+ *  \param [in] param Light xyL Default Set message parameter \ref MS_LIGHT_XYL_DEFAULT_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -553,7 +690,7 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
  *  Light xyL Range Set is an acknowledged message used to set the Light xyL x Range and Light xyL y Range states of an element.
  *  The response to the Light xyL Range Set message is a Light xyL Range Status message.
  *
- *  \param [in] param Light xyL Range Set message
+ *  \param [in] param Light xyL Range Set message parameter \ref MS_LIGHT_XYL_RANGE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -572,7 +709,7 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
  *  Light xyL Range Set Unacknowledged is an unacknowledged message used to set
  *  the Light xyL x Range and Light xyL y Range states of an element.
  *
- *  \param [in] param Light xyL Range Set message
+ *  \param [in] param Light xyL Range Set message parameter \ref MS_LIGHT_XYL_RANGE_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -584,7 +721,83 @@ API_RESULT MS_light_xyl_client_send_reliable_pdu
             0xFFFFFFFF\
         )
 /** \} */
+
+#ifdef MS_MODEL_SERVER_EXTENDED_INTERFACE
+
+/**
+ * \name Light xyL Server and Light xyL setup Server Macros
+ * \{
+ */
+
+/**
+ *  \brief API to initialize Light_xyL Server model
+ *
+ *  \par Description
+ *  This is to initialize Light_xyL Server model and to register with Access layer.
+ *
+ *  \param [in] eh
+ *              Element identifier to be associated with the model instance.
+ *
+ *  \param [in, out] mh
+ *                   Model identifier associated with the Light xyL model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in, out] smh
+ *                   Model identifier associated with the Light xyL Setup model instance on successful initialization.
+ *                   After power cycle of an already provisioned node, the model handle will have
+ *                   valid value and the same will be reused for registration.
+ *
+ *  \param [in] cb   Application Callback to be used by the Light_xyL Server.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+#define MS_light_xyl_server_init(eh,mh,smh,cb) \
+        MS_light_xyl_server_init_ext \
+        (\
+            (eh),\
+            (mh),\
+            (smh),\
+            (cb),\
+            (cb)\
+        )
+
+/**
+ *  \brief API to send reply or to update state change
+ *
+ *  \par Description
+ *  This is to send reply for a request or to inform change in state.
+ *
+ * \param [in] c   Context of the message.
+ * \param [in] cs  Model specific current state parameters.
+ * \param [in] ts  Model specific target state parameters (NULL: to be ignored).
+ * \param [in] rt  Time from current state to target state (0: to be ignored).
+ * \param [in] ex  Additional parameters (NULL: to be ignored).
+ * \param [in] r   If unicast response to be sent
+ * \param [in] p   If state to be published
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+#define MS_light_xyl_server_state_update(c,cs,ts,rt,ex,r,p) \
+        MS_light_xyl_server_state_update_ext \
+        (\
+            (c),\
+            (cs),\
+            (ts),\
+            (rt),\
+            (ex),\
+            (r),\
+            (p)\
+        )
+
 /** \} */
+
+#endif /* MS_MODEL_SERVER_EXTENDED_INTERFACE */
+
+/** \} */
+
+/** \} */
+
 /** \} */
 
 #endif /*_H_MS_LIGHT_XYL_API_ */

@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_usb_hreg_access.c
+ * Version      : 1.44
  * Description  : USB IP Host control register access code
  ***********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -32,6 +20,8 @@
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2020 1.31 RX671 is added.
+ *         : 01.03.2025 1.44 Change Disclaimer.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -685,11 +675,11 @@ void hw_usb_hmodule_init (usb_ctrl_t *p_ctrl)
 #endif  /* defined(BSP_MCU_RX64M) */
 
 #if defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX72T) || defined (BSP_MCU_RX72M)\
- || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N)
+ || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671)
         USB_M0.PHYSLEW.LONG = 0x5;
 
 #endif  /* defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX65N) || defined(BSP_MCU_RX72T) || defined (BSP_MCU_RX72M)
- || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) */
+ || defined (BSP_MCU_RX72N) || defined (BSP_MCU_RX66N) || defined(BSP_MCU_RX671) */
 
         USB_M0.SYSCFG.WORD |= USB_DCFM;
 
@@ -745,14 +735,14 @@ void hw_usb_hmodule_init (usb_ctrl_t *p_ctrl)
 #if USB_NUM_USBIP == 2
     else
     {
-#if defined(BSP_MCU_RX62N)
+#if defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
         USB_M1.SYSCFG.WORD |= USB_SCKE;
         /* WAIT_LOOP */
         while ( USB_SCKE != (USB_M1.SYSCFG.WORD & USB_SCKE))
         {
             /* none */
         }
-#endif /* defined(BSP_MCU_RX62N) */
+#endif /* defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671) */
 
 #if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M)
 #if USB_CFG_CLKSEL == USB_CFG_20MHZ
@@ -794,18 +784,23 @@ void hw_usb_hmodule_init (usb_ctrl_t *p_ctrl)
 
         USB_M1.SYSCFG.WORD |= USB_CNEN;
 
-        USB_M1.BUSWAIT.WORD = (USB_CFG_BUSWAIT | 0x0F00);
+        USB_M1.BUSWAIT.WORD = USB_CFG_BUSWAIT;
         usb_cpu_delay_1us((uint16_t) 1);                    /* wait 1usec */
 
 #endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) */
 
         USB_M1.SOFCFG.WORD |= USB_INTL;
 
+#if defined(BSP_MCU_RX671)
+        USB_M1.PHYSLEW.LONG = 0x5;
+
+#endif  /* defined(BSP_MCU_RX671) */
+
         USB_M1.SYSCFG.WORD |= USB_DCFM;
 
-#if defined(BSP_MCU_RX62N)
+#if defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
         USB_M1.SYSCFG.WORD |= USB_DRPD;
-#endif /* defined(BSP_MCU_RX62N) */
+#endif /* defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671) */
 
         sts = usb_chattaring( (uint16_t *)&USB_M1.SYSCFG.WORD );
 
@@ -848,10 +843,10 @@ void hw_usb_hmodule_init (usb_ctrl_t *p_ctrl)
                 USB_M1.DVSTCTR0.WORD |= USB_UACT;
             break;
             case USB_SE0: /* USB device no connected */
-#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX62N)
+#if defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
                 USB_M1.INTENB1.WORD = USB_ATTCH;
 
-#endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX62N) */
+#endif  /* defined(BSP_MCU_RX64M) || defined(BSP_MCU_RX71M) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671) */
             break;
             default:
             break;

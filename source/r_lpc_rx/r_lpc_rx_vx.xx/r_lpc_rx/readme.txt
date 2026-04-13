@@ -22,16 +22,16 @@ r_lpc_rx
 |    |
 |    +---en
 |    |    |
-|    |    +---r01an2769ej0200_rx.pdf
+|    |    +---r01an2769ej0260-rx-lpc.pdf
 |    |
 |    +---ja
 |         |
-|         +---r01an2769jj0200_rx.pdf
-|    
-+---ref
-|    r_lpc_rx_config_reference.h
+|         +---r01an2769jj0260-rx-lpc.pdf
 |
 +---src
+     |    r_lpc_rx.c
+     |    r_lpc_rx_platform.h
+     |    r_lpc_rx_private.h
      |
      +---targets
           |
@@ -55,6 +55,16 @@ r_lpc_rx
           |    r_lpc_rx130_if.h
           |    r_lpc_rx130_private.h
           |
+          +---rx140
+          |    r_lpc_rx140.c
+          |    r_lpc_rx140_if.h
+          |    r_lpc_rx140_private.h
+          |
+          +---rx14t
+          |    r_lpc_rx14t.c
+          |    r_lpc_rx14t_if.h
+          |    r_lpc_rx14t_private.h
+          |
           +---rx230
           |    r_lpc_rx230.c
           |    r_lpc_rx230_if.h
@@ -65,20 +75,70 @@ r_lpc_rx
           |    r_lpc_rx231_if.h
           |    r_lpc_rx231_private.h
           |
+          +---rx23e-b
+          |    r_lpc_rx23e-b.c
+          |    r_lpc_rx23e-b_if.h
+          |    r_lpc_rx23e-b_private.h
+          |
           +---rx23w
           |    r_lpc_rx23w.c
           |    r_lpc_rx23w_if.h
           |    r_lpc_rx23w_private.h
+          |
+          +---rx260
+          |    r_lpc_rx260.c
+          |    r_lpc_rx260_if.h
+          |    r_lpc_rx260_private.h
+          |
+          +---rx261
+          |    r_lpc_rx261.c
+          |    r_lpc_rx261_if.h
+          |    r_lpc_rx261_private.h
+          |
+          +---rx26t
+          |    r_lpc_rx26t.c
+          |    r_lpc_rx26t_if.h
+          |    r_lpc_rx26t_private.h
           |
           +---rx64m
           |    r_lpc_rx64m.c
           |    r_lpc_rx64m_if.h
           |    r_lpc_rx64m_private.h
           |
+          +---rx65n
+          |    r_lpc_rx65n.c
+          |    r_lpc_rx65n_if.h
+          |    r_lpc_rx65n_private.h
+          |
+          +---rx660
+          |    r_lpc_rx660.c
+          |    r_lpc_rx660_if.h
+          |    r_lpc_rx660_private.h
+          |
+          +---rx66n
+          |    r_lpc_rx66n.c
+          |    r_lpc_rx66n_if.h
+          |    r_lpc_rx66n_private.h
+          |
+          +---rx671
+          |    r_lpc_rx671.c
+          |    r_lpc_rx671_if.h
+          |    r_lpc_rx671_private.h
+          |
           +---rx71m
-               r_lpc_rx71m.c
-               r_lpc_rx71m_if.h
-               r_lpc_rx71m_private.h
+          |    r_lpc_rx71m.c
+          |    r_lpc_rx71m_if.h
+          |    r_lpc_rx71m_private.h
+          |
+          +---rx72m
+          |    r_lpc_rx72m.c
+          |    r_lpc_rx72m_if.h
+          |    r_lpc_rx72m_private.h
+          |
+          +---rx72n
+               r_lpc_rx72n.c
+               r_lpc_rx72n_if.h
+               r_lpc_rx72n_private.h
 
 r_config
     r_lpc_rx_config.h

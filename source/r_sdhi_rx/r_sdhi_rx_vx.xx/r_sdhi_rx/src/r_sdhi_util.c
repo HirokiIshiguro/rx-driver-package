@@ -1,25 +1,12 @@
-/**********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+/***********************************************************************************************************************
+* Copyright (c) 2017 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2017(2019) Renesas Electronics Corporation. All rights reserved.
-**********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /**********************************************************************************************************************
 * System Name  : SDHI Driver
 * File Name    : r_sdhi_util.c
-* Version      : 2.06
+* Version      : 2.13
 * Device       : RX
 * Abstract     : API & Sub module
 * Tool-Chain   : For RX e2_studio
@@ -35,13 +22,16 @@
 *                                   Fixed coding style. 
 *              : 30.07.2019 2.05    Added  WAIT LOOP 
 *              : 22.11.2019 2.06    Modified comment of API function to Doxygen style.
+*              : 27.12.2022 2.10    Updated slash format of included header file paths for Linux compatibility.
+*              : 15.03.2025 2.12    Updated disclaimer.
+*              : 30.10.2025 2.13    Modified comment of API function to Doxygen style.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
 Includes <System Includes> , "Project Includes"
 **********************************************************************************************************************/
 #include "r_sdhi_rx_if.h"
-#include ".\src\r_sdhi_rx_private.h"
+#include "./src/r_sdhi_rx_private.h"
 
 #ifdef SDHI_CFG_LONGQ_ENABLE                                /* Uses FIT LONGQ module                */
 #include "r_longq_if.h"
@@ -366,8 +356,8 @@ sdhi_status_t R_SDHI_GetWP(uint32_t channel, uint32_t * p_wp)
  * @details   Stores the values contained in the response registers (SDRSP10, SDRSP32, SDRSP54, and SDRSP76) 
  *            in the response register information structure. Divides and stores the contents of the response 
  *            among register sdrsp10, sdrsp32, sdrsp54, and sdrsp76, according to the response type. 
- *            Section 3.17 in application note shows the correspondence between the response register information
- *            structure and response storage destinations.
+ *            Section R_SDHI_GetResp() in application note shows the correspondence between the response register
+ *            information structure and response storage destinations.
  * @note      Before running this function, initialization processing by the R_SDHI_Open() function is required.
  */
 sdhi_status_t R_SDHI_GetResp(uint32_t channel, sdhi_get_resp_t * p_resp_reg)
@@ -461,7 +451,7 @@ sdhi_status_t R_SDHI_GetBuffRegAddress(uint32_t channel, uint32_t * p_reg_buff)
  * @param[in] channel
  *             Channel number : SDHI channel number to be used (starting from 0)
  * @param[in] reg
- *             SDHI base register offset value. Refer to the table in section 3.18 in application note, 
+ *             SDHI base register offset value. Refer to the table in section R_SDHI_OutReg() in application note,
  *             when setting macro definitions.
  * @param[in] data
  *             Register setting value
@@ -508,7 +498,7 @@ sdhi_status_t R_SDHI_OutReg(uint32_t channel, uint32_t reg, uint32_t data)
  * @param[in] channel
  *             Channel number : SDHI channel number to be used (starting from 0)
  * @param[in] reg
- *             SDHI base register offset value. Refer to the table in section 3.18 in application note, 
+ *             SDHI base register offset value. Refer to the table in section R_SDHI_OutReg() in application note,
  *             when setting macro definitions.
  * @param[out] *p_data
  *             Pointer to storage destination of acquired register value

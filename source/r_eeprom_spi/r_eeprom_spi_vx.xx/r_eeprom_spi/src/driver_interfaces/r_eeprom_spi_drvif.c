@@ -1,30 +1,12 @@
-/************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/***********************************************************************************************************************
+* Copyright (c) 2014 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2014(2015-2019) Renesas Electronics Corporation. All rights reserved.
-*************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /************************************************************************************************
 * System Name  : EEPROM driver software
 * File Name    : r_eeprom_spi_drvif.c
-* Version      : 3.00
+* Version      : 3.21
 * Device       : -
 * Abstract     : IO I/F module
 * Tool-Chain   : -
@@ -34,10 +16,12 @@
 * Limitation   : none
 *************************************************************************************************/
 /************************************************************************************************
-* History      : DD.MM.YYYY Version  Description
-*              : 28.11.2014 2.30     Revised functions of same as Ver.2.30 of other middleware.
-*              : 30.01.2015 2.31     Added RX71M.
-*              : 22.12.2018 3.00     Added RX72T.  Change eeprom drive interface to Memory Access Driver Interface
+* History      : DD.MM.YYYY Version Description
+*              : 28.11.2014 2.30    Revised functions of same as Ver.2.30 of other middleware.
+*              : 30.01.2015 2.31    Added RX71M.
+*              : 22.12.2018 3.00    Added RX72T.  Change eeprom drive interface to Memory Access Driver Interface
+*              : 30.06.2022 3.10    Fixed issues of wrong conditional expression in the if statement.
+*              : 15.03.2025 3.21    Updated disclaimer.
 *************************************************************************************************/
 
 
@@ -47,7 +31,7 @@ Includes <System Includes> , "Project Includes"
 #include "r_eeprom_spi_if.h"                      /* EEPROM driver I/F definitions                 */
 #include "r_eeprom_spi_config.h"                  /* EEPROM driver Configuration definitions       */
 #include "r_memdrv_rx_if.h"                       /* MEMORY driver I/F definitions                 */
-#include "./src/r_eeprom_spi_private.h"           /* EEPROM driver Private module definitions      */
+#include "../r_eeprom_spi_private.h"              /* EEPROM driver Private module definitions      */
 
 
 /************************************************************************************************
@@ -374,7 +358,7 @@ eeprom_status_t r_eeprom_spi_drvif_tx(uint8_t devno, uint32_t txcnt, uint8_t * p
 
     ret_drv = R_MEMDRV_Tx(devno,&memdrv_info);
 
-    if (MEMDRV_SUCCESS == MEMDRV_ERR_HARD)
+    if (MEMDRV_ERR_HARD == ret_drv)
     {
         return EEPROM_SPI_ERR_HARD;
     }
@@ -409,7 +393,7 @@ eeprom_status_t r_eeprom_spi_drvif_tx_data(uint8_t devno, uint32_t txcnt, uint8_
 
     ret_drv = R_MEMDRV_TxData(devno,&memdrv_info);
 
-    if (MEMDRV_SUCCESS == MEMDRV_ERR_HARD)
+    if (MEMDRV_ERR_HARD == ret_drv)
     {
         return EEPROM_SPI_ERR_HARD;
     }
@@ -444,7 +428,7 @@ eeprom_status_t r_eeprom_spi_drvif_rx(uint8_t devno, uint32_t rxcnt, uint8_t * p
 
     ret_drv = R_MEMDRV_Rx(devno,&memdrv_info);
 
-    if (MEMDRV_SUCCESS == MEMDRV_ERR_HARD)
+    if (MEMDRV_ERR_HARD == ret_drv)
     {
         return EEPROM_SPI_ERR_HARD;
     }
@@ -479,7 +463,7 @@ eeprom_status_t r_eeprom_spi_drvif_rx_data(uint8_t devno, uint32_t rxcnt, uint8_
 
     ret_drv = R_MEMDRV_RxData(devno,&memdrv_info);
 
-    if (MEMDRV_SUCCESS == MEMDRV_ERR_HARD)
+    if (MEMDRV_ERR_HARD == ret_drv)
     {
         return EEPROM_SPI_ERR_HARD;
     }

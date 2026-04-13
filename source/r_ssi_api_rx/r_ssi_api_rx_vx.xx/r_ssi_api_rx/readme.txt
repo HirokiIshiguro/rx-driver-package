@@ -23,6 +23,7 @@ Supported MCUs
 * RX72M Group
 * RX72N Group
 * RX66N Group
+* RX671 Group
 
 Boards Tested On
 ----------------
@@ -33,6 +34,7 @@ Boards Tested On
 * RSSKRX23W
 * RSKRX72M
 * RSKRX72N
+* RSKRX671
  
 Limitations
 -----------
@@ -76,9 +78,6 @@ r_ssi_api_rx
 |   |      r01an2150ej{VERSION_NUMBER}-rx-ssi.pdf
 |   +---ja
 |          r01an2150jj{VERSION_NUMBER}-rx-ssi.pdf
-|
-+---ref
-|       r_ssi_api_rx_config_reference.h
 |
 \---src
         r_ssi_api_rx.c

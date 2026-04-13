@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
   Purpose: Module Description File (MDF) Example (Schema Version 2.0)
            This is a description of a sample FIT module configuration file
@@ -11,12 +16,18 @@
 
     <fileTemplate>r_pinset_type2</fileTemplate>
     <resourceInfo>
-      <peripheral name="USB">
+      <peripheral name="">
         <channel number="USB0_HOST">
           <constraint display="Channel only valid for Host mode" actionOnFail="disable">"${USB_CFG_MODE}" !== "${USB_CFG_MODE.USB_CFG_PERI}"</constraint>
           <channelConfiguration>
             <config>API</config>
           </channelConfiguration>
+          <pin name="USB0_DP">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="USB0_DM">
+            <pinConfiguration config="AUTO"/>
+          </pin>
           <pin name="USB0_VBUSEN">
             <pinConfiguration config="AUTO"/>
           </pin>
@@ -32,6 +43,12 @@
           <channelConfiguration>
             <config>API</config>
           </channelConfiguration>
+          <pin name="USB0_DP">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="USB0_DM">
+            <pinConfiguration config="AUTO"/>
+          </pin>
           <pin name="USB0_VBUS">
             <pinConfiguration config="AUTO"/>
           </pin>
@@ -41,6 +58,12 @@
           <channelConfiguration>
             <config>API</config>
           </channelConfiguration>
+          <pin name="USBA_DP">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="USBA_DM">
+            <pinConfiguration config="AUTO"/>
+          </pin>
           <pin name="USBA_VBUSEN">
             <pinConfiguration config="AUTO"/>
           </pin>
@@ -56,7 +79,49 @@
           <channelConfiguration>
             <config>API</config>
           </channelConfiguration>
+          <pin name="USBA_DP">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="USBA_DM">
+            <pinConfiguration config="AUTO"/>
+          </pin>
           <pin name="USBA_VBUS">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+        <channel number="USB1_HOST">
+          <constraint display="Channel only valid for Host mode" actionOnFail="disable">"${USB_CFG_MODE}" !== "${USB_CFG_MODE.USB_CFG_PERI}"</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="USB1_DP">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="USB1_DM">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="USB1_VBUSEN">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="USB1_OVRCURA">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="USB1_OVRCURB">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+        <channel number="USB1_PERI">
+          <constraint display="Channel only valid for Peripheral mode" actionOnFail="disable">"${USB_CFG_MODE}" !== "${USB_CFG_MODE.USB_CFG_HOST}"&amp;&amp;"${USB_CFG_USE_USBIP}" !== "${USB_CFG_USE_USBIP.USB_CFG_IP0}"</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="USB1_DP">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="USB1_DM">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="USB1_VBUS">
             <pinConfiguration config="AUTO"/>
           </pin>
         </channel>
@@ -84,6 +149,10 @@ No checking the argument</description>
             <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PHID_USE" display="Peripheral Human Interface Device Class" value="#define USB_CFG_PHID_USE"/>
             <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PMSC_USE" display="Peripheral Mass Storage Class" value="#define USB_CFG_PMSC_USE"/>
             <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PVND_USE" display="Peripheral Vendor Class" value="#define USB_CFG_PVND_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PCDC_2COM_USE" display="Peripheral Composite device(CDC VCOM 2Port)" value="#define USB_CFG_PCDC_2COM_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PCDC_PHID_USE" display="Peripheral Composite device(CDC + HID)" value="#define USB_CFG_PCDC_PHID_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PCDC_PMSC_USE" display="Peripheral Composite device(CDC + MSC)" value="#define USB_CFG_PCDC_PMSC_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PHID_PMSC_USE" display="Peripheral Composite device(HID + MSC)" value="#define USB_CFG_PHID_PMSC_USE"/>
             <description>Host Communication Device Class
 Host Human Interface Device Class
 Host Mass Storage Class
@@ -208,26 +277,26 @@ Using DMAC7</description>
             <option id="USB_CFG_CLKSEL.USB_CFG_24MHZ" display="24MHz" value="USB_CFG_24MHZ"/>
             <option id="USB_CFG_CLKSEL.USB_CFG_20MHZ" display="20MHz" value="USB_CFG_20MHZ"/>
             <option id="USB_CFG_CLKSEL.USB_CFG_OTHER" display="Other than 24/20MHz" value="USB_CFG_OTHER"/>
-            <constraint display="Only Rx64M and RX71M supported" actionOnFail="disable">"${Device.group}" == "RX64M" || "${Device.group}" == "RX71M"</constraint>
+            <constraint display="Only RX64M and RX71M supported" actionOnFail="disable">"${Device.group}" == "RX64M" || "${Device.group}" == "RX71M"</constraint>
             <description>In the case of a USB module other than USBAa/USBA module, this definition is ignored.</description>
         </property>
-        <property id="USB_CFG_BUSWAIT" display="CPU bus access wait setting" default="7" type="combobox">
-            <option id="USB_CFG_BUSWAIT.0" display="2 access cycles waits" value="0"/>
-            <option id="USB_CFG_BUSWAIT.1" display="3 access cycles waits" value="1"/>
-            <option id="USB_CFG_BUSWAIT.2" display="4 access cycles waits" value="2"/>
-            <option id="USB_CFG_BUSWAIT.3" display="5 access cycles waits" value="3"/>
-            <option id="USB_CFG_BUSWAIT.4" display="6 access cycles waits" value="4"/>
-            <option id="USB_CFG_BUSWAIT.5" display="7 access cycles  waits" value="5"/>
-            <option id="USB_CFG_BUSWAIT.6" display="8 access cycles  waits" value="6"/>
-            <option id="USB_CFG_BUSWAIT.7" display="9 access cycles  waits" value="7"/>
-            <option id="USB_CFG_BUSWAIT.8" display="10 access cycles waits" value="8"/>
-            <option id="USB_CFG_BUSWAIT.9" display="11 access cycles waits" value="9"/>
-            <option id="USB_CFG_BUSWAIT.10" display="12 access cycles waits" value="10"/>
-            <option id="USB_CFG_BUSWAIT.11" display="13 access cycles waits" value="11"/>
-            <option id="USB_CFG_BUSWAIT.12" display="14 access cycles waits" value="12"/>
-            <option id="USB_CFG_BUSWAIT.13" display="15 access cycles waits" value="13"/>
-            <option id="USB_CFG_BUSWAIT.14" display="16 access cycles waits" value="14"/>
-            <option id="USB_CFG_BUSWAIT.15" display="17 access cycles waits " value="15"/>
+        <property id="USB_CFG_BUSWAIT" display="CPU bus access wait setting" default="USB_CFG_BUSWAIT_7" type="combobox">
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_0" display="2 access cycles waits" value="USB_CFG_BUSWAIT_0"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_1" display="3 access cycles waits" value="USB_CFG_BUSWAIT_1"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_2" display="4 access cycles waits" value="USB_CFG_BUSWAIT_2"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_3" display="5 access cycles waits" value="USB_CFG_BUSWAIT_3"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_4" display="6 access cycles waits" value="USB_CFG_BUSWAIT_4"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_5" display="7 access cycles  waits" value="USB_CFG_BUSWAIT_5"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_6" display="8 access cycles  waits" value="USB_CFG_BUSWAIT_6"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_7" display="9 access cycles  waits" value="USB_CFG_BUSWAIT_7"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_8" display="10 access cycles waits" value="USB_CFG_BUSWAIT_8"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_9" display="11 access cycles waits" value="USB_CFG_BUSWAIT_9"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_10" display="12 access cycles waits" value="USB_CFG_BUSWAIT_10"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_11" display="13 access cycles waits" value="USB_CFG_BUSWAIT_11"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_12" display="14 access cycles waits" value="USB_CFG_BUSWAIT_12"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_13" display="15 access cycles waits" value="USB_CFG_BUSWAIT_13"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_14" display="16 access cycles waits" value="USB_CFG_BUSWAIT_14"/>
+            <option id="USB_CFG_BUSWAIT.USB_CFG_BUSWAIT_15" display="17 access cycles waits " value="USB_CFG_BUSWAIT_15"/>
             <constraint display="Only Rx64M and RX71M supported" actionOnFail="disable">"${Device.group}" == "RX64M" || "${Device.group}" == "RX71M"</constraint>
             <description>CPU Bus Access Wait Select(CPU Bus Wait Register (BUSWAIT)BWAIT[3:0])
 2-17 access cycle wait</description>
@@ -274,7 +343,7 @@ Using the battery charging function</description>
             <description>DCP disabled
 DCP enabled</description>
         </property>
-        <property id="USB_CFG_HUB" display="Setting whether to use USB Hub" default="USB_CFG_ENABLE" type="combobox">
+        <property id="USB_CFG_HUB" display="Setting whether to use USB Hub" default="USB_CFG_DISABLE" type="combobox">
             <option id="USB_CFG_HUB.USB_CFG_DISABLE" display="Not using USB Hub" value="USB_CFG_DISABLE"/>
             <option id="USB_CFG_HUB.USB_CFG_ENABLE" display="Using USB Hub" value="USB_CFG_ENABLE"/>
             <constraint display="Used for USB Host mode only" actionOnFail="disable">"${USB_CFG_MODE}" == "${USB_CFG_MODE.USB_CFG_HOST}"</constraint>
@@ -340,7 +409,7 @@ Supporting Hi-speed electrical test</description>
             <option id="USB_CFG_USE_USBIP.USB_CFG_IP0" display="Using USB0 module" value="USB_CFG_IP0"/>
             <option id="USB_CFG_USE_USBIP.USB_CFG_IP1" display="Using USB1 module" value="USB_CFG_IP1"/>
             <constraint display="Used for USB Peripheral mode only" actionOnFail="disable">"${USB_CFG_MODE}" == "${USB_CFG_MODE.USB_CFG_PERI}"</constraint>
-            <constraint display="Only Rx64M and RX71M supported" actionOnFail="disable">"${Device.group}" == "RX64M" || "${Device.group}" == "RX71M"</constraint>
+            <constraint display="Only Rx64M and RX71M supported" actionOnFail="disable">"${Device.group}" == "RX64M" || "${Device.group}" == "RX71M" || "${Device.group}" == "RX671"</constraint>
             <description>Using USB0 module
 Using USB1 module</description>
         </property>

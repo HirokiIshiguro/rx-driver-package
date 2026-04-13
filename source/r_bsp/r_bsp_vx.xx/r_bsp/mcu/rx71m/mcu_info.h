@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : mcu_info.h
 * Device(s)    : RX71M
@@ -40,6 +27,11 @@
 *                               Added the error check of BSP_CFG_CLOCK_SOURCE.
 *                               Added the following enumeration constant.
 *                               - BSP_MCU_GROUP_INTERRUPT_BE0
+*         : 30.11.2021 2.01     Deleted the compile switch for BSP_CFG_MCU_PART_SERIES and BSP_CFG_MCU_PART_GROUP.
+*         : 22.04.2022 2.02     Added version check of smart configurator.
+*         : 27.11.2024 2.03     Added version check of smart configurator.
+*         : 26.02.2025 2.04     Changed the disclaimer.
+*                               Fixed comment about BSP_CFG_CONFIGURATOR_VERSION.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -55,6 +47,30 @@ Macro definitions
 #ifndef MCU_INFO
 #define MCU_INFO
 
+#if BSP_CFG_CONFIGURATOR_VERSION < 2120
+    /* The following macros are updated to invalid value by Smart configurator if you are using Smart Configurator for 
+       RX V2.11.0 (equivalent to e2 studio 2021-10) or earlier version.
+       - BSP_CFG_MCU_PART_GROUP, BSP_CFG_MCU_PART_SERIES
+       The following macros are not updated by Smart configurator if you are using Smart Configurator for RX V2.11.0 
+       (equivalent to e2 studio 2021-10) or earlier version.
+       - BSP_CFG_MAIN_CLOCK_OSCILLATE_ENABLE, BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE, BSP_CFG_HOCO_OSCILLATE_ENABLE, 
+         BSP_CFG_LOCO_OSCILLATE_ENABLE, BSP_CFG_IWDT_CLOCK_OSCILLATE_ENABLE, BSP_CFG_CPLUSPLUS
+       Please update Smart configurator to Smart Configurator for RX V2.12.0 (equivalent to e2 studio 2022-01) or 
+       later version.
+     */
+    #error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."
+#endif
+
+#if BSP_CFG_CONFIGURATOR_VERSION < 2240
+    /* If you are using a version earlier than Smart Configurator for RX V2.23.0 (equivalent to e2 studio 2024-10), 
+       the program may enter an infinite loop in the initial settings depending on the conditions used. For details, 
+       see the related Tool News (R20TS1052).
+       Please update Smart configurator to Smart Configurator for RX V2.24.0 (equivalent to e2 studio 2025-01) or 
+       later version.
+     */
+    #error "To use this version of BSP, you need to upgrade Smart configurator. Please upgrade Smart configurator. If you don't use Smart Configurator, please change value of BSP_CFG_CONFIGURATOR_VERSION in r_bsp_config.h."
+#endif
+
 /* MCU CPU Version */
 #define BSP_MCU_CPU_VERSION    (2)
 
@@ -62,21 +78,13 @@ Macro definitions
 #define CPU_CYCLES_PER_LOOP    (4)
 
 /* MCU Series. */
-#if BSP_CFG_MCU_PART_SERIES == 0x0
-    #define BSP_MCU_SERIES_RX700    (1)
-#else
-    #error "ERROR - BSP_CFG_MCU_PART_SERIES - Unknown MCU Series chosen in r_bsp_config.h"
-#endif
+#define BSP_MCU_SERIES_RX700   (1)
 
 /* This macro means that this MCU is part of the RX64x collection of MCUs (i.e. RX64M). */
-#define BSP_MCU_RX71_ALL            (1)
+#define BSP_MCU_RX71_ALL       (1)
 
 /* MCU Group name. */
-#if BSP_CFG_MCU_PART_GROUP == 0x0
-    #define BSP_MCU_RX71M           (1)
-#else
-    #error "ERROR - BSP_CFG_MCU_PART_GROUP - Unknown MCU Group chosen in r_bsp_config.h"
-#endif
+#define BSP_MCU_RX71M          (1)
 
 /* Package. */
 #if   BSP_CFG_MCU_PART_PACKAGE == 0x0

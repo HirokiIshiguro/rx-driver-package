@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
 /***********************************************************************************************************************
+* Copyright (c) 2014 - 2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+/***********************************************************************************************************************
   Purpose: Module Description File (MDF) Example (Schema Version 2.0)
            This is a description of a sample FIT module configuration file
 ***********************************************************************************************************************/
@@ -22,120 +27,206 @@ Value must be 10 or less</description>
             <description>Value must be an integer
 Value must be 10 or less</description>
         </property>
+        <property id="TFAT_SPI_SDMEM_DRIVE_NUM" display="Number of SPI mode SD memory card drives" default="0" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${TFAT_SPI_SDMEM_DRIVE_NUM}")</constraint>
+            <constraint display="Value must be 10 or less">("${TFAT_SPI_SDMEM_DRIVE_NUM}" &gt;= 0) &amp;&amp; ("${TFAT_SPI_SDMEM_DRIVE_NUM}" &lt;= 10)</constraint>
+            <description>Value must be an integer
+Value must be 10 or less</description>
+        </property>
+        <property id="TFAT_MMC_DRIVE_NUM" display="Number of MMC drives" default="0" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${TFAT_MMC_DRIVE_NUM}")</constraint>
+            <constraint display="Value must be 10 or less">("${TFAT_MMC_DRIVE_NUM}" &gt;= 0) &amp;&amp; ("${TFAT_MMC_DRIVE_NUM}" &lt;= 10)</constraint>
+            <description>Value must be an integer
+Value must be 10 or less</description>
+        </property>
         <property id="TFAT_USB_MINI_DRIVE_NUM" display="Number of USB mini drives" default="0" type="textbox">
             <constraint display="Value must be an integer">testInteger("${TFAT_USB_MINI_DRIVE_NUM}")</constraint>
             <constraint display="Value must be 10 or less">("${TFAT_USB_MINI_DRIVE_NUM}" &gt;= 0) &amp;&amp; ("${TFAT_USB_MINI_DRIVE_NUM}" &lt;= 10)</constraint>
             <description>Value must be an integer
 Value must be 10 or less</description>
         </property>
+        <property id="TFAT_SERIAL_FLASH_DRIVE_NUM" display="Number of Serial FLASH drives" default="0" type="textbox">
+            <constraint display="Value must be an integer">testInteger("${TFAT_SERIAL_FLASH_DRIVE_NUM}")</constraint>
+            <constraint display="Value must be 10 or less">("${TFAT_SERIAL_FLASH_DRIVE_NUM}" &gt;= 0) &amp;&amp; ("${TFAT_SERIAL_FLASH_DRIVE_NUM}" &lt;= 10)</constraint>
+            <description>Value must be an integer
+Value must be 10 or less</description>
+        </property>
+        <property id="TFAT_FLASH_SECTOR_SIZE" display="FLASH sector size input" default="4096" type="combobox">
+            <option id="TFAT_FLASH_SECTOR_SIZE.512" display="512 bytes" value="512"/>
+            <option id="TFAT_FLASH_SECTOR_SIZE.1024" display="1024 bytes" value="1024"/>
+            <option id="TFAT_FLASH_SECTOR_SIZE.2048" display="2048 bytes" value="2048"/>
+            <option id="TFAT_FLASH_SECTOR_SIZE.4096" display="4096 bytes" value="4096"/>
+            <description>Configure selectable sector size for Flash SPI usage (available is 512, 1024, 2048 or 4096 bytes)
+Default value is 4096 bytes</description>
+        </property>
         <property id="TFAT_DRIVE_ALLOC_NUM_0" display="Memory Drive 0" default="TFAT_CTRL_NONE" type="combobox">
             <option id="TFAT_DRIVE_ALLOC_NUM_0.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_0.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_0.TFAT_CTRL_SPI_SDMEM" display="SPI mode SD memory card" value="TFAT_CTRL_SPI_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_0.TFAT_CTRL_MMC" display="MMC" value="TFAT_CTRL_MMC"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_0.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_0.TFAT_CTRL_SERIAL_FLASH" display="Serial FLASH" value="TFAT_CTRL_SERIAL_FLASH"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_0.TFAT_CTRL_NONE" display="None" value="TFAT_CTRL_NONE"/>
             <description>Selects whether to include parameter checking in the code.
 USB       = Use USB memory driver.
-SD Card  = Use SD memory card driver
+SD Card  = Use SD memory card driver.
+SPI mode SD memory card  = Use SPI mode SD memory card driver.
+MMC = Use MMC Card or eMMC driver.
 USB mini = Use USB memory driver.
+Serial Flash = Use Flash SPI driver.
 None      = Not use this memory drive.</description>
         </property>
         <property id="TFAT_DRIVE_ALLOC_NUM_1" display="Memory Drive 1" default="TFAT_CTRL_NONE" type="combobox">
             <option id="TFAT_DRIVE_ALLOC_NUM_1.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_1.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_1.TFAT_CTRL_SPI_SDMEM" display="SPI mode SD memory card" value="TFAT_CTRL_SPI_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_1.TFAT_CTRL_MMC" display="MMC" value="TFAT_CTRL_MMC"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_1.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_1.TFAT_CTRL_SERIAL_FLASH" display="Serial FLASH" value="TFAT_CTRL_SERIAL_FLASH"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_1.TFAT_CTRL_NONE" display="None" value="TFAT_CTRL_NONE"/>
             <description>Selects whether to include parameter checking in the code.
 USB       = Use USB memory driver.
-SD Card  = Use SD memory card driver
+SD Card  = Use SD memory card driver.
+SPI mode SD memory card  = Use SPI mode SD memory card driver.
+MMC = Use MMC Card or eMMC driver.
 USB mini = Use USB memory driver.
+Serial Flash = Use Flash SPI driver.
 None      = Not use this memory drive.</description>
         </property>
         <property id="TFAT_DRIVE_ALLOC_NUM_2" display="Memory Drive 2" default="TFAT_CTRL_NONE" type="combobox">
             <option id="TFAT_DRIVE_ALLOC_NUM_2.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_2.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_2.TFAT_CTRL_SPI_SDMEM" display="SPI mode SD memory card" value="TFAT_CTRL_SPI_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_2.TFAT_CTRL_MMC" display="MMC" value="TFAT_CTRL_MMC"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_2.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_2.TFAT_CTRL_SERIAL_FLASH" display="Serial FLASH" value="TFAT_CTRL_SERIAL_FLASH"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_2.TFAT_CTRL_NONE" display="None" value="TFAT_CTRL_NONE"/>
             <description>Selects whether to include parameter checking in the code.
 USB       = Use USB memory driver.
-SD Card  = Use SD memory card driver
+SD Card  = Use SD memory card driver.
+SPI mode SD memory card  = Use SPI mode SD memory card driver.
+MMC = Use MMC Card or eMMC driver.
 USB mini = Use USB memory driver.
+Serial Flash = Use Flash SPI driver.
 None      = Not use this memory drive.</description>
         </property>
         <property id="TFAT_DRIVE_ALLOC_NUM_3" display="Memory Drive 3" default="TFAT_CTRL_NONE" type="combobox">
             <option id="TFAT_DRIVE_ALLOC_NUM_3.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_3.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_3.TFAT_CTRL_SPI_SDMEM" display="SPI mode SD memory card" value="TFAT_CTRL_SPI_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_3.TFAT_CTRL_MMC" display="MMC" value="TFAT_CTRL_MMC"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_3.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_3.TFAT_CTRL_SERIAL_FLASH" display="Serial FLASH" value="TFAT_CTRL_SERIAL_FLASH"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_3.TFAT_CTRL_NONE" display="None" value="TFAT_CTRL_NONE"/>
             <description>Selects whether to include parameter checking in the code.
 USB       = Use USB memory driver.
-SD Card  = Use SD memory card driver
+SD Card  = Use SD memory card driver.
+SPI mode SD memory card  = Use SPI mode SD memory card driver.
+MMC = Use MMC Card or eMMC driver.
 USB mini = Use USB memory driver.
+Serial Flash = Use Flash SPI driver.
 None      = Not use this memory drive.</description>
         </property>
         <property id="TFAT_DRIVE_ALLOC_NUM_4" display="Memory Drive 4" default="TFAT_CTRL_NONE" type="combobox">
             <option id="TFAT_DRIVE_ALLOC_NUM_4.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_4.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_4.TFAT_CTRL_SPI_SDMEM" display="SPI mode SD memory card" value="TFAT_CTRL_SPI_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_4.TFAT_CTRL_MMC" display="MMC" value="TFAT_CTRL_MMC"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_4.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_4.TFAT_CTRL_SERIAL_FLASH" display="Serial FLASH" value="TFAT_CTRL_SERIAL_FLASH"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_4.TFAT_CTRL_NONE" display="None" value="TFAT_CTRL_NONE"/>
             <description>Selects whether to include parameter checking in the code.
 USB       = Use USB memory driver.
-SD Card  = Use SD memory card driver
+SD Card  = Use SD memory card driver.
+SPI mode SD memory card  = Use SPI mode SD memory card driver.
+MMC = Use MMC Card or eMMC driver.
 USB mini = Use USB memory driver.
+Serial Flash = Use Flash SPI driver
 None      = Not use this memory drive.</description>
         </property>
         <property id="TFAT_DRIVE_ALLOC_NUM_5" display="Memory Drive 5" default="TFAT_CTRL_NONE" type="combobox">
             <option id="TFAT_DRIVE_ALLOC_NUM_5.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_5.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_5.TFAT_CTRL_SPI_SDMEM" display="SPI mode SD memory card" value="TFAT_CTRL_SPI_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_5.TFAT_CTRL_MMC" display="MMC" value="TFAT_CTRL_MMC"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_5.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_5.TFAT_CTRL_SERIAL_FLASH" display="Serial FLASH" value="TFAT_CTRL_SERIAL_FLASH"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_5.TFAT_CTRL_NONE" display="None" value="TFAT_CTRL_NONE"/>
             <description>Selects whether to include parameter checking in the code.
 USB       = Use USB memory driver.
-SD Card  = Use SD memory card driver
+SD Card  = Use SD memory card driver.
+SPI mode SD memory card  = Use SPI mode SD memory card driver.
+MMC = Use MMC Card or eMMC driver.
 USB mini = Use USB memory driver.
+Serial Flash = Use Flash SPI driver.
 None      = Not use this memory drive.</description>
         </property>
         <property id="TFAT_DRIVE_ALLOC_NUM_6" display="Memory Drive 6" default="TFAT_CTRL_NONE" type="combobox">
             <option id="TFAT_DRIVE_ALLOC_NUM_6.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_6.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_6.TFAT_CTRL_SPI_SDMEM" display="SPI mode SD memory card" value="TFAT_CTRL_SPI_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_6.TFAT_CTRL_MMC" display="MMC" value="TFAT_CTRL_MMC"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_6.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_6.TFAT_CTRL_SERIAL_FLASH" display="Serial FLASH" value="TFAT_CTRL_SERIAL_FLASH"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_6.TFAT_CTRL_NONE" display="None" value="TFAT_CTRL_NONE"/>
             <description>Selects whether to include parameter checking in the code.
 USB       = Use USB memory driver.
-SD Card  = Use SD memory card driver
+SD Card  = Use SD memory card driver.
+SPI mode SD memory card  = Use SPI mode SD memory card driver.
+MMC = Use MMC Card or eMMC driver.
 USB mini = Use USB memory driver.
+Serial Flash = Use Flash SPI driver.
 None      = Not use this memory drive.</description>
         </property>
         <property id="TFAT_DRIVE_ALLOC_NUM_7" display="Memory Drive 7" default="TFAT_CTRL_NONE" type="combobox">
             <option id="TFAT_DRIVE_ALLOC_NUM_7.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_7.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_7.TFAT_CTRL_SPI_SDMEM" display="SPI mode SD memory card" value="TFAT_CTRL_SPI_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_7.TFAT_CTRL_MMC" display="MMC" value="TFAT_CTRL_MMC"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_7.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_7.TFAT_CTRL_SERIAL_FLASH" display="Serial FLASH" value="TFAT_CTRL_SERIAL_FLASH"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_7.TFAT_CTRL_NONE" display="None" value="TFAT_CTRL_NONE"/>
             <description>Selects whether to include parameter checking in the code.
 USB       = Use USB memory driver.
-SD Card  = Use SD memory card driver
+SD Card  = Use SD memory card driver.
+SPI mode SD memory card  = Use SPI mode SD memory card driver.
+MMC = Use MMC Card or eMMC driver.
 USB mini = Use USB memory driver.
+Serial Flash = Use Flash SPI driver.
 None      = Not use this memory drive.</description>
         </property>
         <property id="TFAT_DRIVE_ALLOC_NUM_8" display="Memory Drive 8" default="TFAT_CTRL_NONE" type="combobox">
             <option id="TFAT_DRIVE_ALLOC_NUM_8.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_8.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_8.TFAT_CTRL_SPI_SDMEM" display="SPI mode SD memory card" value="TFAT_CTRL_SPI_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_8.TFAT_CTRL_MMC" display="MMC" value="TFAT_CTRL_MMC"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_8.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_8.TFAT_CTRL_SERIAL_FLASH" display="Serial FLASH" value="TFAT_CTRL_SERIAL_FLASH"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_8.TFAT_CTRL_NONE" display="None" value="TFAT_CTRL_NONE"/>
             <description>Selects whether to include parameter checking in the code.
 USB       = Use USB memory driver.
-SD Card  = Use SD memory card driver
+SD Card  = Use SD memory card driver.
+SPI mode SD memory card  = Use SPI mode SD memory card driver.
+MMC = Use MMC Card or eMMC driver.
 USB mini = Use USB memory driver.
+Serial Flash = Use Flash SPI driver.
 None      = Not use this memory drive.</description>
         </property>
         <property id="TFAT_DRIVE_ALLOC_NUM_9" display="Memory Drive 9" default="TFAT_CTRL_NONE" type="combobox">
             <option id="TFAT_DRIVE_ALLOC_NUM_9.TFAT_CTRL_USB" display="USB" value="TFAT_CTRL_USB"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_9.TFAT_CTRL_SDMEM" display="SD memory card" value="TFAT_CTRL_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_9.TFAT_CTRL_SPI_SDMEM" display="SPI mode SD memory card" value="TFAT_CTRL_SPI_SDMEM"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_9.TFAT_CTRL_MMC" display="MMC" value="TFAT_CTRL_MMC"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_9.TFAT_CTRL_USB_MINI" display="USB mini" value="TFAT_CTRL_USB_MINI"/>
+            <option id="TFAT_DRIVE_ALLOC_NUM_9.TFAT_CTRL_SERIAL_FLASH" display="Serial FLASH" value="TFAT_CTRL_SERIAL_FLASH"/>
             <option id="TFAT_DRIVE_ALLOC_NUM_9.TFAT_CTRL_NONE" display="None" value="TFAT_CTRL_NONE"/>
             <description>Selects whether to include parameter checking in the code.
 USB       = Use USB memory driver.
-SD Card  = Use SD memory card driver
+SD Card  = Use SD memory card driver.
+SPI mode SD memory card  = Use SPI mode SD memory card driver.
+MMC = Use MMC Card or eMMC driver.
 USB mini = Use USB memory driver.
+Serial Flash = Use Flash SPI driver.
 None      = Not use this memory drive.</description>
         </property>
         <property id="RI600V4_MUTEX_ID_FOR_TFAT_DRIVE_ALLOC_NUM_0" display="RI600V4 Mutex ID For Memory Drive 0" default="0" type="textbox">

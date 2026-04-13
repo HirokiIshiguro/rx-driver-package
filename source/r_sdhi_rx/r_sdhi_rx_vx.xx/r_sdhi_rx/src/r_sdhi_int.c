@@ -1,25 +1,12 @@
-/**********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+/***********************************************************************************************************************
+* Copyright (c) 2017 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2017(2019) Renesas Electronics Corporation. All rights reserved.
-**********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /**********************************************************************************************************************
 * System Name  : SDHI Driver
 * File Name    : r_sdhi_int.c
-* Version      : 2.06
+* Version      : 2.13
 * Device       : RX
 * Abstract     : API & Sub module
 * Tool-Chain   : For RX e2_studio
@@ -34,13 +21,16 @@
 *              : 20.05.2019 2.04    Added support for GNUC and ICCRX.
 *                                   Fixed coding style. 
 *              : 22.11.2019 2.06    Modified comment of API function to Doxygen style.
+*              : 27.12.2022 2.10    Updated slash format of included header file paths for Linux compatibility.
+*              : 15.03.2025 2.12    Updated disclaimer.
+*              : 30.10.2025 2.13    Modified comment of API function to Doxygen style.
 **********************************************************************************************************************/
 
 /**********************************************************************************************************************
 Includes <System Includes> , "Project Includes"
 **********************************************************************************************************************/
 #include "r_sdhi_rx_if.h"
-#include ".\src\r_sdhi_rx_private.h"
+#include "./src/r_sdhi_rx_private.h"
 
 /**********************************************************************************************************************
 Macro definitions
@@ -65,13 +55,13 @@ Private global variables and functions
  *              To enable an interrupt, set the target bit to 1.\n 
  *              To not change the interrupt setting, clear the target bit to 0.\n 
  *              However, setting to the Read Only bit is invalid.\n 
- *              For details of the SDIMSK1 register, refer to section 3.9 in application note.
+ *              For details of the SDIMSK1 register, refer to section R_SDHI_SetIntMask() in application note.
  * @param[in] mask2
  *             SD interrupt mask register 2 (SDIMSK2) control\n 
  *              To enable an interrupt, set the target bit to 1.\n 
  *              To not change the interrupt setting, clear the target bit to 0.\n 
  *              However, setting to the Read Only bit is invalid.\n 
- *              For details of the SDIMSK2 register, refer to section 3.9 in application note.
+ *              For details of the SDIMSK2 register, refer to section R_SDHI_SetIntMask() in application note.
  * @retval    SDHI_SUCCESS Successful operation
  * @retval    SDHI_ERR     General error
  * @details   Controls SD interrupt mask register 1 (SDIMSK1) and SD interrupt mask register 2 (SDIMSK2) to enable 
@@ -130,13 +120,13 @@ sdhi_status_t R_SDHI_SetIntMask(uint32_t channel, uint32_t mask1, uint32_t mask2
  *              To disable an interrupt, set the target bit to 1.\n 
  *              To not change the interrupt setting, clear the target bit to 0.\n 
  *              However, setting to the Read Only bit is invalid.\n 
- *              For details of the SDIMSK1 register, refer to section 3.9 in application note.
+ *              For details of the SDIMSK1 register, refer to section R_SDHI_SetIntMask() in application note.
  * @param[in] mask2
  *             SD interrupt mask register 2 (SDIMSK2) control\n 
  *              To disable an interrupt, set the target bit to 1.\n 
  *              To not change the interrupt setting, clear the target bit to 0.\n 
  *              However, setting to the Read Only bit is invalid.\n 
- *              For details of the SDIMSK2 register, refer to section 3.9 in application note.
+ *              For details of the SDIMSK2 register, refer to section R_SDHI_SetIntMask() in application note.
  * @retval    SDHI_SUCCESS Successful operation
  * @retval    SDHI_ERR     General error
  * @details   Controls SD interrupt mask register 1 (SDIMSK1) and SD interrupt mask register 2 (SDIMSK2) to disable
@@ -195,13 +185,13 @@ sdhi_status_t R_SDHI_ClearIntMask(uint32_t channel, uint32_t mask1, uint32_t mas
  *              To 0 clear an interrupt flag, set the target bit to 1.\n 
  *              To not change the interrupt flag, clear the target bit to 0.\n 
  *              However, setting to the Read Only bit is invalid.\n 
- *              For details of the SDSTS1 register, refer to section 3.11 in application note.
+ *              For details of the SDSTS1 register, refer to section R_SDHI_ClearSdstsReg() in application note.
  * @param[in] clear_sdsts2
  *             SD status register 2 (SDSTS2) control\n 
  *              To 0 clear an interrupt flag, set the target bit to 1.\n 
  *              To not change the interrupt flag, clear the target bit to 0.\n 
  *              However, setting to the Read Only bit and b12 (Reserved bit) is invalid.\n 
- *              For details of the SDSTS2 register, refer to section 3.11 in application note.
+ *              For details of the SDSTS2 register, refer to section R_SDHI_ClearSdstsReg() in application note.
  * @retval    SDHI_SUCCESS Successful operation
  * @retval    SDHI_ERR     General error
  * @details   Clears interrupt flags in SD status register 1 (SDSTS1) and SD status register 2 (SDSTS2).
@@ -260,7 +250,7 @@ sdhi_status_t R_SDHI_ClearSdstsReg(uint32_t channel, uint32_t clear_sdsts1, uint
  *              To enable an interrupt, set the target bit to 1.\n 
  *              To not change the interrupt setting, clear the target bit to 0.\n 
  *              However, setting to the Read Only bit and b2-b1 (Reserved bit) is invalid.\n 
- *              For details of the SDIOIMSK register, refer to section 3.12 in application note.
+ *              For details of the SDIOIMSK register, refer to section R_SDHI_SetSdioIntMask() in application note.
  * @retval    SDHI_SUCCESS Successful operation
  * @retval    SDHI_ERR     General error
  * @details   Controls the SDIO interrupt mask register (SDIOIMSK) to enable interrupts.
@@ -316,7 +306,7 @@ sdhi_status_t R_SDHI_SetSdioIntMask(uint32_t channel, uint32_t mask)
  *              To disable an interrupt, set the target bit to 1.\n 
  *              To not change the interrupt setting, clear the target bit to 0.\n 
  *              However, setting to the Read Only bit and b2-b1 (Reserved bit) is invalid.\n 
- *              For details of the SDIOIMSK register, refer to section 3.12 in application note.
+ *              For details of the SDIOIMSK register, refer to section R_SDHI_SetSdioIntMask() in application note.
  * @retval    SDHI_SUCCESS Successful operation
  * @retval    SDHI_ERR     General error
  * @details   Controls the SDIO interrupt mask register (SDIOIMSK) to disable interrupts.
@@ -372,7 +362,7 @@ sdhi_status_t R_SDHI_ClearSdioIntMask(uint32_t channel, uint32_t mask)
  *              To clear an interrupt flag, set the target bit to 1.\n 
  *              To not change the interrupt flag, clear the target bit to 0.\n 
  *              However, setting to the Read Only bit and b2-b1 (Reserved bit) is invalid.\n 
- *              For details of the SDIOSTS register, refer to section 3.14 in application note.
+ *              For details of the SDIOSTS register, refer to section R_SDHI_ClearSdiostsReg() in application note.
  * @retval    SDHI_SUCCESS Successful operation
  * @retval    SDHI_ERR     General error
  * @details   Clears interrupt flags in the SDIO status register (SDIOSTS).

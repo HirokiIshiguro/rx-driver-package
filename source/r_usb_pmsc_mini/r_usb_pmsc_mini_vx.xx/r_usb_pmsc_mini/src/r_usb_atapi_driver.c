@@ -1,25 +1,8 @@
-/*******************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- * Copyright (C) 2014(2019) Renesas Electronics Corporation. All rights reserved.
- ******************************************************************************/
+/*
+* Copyright (c) 2014(2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /******************************************************************************
  * File Name    : r_usb_atapi_driver.c
  * Description  : USB ATAPI Driver code
@@ -29,7 +12,9 @@
  *         : 01.09.2014 1.00     First Release
  *         : 01.06.2015 1.01     Added RX231.
  *         : 30.11.2018 1.10     Supporting Smart Configurator
- *         : 31.05.2019 1.11    Added support for GNUC and ICCRX.
+ *         : 31.05.2019 1.11     Added support for GNUC and ICCRX.
+ *         : 30.06.2020 1.20     Added support for RTOS.
+ *         : 20.03.2025 1.31     Changed the disclaimer.
  ******************************************************************************/
 
 /******************************************************************************
@@ -49,6 +34,7 @@
 #include "r_usb_patapi.h"
 #include "r_usb_pmsc.h"
 
+#if defined(USB_CFG_PMSC_USE)
 /******************************************************************************
  Macro definitions
  ******************************************************************************/
@@ -68,9 +54,11 @@ static void             pmsc_atapi_get_read_data(uint32_t *p_size, uint8_t **pp_
 static void             pmsc_atapi_get_mode_sense10_data (uint8_t page_code, uint32_t *p_size, uint8_t **pp_buff);
 
 static uint8_t          gs_usb_atapi_is_data_stage = USB_FALSE;      /* Data SetUp Flag */
-static uint8_t          gs_usb_pmsc_media_buffer[USB_ATAPI_BLOCK_UNIT * USB_CFG_PMSC_TRANS_COUNT];
+static uint32_t         g_usb_pmsc_media_buffer[(USB_ATAPI_BLOCK_UNIT * USB_CFG_PMSC_TRANS_COUNT)/4];
+static uint8_t          *gp_usb_pmsc_media_buffer = (uint8_t *)&g_usb_pmsc_media_buffer[0];
 static usb_pmsc_cdb_t   *gsp_usb_atapi_cbwcb;                        /* CBWCB pointer */
 static uint32_t         gs_usb_atapi_cur_lba;                        /* the current Logical Block Address */
+static uint8_t          g_usb_pmsc_atapi_data[256];
 
 /* Inquiry data */
 static uint8_t   gs_usb_atapi_inquiry_tbl[USB_ATAPI_INQUIRY_SIZE] =
@@ -478,9 +466,6 @@ void pmsc_atapi_analyze_cbwcb(uint8_t *p_cbwcb)
         break;
 
         default:
-
-            USB_PRINTF0("### CBW Command Not Support\n");
-
         break;
     }
 
@@ -535,13 +520,13 @@ static void pmsc_atapi_get_read_data(uint32_t *p_size, uint8_t **pp_buff)
                 trans_block = USB_CFG_PMSC_TRANS_COUNT;
             }
 
-            R_USB_media_read(&gs_usb_pmsc_media_buffer[0], gs_usb_atapi_cur_lba, trans_block);
+            R_USB_media_read(gp_usb_pmsc_media_buffer, gs_usb_atapi_cur_lba, trans_block);
 
             gs_usb_atapi_cur_lba += trans_block;
 
             *p_size = (USB_ATAPI_BLOCK_UNIT * trans_block);
             /* Casting uint8_t */
-            *pp_buff = (uint8_t *)(&gs_usb_pmsc_media_buffer[0]);
+            *pp_buff = (uint8_t *)(gp_usb_pmsc_media_buffer);
 
         break;
 
@@ -669,6 +654,14 @@ static void pmsc_atapi_get_read_data(uint32_t *p_size, uint8_t **pp_buff)
         *p_size = g_usb_pmsc_message.ul_size;
     }
 
+    if ((g_usb_pmsc_dtl > *p_size) && (g_usb_pmsc_dtl <256))
+    {
+        memcpy (&g_usb_pmsc_atapi_data[0], *pp_buff, *p_size);
+        memset ((void *)&g_usb_pmsc_atapi_data[*p_size], 0, (g_usb_pmsc_dtl - *p_size));
+        *pp_buff = &g_usb_pmsc_atapi_data[0];
+        *p_size = g_usb_pmsc_dtl;
+        g_usb_pmsc_message.ul_size = g_usb_pmsc_dtl;
+    }
 } /* End of function pmsc_atapi_get_read_data() */
 
 /******************************************************************************
@@ -676,12 +669,11 @@ static void pmsc_atapi_get_read_data(uint32_t *p_size, uint8_t **pp_buff)
  * Description  : ATAPI Command Transfer
  * Arguments    : uint8_t       *p_cbw       : CBW
  *              : uint16_t      status       : status
- *              : usb_pcb_t     complete     : callback
+ *              : usb_putr_t    *p_atapi_utr : Return value USB Transfer parameter
  * Return value : usb_er_t                   : error
  ******************************************************************************/
-void pmsc_atapi_command_processing(uint8_t *p_cbw, uint16_t usb_result, usb_pcb_t complete)
+void pmsc_atapi_command_processing(uint8_t *p_cbw, uint16_t usb_result, usb_putr_t *p_atapi_utr)
 {
-    static usb_putr_t    atapi_mess;
     static void         *p_atapi_rw_buff;   /* Transfer Address */
     static uint32_t     real_data_count;    /* The amount of real data transferred */
     static uint32_t     this_transfer_size; /* Transfer Size */
@@ -743,29 +735,21 @@ void pmsc_atapi_command_processing(uint8_t *p_cbw, uint16_t usb_result, usb_pcb_
                     {
                         if (g_usb_pmsc_dtl == g_usb_pmsc_message.ul_size)
                         {
-                            status = USB_PMSC_CMD_COMPLETE;               /* case 6 */
+                            status = USB_PMSC_CMD_COMPLETE;             /* case 6 */
                         }
                         else
                         {
-                            if ((USB_ATAPI_MODE_SENSE10 == gsp_usb_atapi_cbwcb->s_usb_ptn0.uc_opcode)
-                                || (USB_ATAPI_READ_FORMAT_CAPACITY == gsp_usb_atapi_cbwcb->s_usb_ptn0.uc_opcode))
+                            if (g_usb_pmsc_dtl > g_usb_pmsc_message.ul_size)
                             {
-                                if (g_usb_pmsc_dtl > g_usb_pmsc_message.ul_size)
-                                {
 #if (USB_ATAPI_SHT_RESPONSE == 0)
-                                    status = USB_PMSC_CMD_SHT_COMPLETE;   /* case 5 */
+                                status = USB_PMSC_CMD_SHT_COMPLETE;     /* case 5 */
 #else   /* USB_ATAPI_SHT_RESPONSE == 0 */
-                                    status = USB_PMSC_CMD_COMPLETE;       /* case 5 */
+                                status = USB_PMSC_CMD_COMPLETE;         /* case 5 */
 #endif  /* USB_ATAPI_SHT_RESPONSE == 0 */
-                                }
-                                else
-                                {
-                                    status = USB_PMSC_CMD_FAILED;         /* case 7*/
-                                }
                             }
                             else
                             {
-                                status = USB_PMSC_CMD_FAILED;             /* case 5 & 7*/
+                                status = USB_PMSC_CMD_FAILED;           /* case 7*/
                             }
                         }
                         g_usb_pmsc_dtl = g_usb_pmsc_dtl - g_usb_pmsc_message.ul_size;
@@ -796,7 +780,7 @@ void pmsc_atapi_command_processing(uint8_t *p_cbw, uint16_t usb_result, usb_pcb_
 
                     /* Retrieve the location and size of the write buffer. */
                     this_transfer_size = g_usb_pmsc_message.ul_size;
-                    p_atapi_rw_buff = &gs_usb_pmsc_media_buffer[0];
+                    p_atapi_rw_buff = gp_usb_pmsc_media_buffer;
 
                     if (this_transfer_size > (USB_ATAPI_BLOCK_UNIT * USB_CFG_PMSC_TRANS_COUNT))
                     {
@@ -818,7 +802,7 @@ void pmsc_atapi_command_processing(uint8_t *p_cbw, uint16_t usb_result, usb_pcb_
                 if (USB_DATA_OK == usb_result)  /* Previous Transfer OK */
                 {
                     /* Casting uint8_t* */
-                    p_atapi_rw_buff = (uint8_t *)(&gs_usb_pmsc_media_buffer[0]);
+                    p_atapi_rw_buff = (uint8_t *)(gp_usb_pmsc_media_buffer);
 
                     trans_block = this_transfer_size / USB_ATAPI_BLOCK_UNIT;
                     if (0 != (this_transfer_size % USB_ATAPI_BLOCK_UNIT))
@@ -827,7 +811,7 @@ void pmsc_atapi_command_processing(uint8_t *p_cbw, uint16_t usb_result, usb_pcb_
                     }
 
                     /* Write will be limited to max one block at a time */
-                    R_USB_media_write(&gs_usb_pmsc_media_buffer[0], gs_usb_atapi_cur_lba, trans_block);
+                    R_USB_media_write(gp_usb_pmsc_media_buffer, gs_usb_atapi_cur_lba, trans_block);
                     gs_usb_atapi_cur_lba += trans_block;
 
                     /* Update the count of data transferred so far. */
@@ -885,27 +869,15 @@ void pmsc_atapi_command_processing(uint8_t *p_cbw, uint16_t usb_result, usb_pcb_
         default:
 
             status = USB_PMSC_CMD_ERROR;
-            USB_PRINTF0("### Command Execute error (1st sequence) \n");
             gs_usb_atapi_is_data_stage = USB_FALSE;
 
         break;
     }
 
     /* Set mess members */
-    atapi_mess.p_tranadr    = p_atapi_rw_buff;
-    atapi_mess.tranlen      = this_transfer_size;
-    atapi_mess.status       = status;
-
-    if (USB_NULL == complete)
-    {
-        /* WAIT_LOOP */
-        while(1) /* Error */
-        {
-            /* Do Nothing */
-        }
-    }
-
-    complete(&atapi_mess, USB_NULL, USB_NULL);
+    p_atapi_utr->p_tranadr    = p_atapi_rw_buff;
+    p_atapi_utr->tranlen      = this_transfer_size;
+    p_atapi_utr->status       = status;
 } /* End of function pmsc_atapi_command_processing() */
 
 
@@ -996,12 +968,12 @@ static void pmsc_atapi_get_mode_sense10_data(uint8_t page_code, uint32_t *p_size
 void pmsc_atapi_init (void)
 {
     /* Casting void* */
-    memset((void *)&gs_usb_pmsc_media_buffer, 0, (USB_ATAPI_BLOCK_UNIT * USB_CFG_PMSC_TRANS_COUNT));
+    memset((void *)gp_usb_pmsc_media_buffer, 0, (USB_ATAPI_BLOCK_UNIT * USB_CFG_PMSC_TRANS_COUNT));
     gsp_usb_atapi_cbwcb = USB_NULL;
     gs_usb_atapi_cur_lba = 0;
 } /* End of function pmsc_atapi_init() */
 
-
+#endif /* defined(USB_CFG_PMSC_USE) */
 
 /******************************************************************************
  End Of File

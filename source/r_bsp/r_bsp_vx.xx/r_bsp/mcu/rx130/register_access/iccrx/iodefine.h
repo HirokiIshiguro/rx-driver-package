@@ -1,5 +1,10 @@
 /* IAR file generator: v1.0 */
 
+/*
+* Copyright (c) 2015(2017-2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /*********************************************************************************
 *
 * Device     : RX/RX100/RX130
@@ -8,13 +13,13 @@
 *
 * Abstract   : Definition of I/O Register.
 *
-* History    : 0.5  (2015-06-30)  [Hardware Manual Revision : 0.50]
-*            : 1.0  (2015-10-05)  [Hardware Manual Revision : 1.00]
-*            : 2.0  (2017-04-17)  [Hardware Manual Revision : 2.00] 
+* History    : 0.5   (2015-06-30)  [Hardware Manual Revision : 0.50]
+*            : 1.0   (2015-10-05)  [Hardware Manual Revision : 1.00]
+*            : 2.0   (2017-04-17)  [Hardware Manual Revision : 2.00] 
+*            : 2.0A  (2023-03-03)  [Hardware Manual Revision : 2.00] 
+*            : 2.00B (2025-02-14)  [Hardware Manual Revision : 2.00] 
 *
 * NOTE       : THIS IS A TYPICAL EXAMPLE.
-*
-* Copyright (C) 2015-2017 Renesas Electronics Corporation.
 *
 *********************************************************************************/
 /********************************************************************************/
@@ -559,7 +564,8 @@ struct st_ctsu {
 			unsigned short CTSUICOMP:1;
 			unsigned short :7;
 			unsigned short CTSUTSOC:1;
-			unsigned short :3;
+			unsigned short CTSUCLKSEL1:1;
+			unsigned short :2;
 			unsigned short CTSUDRV:1;
 			unsigned short CTSUTSOD:1;
 			unsigned short CTSUSPMD:2;

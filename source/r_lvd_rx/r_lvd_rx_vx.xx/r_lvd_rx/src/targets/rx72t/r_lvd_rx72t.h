@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2019 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx72t.h
@@ -22,7 +9,11 @@
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * History      : DD.MM.YYYY Version  Description
-*              : 01.02.2019 2.50     First Release
+*              : 01.02.2019 1.00     First Release
+*              : 12.12.2022 1.10     Update default register value of voltage level
+*              : 30.01.2024 1.20     Changed LVD circuit enable wait value
+*                                    Changed ICU group from LVD_GROUP_INT_ICUB to LVD_GROUP_INT_ICUC
+*              : 15.03.2025 4.81     Updated disclaimer.
 ***********************************************************************************************************************/
 #ifndef LVD_RX72T_HEADER_FILE
 #define LVD_RX72T_HEADER_FILE
@@ -44,7 +35,7 @@ Macro definitions
 #define LVD_GROUP_SETUP                         (LVD_GROUP_SETUP_LVDA_2)
 
 /* Group: ICU group */
-#define LVD_GROUP_INT                           (LVD_GROUP_INT_ICUB)
+#define LVD_GROUP_INT                           (LVD_GROUP_INT_ICUC)
 
 /* Support: Maskable interrupt */
 #define LVD_SUPPORT_MI_CH1                      (LVD_ENABLE)
@@ -66,8 +57,8 @@ Macro definitions
 #define LVD_MAX_MI_PRIO                         (15)
 
 /* Default value: Default register value of voltage level */
-#define LVD_VOLTAGE_LEVEL_DEFAULT_VALUE_CH1     (11)
-#define LVD_VOLTAGE_LEVEL_DEFAULT_VALUE_CH2     (11)
+#define LVD_VOLTAGE_LEVEL_DEFAULT_VALUE_CH1     (6)
+#define LVD_VOLTAGE_LEVEL_DEFAULT_VALUE_CH2     (6)
 
 /* Convert: Voltage level: Setting value -> register value */
 #if (LVD_CFG_VOLTAGE_LEVEL_CHANNEL_1 == 457)
@@ -159,7 +150,7 @@ Macro definitions
 
 
 /* Value: Wait for enable LVD circuit. (micro sec) */
-#define LVD_DELAY_CIRCUIT_ENABLE_USEC           (10)
+#define LVD_DELAY_CIRCUIT_ENABLE_USEC           (20)
 
 /***********************************************************************************************************************
 Typedef definitions

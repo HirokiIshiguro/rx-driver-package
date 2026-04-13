@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : mcu_interrupts.h
 * Description  : This module is the control of the interrupt enable.
@@ -30,6 +17,12 @@
 *                               - BSP_INT_ERR_INVALID_IPL
 *                               Added the following enumeration constant.
 *                               - BSP_INT_SRC_EMPTY
+*         : 30.06.2021 1.11     Added the following enumeration constant.
+*                               - BSP_INT_SRC_EXC_ADDRESS
+*         : 21.11.2023 1.12     Added the following enumeration constant.
+*                               - BSP_INT_SRC_BUS_ERROR_ILLEGAL_ACCESS
+*                               - BSP_INT_SRC_BUS_ERROR_TIMEOUT
+*         : 26.02.2025 1.13     Changed the disclaimer.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -67,8 +60,11 @@ typedef enum
     BSP_INT_SRC_IWDT_ERROR,               /* IWDT underflow/refresh error has occurred */
     BSP_INT_SRC_LVD1,                     /* Voltage monitoring 1 interrupt */
     BSP_INT_SRC_LVD2,                     /* Voltage monitoring 2 interrupt */
+    BSP_INT_SRC_EXC_ADDRESS,              /* Address exception */
     BSP_INT_SRC_UNDEFINED_INTERRUPT,      /* Interrupt has triggered for a vector that user did not write a handler. */
     BSP_INT_SRC_BUS_ERROR,                /* Bus error: illegal address access or timeout */
+    BSP_INT_SRC_BUS_ERROR_ILLEGAL_ACCESS, /* Bus error: illegal address access. Use this when you want to set only Illegal address access detection. */
+    BSP_INT_SRC_BUS_ERROR_TIMEOUT,        /* Bus error: timeout. Use this when you want to set only Bus timeout detection. */
     BSP_INT_SRC_RAM,                      /* RAM error interrupt */
     BSP_INT_SRC_EXRAM,                    /* EXRAM error interrupt */
     BSP_INT_SRC_ECCRAM_1BIT,              /* ECCRAM 1-bit error interrupt */

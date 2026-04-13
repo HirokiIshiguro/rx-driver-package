@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
+/*
+* Copyright (c) 2014 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
   Purpose: Module Description File (MDF) Example (Schema Version 2.0)
            This is a description of a sample FIT module configuration file
@@ -17,6 +22,12 @@
           <channelConfiguration>
             <config>API</config>
           </channelConfiguration>
+          <pin name="USB0_DP">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="USB0_DM">
+            <pinConfiguration config="AUTO"/>
+          </pin>
           <pin name="USB0_VBUSEN">
             <pinConfiguration config="AUTO"/>
           </pin>
@@ -32,6 +43,12 @@
           <channelConfiguration>
             <config>API</config>
           </channelConfiguration>
+          <pin name="USB0_DP">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="USB0_DM">
+            <pinConfiguration config="AUTO"/>
+          </pin>
           <pin name="USB0_VBUS">
             <pinConfiguration config="AUTO"/>
           </pin>
@@ -60,6 +77,10 @@ No checking the argument</description>
             <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PHID_USE" display="Peripheral Human Interface Device Class" value="#define USB_CFG_PHID_USE"/>
             <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PMSC_USE" display="Peripheral Mass Storage Classs" value="#define USB_CFG_PMSC_USE"/>
             <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PVND_USE" display="Peripheral Vendor Class" value="#define USB_CFG_PVND_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PCDC_2COM_USE" display="Peripheral Composite device(CDC VCOM 2Port)" value="#define USB_CFG_PCDC_2COM_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PCDC_PHID_USE" display="Peripheral Composite device(CDC + HID)" value="#define USB_CFG_PCDC_PHID_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PCDC_PMSC_USE" display="Peripheral Composite device(CDC + MSC)" value="#define USB_CFG_PCDC_PMSC_USE"/>
+            <option id="USB_CFG_DEVICE_CLASS.#define USB_CFG_PHID_PMSC_USE" display="Peripheral Composite device(HID + MSC)" value="#define USB_CFG_PHID_PMSC_USE"/>
             <description>Host Communication Device Class
 Host Human Interface Device Class
 Host Mass Storage Class
@@ -79,7 +100,7 @@ Using DTC</description>
         <property id="USB_CFG_DMA" display="DMA use setting" default="USB_CFG_DISABLE" type="combobox">
             <option id="USB_CFG_DMA.USB_CFG_ENABLE" display="Using DMA" value="USB_CFG_ENABLE"/>
             <option id="USB_CFG_DMA.USB_CFG_DISABLE" display="Not using DMA" value="USB_CFG_DISABLE"/>
-            <constraint display="DMA transfer is supported only for RX231 and RX23W" actionOnFail="disable">"${Device.group}" == "RX231"||"${Device.group}" == "RX23W"</constraint>
+            <constraint display="DMA transfer is supported only for RX231 and RX23W and RX261" actionOnFail="disable">"${Device.group}" == "RX231"||"${Device.group}" == "RX23W"||"${Device.group}" == "RX261"</constraint>
             <constraint display="DTC and DMA should not be enabled at the same time" actionOnFail="error">!("${USB_CFG_DTC}" == "${USB_CFG_DTC.USB_CFG_ENABLE}" &amp;&amp; "${USB_CFG_DMA}" == "${USB_CFG_DMA.USB_CFG_ENABLE}")</constraint>
             <description>Not using DMA
 Using DMA</description>
@@ -141,7 +162,7 @@ Using the battery charging function</description>
         <property id="USB_CFG_REGULATOR" display="Setting USB regulator use or not" default="USB_CFG_DISABLE" type="combobox">
             <option id="USB_CFG_REGULATOR.USB_CFG_DISABLE" display="USB Regulator disabled" value="USB_CFG_DISABLE"/>
             <option id="USB_CFG_REGULATOR.USB_CFG_ENABLE" display="USB Regulator enabled" value="USB_CFG_ENABLE"/>
-            <constraint display="Only RX231 and RX23W supported" actionOnFail="disable">"${Device.group}" == "RX231"||"${Device.group}" == "RX23W"</constraint>
+            <constraint display="Only RX231 supported" actionOnFail="disable">"${Device.group}" == "RX231"</constraint>
             <description>USB Regulator disabled
 USB Regulator enabled</description>
         </property>

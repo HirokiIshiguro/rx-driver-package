@@ -1,33 +1,11 @@
-/*******************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/***********************************************************************************************************************
+* Copyright (c) 2014 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
-*******************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 
 /*******************************************************************************
 * File Name    : r_dmaca_rx.c
-* Device(s)    : RX
-* Tool-Chain   : Renesas RXC Toolchain v3.01.00
-* OS           : not use
-* H/W Platform : not use
 * Description  : Functions for DMACA driver
 *******************************************************************************/
 /*******************************************************************************
@@ -51,6 +29,10 @@
 *                              Fixed warnings in IAR.
 *         : 30.12.2019 2.30    Modified comment of API function to Doxygen style.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
+*         : 31.03.2021 2.60    Supported RX671.
+*         : 15.08.2022 3.10    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023 3.20    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 15.03.2025 3.41    Updated disclaimer.
 *******************************************************************************/
 
 /*******************************************************************************
@@ -79,8 +61,8 @@ Typedef definitions
 /*******************************************************************************
 Private variables and functions
 *******************************************************************************/
-static bool r_dmaca_set_transfer_data(uint8_t channel, dmaca_transfer_data_cfg_t *p_cfg);
-static dmaca_chk_locking_sw_t r_dmaca_check_locking_sw(void);
+static bool r_dmaca_set_transfer_data (uint8_t channel, dmaca_transfer_data_cfg_t *p_cfg);
+static dmaca_chk_locking_sw_t r_dmaca_check_locking_sw (void);
 
 /*******************************************************************************
 Exported global variables (to be accessed by other files)
@@ -740,6 +722,7 @@ static bool r_dmaca_set_transfer_data(uint8_t channel, dmaca_transfer_data_cfg_t
 {
 #if (1 == DMACA_CFG_PARAM_CHECKING_ENABLE)
 
+#if !defined(BSP_MCU_RX671)
     /* Check source address value. */
     if ((0x00000000 != ((uint32_t)p_cfg->p_src_addr & DMACA_INVALID_SRC_ADDR_MASK)) &&
 
@@ -757,6 +740,7 @@ static bool r_dmaca_set_transfer_data(uint8_t channel, dmaca_transfer_data_cfg_t
     {
         return false;
     }
+#endif
 
     /* Offset addition can be specified only for channel 0. */
     if (0 == channel)
@@ -830,14 +814,14 @@ static bool r_dmaca_set_transfer_data(uint8_t channel, dmaca_transfer_data_cfg_t
 
             /* Check source Address Extended Repeat setting. */
             if ((DMACA_REPEAT_BLOCK_SOURCE == p_cfg->repeat_block_side) &&
-               (DMACA_SRC_ADDR_EXT_REP_AREA_NONE != p_cfg->src_addr_repeat_area))
+                (DMACA_SRC_ADDR_EXT_REP_AREA_NONE != p_cfg->src_addr_repeat_area))
             {
                 return false;
             }
 
             /* Check destination Address Extended Repeat setting. */
             if ((DMACA_REPEAT_BLOCK_DESTINATION == p_cfg->repeat_block_side) &&
-               (DMACA_DES_ADDR_EXT_REP_AREA_NONE != p_cfg->des_addr_repeat_area))
+                (DMACA_DES_ADDR_EXT_REP_AREA_NONE != p_cfg->des_addr_repeat_area))
             {
                 return false;
             }
@@ -855,7 +839,7 @@ static bool r_dmaca_set_transfer_data(uint8_t channel, dmaca_transfer_data_cfg_t
     /* Clear DMREQ register. */
     DMACA_DMREQ(channel) = 0x00;
 
-   /* Disable DMA transfers. */
+    /* Disable DMA transfers. */
     DMACA_DMCNT(channel) = DMACA_TRANSFER_DISABLE;
 
     /* Set ICU.DMRSR register. */
@@ -873,11 +857,11 @@ static bool r_dmaca_set_transfer_data(uint8_t channel, dmaca_transfer_data_cfg_t
 
     /* Set DMAMD register. */
     DMACA_DMAMD(channel) = ((((uint16_t)p_cfg->src_addr_mode | (uint16_t)p_cfg->src_addr_repeat_area) | (uint16_t)p_cfg->des_addr_mode) |
-                                     (uint16_t)p_cfg->des_addr_repeat_area);
+        (uint16_t)p_cfg->des_addr_repeat_area);
 
     /* Set DMTMD register. */
     DMACA_DMTMD(channel) = ((((uint16_t)p_cfg->transfer_mode | (uint16_t)p_cfg->repeat_block_side) | (uint16_t)p_cfg->data_size) |
-                                     (uint16_t)p_cfg->request_source);
+        (uint16_t)p_cfg->request_source);
 
     /* Set DMSAR register. */
     DMACA_DMSAR(channel) = (volatile void R_BSP_EVENACCESS_SFR *)p_cfg->p_src_addr;
@@ -920,7 +904,7 @@ static bool r_dmaca_set_transfer_data(uint8_t channel, dmaca_transfer_data_cfg_t
     
     /* Set DMINT register */
     DMACA_DMINT(channel) = (((((uint8_t)p_cfg->dtie_request | (uint8_t)p_cfg->esie_request) | (uint8_t)p_cfg->rptie_request) |
-                                     (uint8_t)p_cfg->sarie_request) | (uint8_t)p_cfg->darie_request);
+        (uint8_t)p_cfg->sarie_request) | (uint8_t)p_cfg->darie_request);
 
     /* Get DMAC interrupt setting */
     if ((uint8_t)p_cfg->dtie_request == DMACA_DMINT(channel))
@@ -960,7 +944,7 @@ static dmaca_chk_locking_sw_t r_dmaca_check_locking_sw(void)
     {
         if (0x00 != g_locking_sw[i])
         {
-            dmaca_lock_num ++;
+            dmaca_lock_num ++ ;
         }
     }
 

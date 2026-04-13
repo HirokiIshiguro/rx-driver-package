@@ -1,23 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
-* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
-* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
-* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
-* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
-* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
-* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 -->
 <refinfo>
 
@@ -40,6 +27,11 @@
         <version>3.00.00</version>
         <version>3.01.00</version>
         <version>3.02.00</version>
+        <version>3.03.00</version>
+        <version>3.04.00</version>
+        <version>3.05.00</version>
+        <version>3.06.00</version>
+        <version>3.07.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
@@ -48,6 +40,17 @@
         <version>4.08.04.201803</version>
         <version>4.08.04.201902</version>
         <version>8.03.00.201904</version>
+        <version>8.03.00.202002</version>
+        <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202104</version>
+        <version>8.03.00.202202</version>
+        <version>8.03.00.202204</version>
+        <version>8.03.00.202305</version>
+        <version>8.03.00.202311</version>
+        <version>8.03.00.202405</version>
+        <version>8.03.00.202411</version>
+        <version>14.02.00.202505</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -57,6 +60,9 @@
         <version>4.12.01</version>
         <version>4.13.01</version>
         <version>4.14.01</version>
+        <version>4.20.01</version>
+        <version>4.20.03</version>
+        <version>5.10.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -71,18 +77,26 @@
         <group>RX113</group>
         <group>RX130</group>
         <group>RX13T</group>
+        <group>RX140</group>
+        <group>RX14T</group>
         <group>RX230</group>
         <group>RX231</group>
         <group>RX23E-A</group>
+        <group>RX23E-B</group>
         <group>RX23T</group>
         <group>RX23W</group>
         <group>RX24T</group>
         <group>RX24U</group>
+        <group>RX260</group>
+        <group>RX261</group>
+        <group>RX26T</group>
         <group>RX64M</group>
         <group>RX651</group>
         <group>RX65N</group>
+        <group>RX660</group>
         <group>RX66N</group>
         <group>RX66T</group>
+        <group>RX671</group>
         <group>RX71M</group>
         <group>RX72M</group>
         <group>RX72N</group>
@@ -92,18 +106,26 @@
         <board>GENERIC_RX113</board>
         <board>GENERIC_RX130</board>
         <board>GENERIC_RX13T</board>
+        <board>GENERIC_RX140</board>
+        <board>GENERIC_RX14T</board>
         <board>GENERIC_RX230</board>
         <board>GENERIC_RX231</board>
         <board>GENERIC_RX23E-A</board>
+        <board>GENERIC_RX23E-B</board>
         <board>GENERIC_RX23T</board>
         <board>GENERIC_RX23W</board>
         <board>GENERIC_RX24T</board>
         <board>GENERIC_RX24U</board>
+        <board>GENERIC_RX260</board>
+        <board>GENERIC_RX261</board>
+        <board>GENERIC_RX26T</board>
         <board>GENERIC_RX64M</board>
         <board>GENERIC_RX65N</board>
         <board device_compatibility="RX651,RX65N">GENERIC_RX65N</board>
+        <board>GENERIC_RX660</board>
         <board>GENERIC_RX66N</board>
         <board>GENERIC_RX66T</board>
+        <board>GENERIC_RX671</board>
         <board>GENERIC_RX71M</board>
         <board>GENERIC_RX72M</board>
         <board>GENERIC_RX72N</board>
@@ -130,11 +152,13 @@
             <product>RXC</product>
             <file>mcu/all/linker_script_rvectors.inc</file>
             <file>mcu/all/reset_program.S</file>
+            <file>mcu/all/iar_call_inits.s</file>
             <file>register_access/gnuc/iodefine.h</file>
             <file>register_access/iccrx/iodefine.h</file>
         </toolchainfile>
         <toolchainfile>
             <product>GNURX</product>
+            <file>mcu/all/iar_call_inits.s</file>
             <file>register_access/ccrx/iodefine.h</file>
             <file>register_access/iccrx/iodefine.h</file>
         </toolchainfile>
@@ -142,8 +166,6 @@
             <product>ICCRX</product>
             <file>mcu/all/dbsct.c</file>
             <file>mcu/all/linker_script_rvectors.inc</file>
-            <file>mcu/all/lowlvl.c</file>
-            <file>mcu/all/lowsrc.c</file>
             <file>mcu/all/reset_program.S</file>
             <file>mcu/all/sbrk.c</file>
             <file>mcu/all/sbrk.h</file>

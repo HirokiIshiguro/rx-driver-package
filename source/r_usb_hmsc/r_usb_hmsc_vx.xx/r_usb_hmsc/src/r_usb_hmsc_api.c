@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_usb_hmsc_api.c
+ * Version      : 1.44
  * Description  : USB Host MSC Driver API
  ***********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -30,6 +18,7 @@
  *                           Change Arguments for "R_USB_HmscDriverStart()","usb_hmsc_mode_sense10()"
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 01.03.2025 1.44 Change Disclaimer.
 ************************************************************************************************************************/
 
 /**********************************************************************************************************************
@@ -73,9 +62,6 @@ usb_err_t   R_USB_HmscStrgCmd(usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint16_t comma
     uint8_t     side;
     uint16_t    ret;
 
-    utr.ip = p_ctrl->module;
-    utr.ipp = usb_hstd_get_usb_ip_adr(utr.ip);
-
 #if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
     if (USB_NULL == p_ctrl)
     {
@@ -109,6 +95,9 @@ usb_err_t   R_USB_HmscStrgCmd(usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint16_t comma
         return USB_ERR_NG;
     }
 
+    utr.ip = p_ctrl->module;
+    utr.ipp = usb_hstd_get_usb_ip_adr(utr.ip);
+
     ret = usb_hmsc_strg_user_command(&utr, side, command, p_buf, usb_hmsc_strg_cmd_complete);
     if (USB_PAR == ret)
     {
@@ -126,6 +115,7 @@ usb_err_t   R_USB_HmscStrgCmd(usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint16_t comma
             p_ctrl->pipe    = utr.keyword;  /* Pipe number setting */
             p_ctrl->address = usb_hstd_get_devsel(&utr, p_ctrl->pipe) >> 12;
             p_ctrl->size = 0;
+            p_ctrl->type = USB_HMSC;
 #if (BSP_CFG_RTOS_USED == 1)                /* FreeRTOS */
             p_ctrl->p_data = (void *)xTaskGetCurrentTaskHandle();
 #endif /* (BSP_CFG_RTOS_USED == 1) */
@@ -148,6 +138,7 @@ usb_err_t   R_USB_HmscStrgCmd(usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint16_t comma
         p_ctrl->pipe    = utr.keyword;  /* Pipe number setting */
         p_ctrl->address = usb_hstd_get_devsel(&utr, p_ctrl->pipe) >> 12;
         p_ctrl->size = 0;
+        p_ctrl->type = USB_HMSC;
 
         switch (utr.result)
         {
@@ -198,11 +189,8 @@ usb_err_t   R_USB_HmscStrgCmd(usb_ctrl_t *p_ctrl, uint8_t *p_buf, uint16_t comma
 usb_err_t     R_USB_HmscGetDriveNo(usb_ctrl_t *p_ctrl, uint8_t *p_drive)
 {
     usb_info_t  info;
-    usb_utr_t   utr;
     volatile uint16_t   address;
-
-    utr.ip = p_ctrl->module;
-    utr.ipp = usb_hstd_get_usb_ip_adr(utr.ip);
+    usb_err_t   err;
 
 #if USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE
     if (USB_NULL == p_ctrl)
@@ -227,8 +215,8 @@ usb_err_t     R_USB_HmscGetDriveNo(usb_ctrl_t *p_ctrl, uint8_t *p_drive)
 
 #endif  /* USB_CFG_PARAM_CHECKING == USB_CFG_ENABLE */
 
-    R_USB_GetInformation(p_ctrl, &info);
-    if (USB_STS_CONFIGURED != info.status)
+    err = R_USB_GetInformation(p_ctrl, &info);
+    if ((USB_STS_CONFIGURED != info.status) || (USB_SUCCESS != err))
     {
         return USB_ERR_NG;
     }

@@ -1,23 +1,10 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
-* File Name	   : mcu_interrupts.c
+* File Name    : mcu_interrupts.c
 * Description  : This module is the control of the interrupt enable.
 ***********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -35,6 +22,12 @@
 *                               - INTERNAL_NOT_USED(p)
 *                               Replaced the setting of IEN bit.
 *                               Fixed coding style.
+*         : 25.11.2022 2.01     Modified comment.
+*         : 21.11.2023 2.02     Added timeout detection processing to bus error processing.
+*                               Added processing to control only illegal address access detection to bus error 
+*                               processing.
+*                               Added processing to control only timeout detection to bus error processing.
+*         : 26.02.2025 2.03     Changed the disclaimer.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -92,6 +85,9 @@ bsp_int_err_t bsp_interrupt_enable_disable (bsp_int_src_t vector, bool enable)
 
                 /* Enable illegal address interrupt in the BSC */
                 BSC.BEREN.BIT.IGAEN = 1;
+
+                /* Enable timeout detection enable. */
+                BSC.BEREN.BIT.TOEN = 1;
             }
             else
             {
@@ -101,6 +97,77 @@ bsp_int_err_t bsp_interrupt_enable_disable (bsp_int_src_t vector, bool enable)
 
                 /* Disable illegal address interrupt in the BSC */
                 BSC.BEREN.BIT.IGAEN = 0;
+
+                /* Disable timeout detection enable. */
+                BSC.BEREN.BIT.TOEN = 0;
+            }
+            break;
+
+        case (BSP_INT_SRC_BUS_ERROR_ILLEGAL_ACCESS):
+            if (true == enable)
+            {
+                /* Check the bus error monitoring status. */
+                if (0 == BSC.BEREN.BYTE)
+                {
+                    /* Enable the bus error interrupt to catch accesses to illegal/reserved areas of memory */
+                    /* Clear any pending interrupts */
+                    IR(BSC,BUSERR) = 0;
+
+                    /* Make this the highest priority interrupt (adjust as necessary for your application */
+                    IPR(BSC,BUSERR) = 0x0F;
+
+                    /* Enable the interrupt in the ICU. */
+                    R_BSP_InterruptRequestEnable(VECT(BSC,BUSERR));
+                }
+
+                /* Enable illegal address interrupt in the BSC */
+                BSC.BEREN.BIT.IGAEN = 1;
+            }
+            else
+            {
+                /* Disable illegal address interrupt in the BSC */
+                BSC.BEREN.BIT.IGAEN = 0;
+
+                /* Check the bus error monitoring status. */
+                if (0 == BSC.BEREN.BYTE)
+                {
+                    /* Disable the bus error interrupt in the ICU. */
+                    R_BSP_InterruptRequestDisable(VECT(BSC,BUSERR));
+                }
+            }
+            break;
+
+        case (BSP_INT_SRC_BUS_ERROR_TIMEOUT):
+            if (true == enable)
+            {
+                /* Check the bus error monitoring status. */
+                if (0 == BSC.BEREN.BYTE)
+                {
+                    /* Enable the bus error interrupt to catch accesses to illegal/reserved areas of memory */
+                    /* Clear any pending interrupts */
+                    IR(BSC,BUSERR) = 0;
+
+                    /* Make this the highest priority interrupt (adjust as necessary for your application */
+                    IPR(BSC,BUSERR) = 0x0F;
+
+                    /* Enable the interrupt in the ICU. */
+                    R_BSP_InterruptRequestEnable(VECT(BSC,BUSERR));
+                }
+
+                /* Enable timeout detection enable. */
+                BSC.BEREN.BIT.TOEN = 1;
+            }
+            else
+            {
+                /* Disable timeout detection enable. */
+                BSC.BEREN.BIT.TOEN = 0;
+
+                /* Check the bus error monitoring status. */
+                if (0 == BSC.BEREN.BYTE)
+                {
+                    /* Disable the bus error interrupt in the ICU. */
+                    R_BSP_InterruptRequestDisable(VECT(BSC,BUSERR));
+                }
             }
             break;
 

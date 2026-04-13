@@ -1,30 +1,12 @@
-/************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/***********************************************************************************************************************
+* Copyright (c) 2018 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2018(2019) Renesas Electronics Corporation. All rights reserved.
-*************************************************************************************************/
-/************************************************************************************************
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+/***********************************************************************************************************************
 * System Name  : memdrv software
 * File Name    : r_memdrv_rx.c
-* Version      : 1.02
+* Version      : 1.31
 * Device       : -
 * Abstract     : IO I/F module
 * Tool-Chain   : -
@@ -32,14 +14,18 @@
 * H/W Platform : -
 * Description  : memdrv I/O file
 * Limitation   : None
-*************************************************************************************************/
-/************************************************************************************************
-* History      : DD.MM.YYYY Version  Description
-*              : 15.12.2018 1.00     Initial Release
-*              : 04.04.2019 1.01     Added support for GNUC and ICCRX.
-*                                    Fixed coding style.
-*              : 22.11.2019 1.02     Modified comment of API function to Doxygen style.
-*************************************************************************************************/
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+* History      : DD.MM.YYYY Version Description
+*              : 15.12.2018 1.00    Initial Release
+*              : 04.04.2019 1.01    Added support for GNUC and ICCRX.
+*                                   Fixed coding style.
+*              : 22.11.2019 1.02    Modified comment of API function to Doxygen style.
+*              : 10.09.2020 1.03    Modified the callback function processing during DMAC/DTC transfer.
+*              : 30.10.2021 1.04    Add the RX QSPIX FIT Module.
+*              : 16.03.2023 1.05    Added support for RSCI and QSPIX Memory Mapped Mode.
+*              : 15.03.2025 1.31    Updated disclaimer.
+***********************************************************************************************************************/
 
 /************************************************************************************************
 Includes <System Includes> , "Project Includes"
@@ -124,6 +110,36 @@ static const st_memdrv_func_t r_memdrv_tbl[MEMDRV_INDX_DRVR_NUM][MEMDRV_INDX_FUN
         { r_memdrv_sci_rx              },
         { r_memdrv_sci_rx_data         },
     },
+    /* RX QSPIX FIT Module */
+    {
+        { r_memdrv_qspix_open            },
+        { r_memdrv_qspix_close           },
+        { r_memdrv_qspix_disable         },
+        { r_memdrv_qspix_disable_tx_data },
+        { r_memdrv_qspix_disable_rx_data },
+        { r_memdrv_qspix_enable          },
+        { r_memdrv_qspix_enable_tx_data  },
+        { r_memdrv_qspix_enable_rx_data  },
+        { r_memdrv_qspix_tx              },
+        { r_memdrv_qspix_tx_data         },
+        { r_memdrv_qspix_rx              },
+        { r_memdrv_qspix_rx_data         },
+    },
+    /* RX RSCI SPI FIT Module */
+    {
+        { r_memdrv_rsci_open            },
+        { r_memdrv_rsci_close           },
+        { r_memdrv_rsci_disable         },
+        { r_memdrv_rsci_disable_tx_data },
+        { r_memdrv_rsci_disable_rx_data },
+        { r_memdrv_rsci_enable          },
+        { r_memdrv_rsci_enable_tx_data  },
+        { r_memdrv_rsci_enable_rx_data  },
+        { r_memdrv_rsci_tx              },
+        { r_memdrv_rsci_tx_data         },
+        { r_memdrv_rsci_rx              },
+        { r_memdrv_rsci_rx_data         },
+    },
 };
 
 /***********************************************************************************************************************
@@ -140,6 +156,7 @@ void R_MEMDRV_ClearDMACFlagTx(uint8_t channel)
     ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_RSPI))
     g_rspi_handle->channel = channel;
 
+    R_RSPI_DisableSpti(g_rspi_handle);
     R_RSPI_IntSptiIerClear(g_rspi_handle);
 #endif
 #if ((MEMDRV_CFG_DEV0_INCLUDED == 1) && (MEMDRV_CFG_DEV0_MODE_DRVR == MEMDRV_DRVR_RX_FIT_QSPI_SMSTR)) || \
@@ -163,41 +180,8 @@ void R_MEMDRV_ClearDMACFlagRx(uint8_t channel)
     ((MEMDRV_CFG_DEV1_INCLUDED == 1) && (MEMDRV_CFG_DEV1_MODE_DRVR == MEMDRV_DRVR_RX_FIT_RSPI))
     g_rspi_handle->channel = channel;
     
-    R_RSPI_IntSptiIerClear(g_rspi_handle);
     R_RSPI_IntSpriIerClear(g_rspi_handle);
-    if (0 == channel)
-    {
-#if ((MEMDRV_CFG_DEV0_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH0) | \
-    ((MEMDRV_CFG_DEV1_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH0)
-        RSPI0.SPCR.BIT.SPE   = 0;  // Disable RSPI.
-#if RSPI_CFG_REQUIRE_LOCK == 1
-        R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI0 + channel));
-#endif
-#endif
-    }
-    else if (1 == channel)
-    {
-#if ((MEMDRV_CFG_DEV0_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH1) | \
-    ((MEMDRV_CFG_DEV1_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH1)
-        RSPI1.SPCR.BIT.SPE   = 0;  // Disable RSPI.
-#if RSPI_CFG_REQUIRE_LOCK == 1
-        R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI0 + channel));
-#endif
-#endif
-    }
-    else if (2 == channel)
-    {
-#if ((MEMDRV_CFG_DEV0_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH2) | \
-    ((MEMDRV_CFG_DEV1_MODE_DRVR_CH & MEMDRV_DRVR_MASK_CH) == MEMDRV_DRVR_CH2)
-        RSPI2.SPCR.BIT.SPE   = 0;  // Disable RSPI.
-#if RSPI_CFG_REQUIRE_LOCK == 1
-        R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_RSPI0 + channel));
-#endif
-#endif
-    }
-    else
-    {
-    }
+    R_RSPI_DisableRSPI(g_rspi_handle);  // Disable RSPI.
     g_transfer_busy = false;
 #endif
 #if (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPI_SMSTR) | \
@@ -228,6 +212,16 @@ void R_MEMDRV_1msInterval(void)
 #if (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_SCI_SPI) | \
     (MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_SCI_SPI)
     r_memdrv_sci_1ms_interval();
+#endif
+#if (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) | \
+    (MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_IAM) | \
+    (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_MMM) | \
+    (MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_QSPIX_MMM)
+    r_memdrv_qspix_1ms_interval();
+#endif
+#if (MEMDRV_CFG_DEV0_MODE_DRVR & MEMDRV_DRVR_RX_FIT_RSCI_SPI) | \
+    (MEMDRV_CFG_DEV1_MODE_DRVR & MEMDRV_DRVR_RX_FIT_RSCI_SPI)
+    r_memdrv_rsci_1ms_interval();
 #endif
 } /* End of function R_MEMDRV_1msInterval() */
 
@@ -381,6 +375,17 @@ static uint32_t r_memdrv_get_drv_type(uint8_t devno)
                 drv_type = MEMDRV_INDX_SCI_SPI;
             }
             break;
+            case MEMDRV_DRVR_RX_FIT_QSPIX_IAM:
+            case MEMDRV_DRVR_RX_FIT_QSPIX_MMM:
+            {
+                drv_type = MEMDRV_INDX_QSPIX;
+            }
+            break;
+            case MEMDRV_DRVR_RX_FIT_RSCI_SPI:
+            {
+                drv_type = MEMDRV_INDX_RSCI_SPI;
+            }
+            break;
             default:
             {
                 /* Do nothing. */
@@ -409,6 +414,18 @@ static uint32_t r_memdrv_get_drv_type(uint8_t devno)
             {
                 drv_type = MEMDRV_INDX_SCI_SPI;
             }
+            break;
+            case MEMDRV_DRVR_RX_FIT_QSPIX_IAM:
+            case MEMDRV_DRVR_RX_FIT_QSPIX_MMM:
+            {
+                drv_type = MEMDRV_INDX_QSPIX;
+            }
+            break;
+            case MEMDRV_DRVR_RX_FIT_RSCI_SPI:
+            {
+                drv_type = MEMDRV_INDX_RSCI_SPI;
+            }
+            break;
             default:
             {
                 /* Do nothing. */

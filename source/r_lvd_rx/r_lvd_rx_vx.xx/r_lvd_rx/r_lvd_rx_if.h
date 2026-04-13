@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2016 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2016-2019 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_lvd_rx_if.h
@@ -30,6 +17,9 @@
 *              : 28.09.2018 2.40     Added support for RX66T.
 *              : 01.02.2019 2.50     Added support for RX72T, RX65N-64pin.
 *              : 20.05.2019 3.00     Added support for GNUC and ICCRX.
+*              : 31.03.2023 4.40     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 28.06.2024 4.80     Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*              : 15.03.2025 4.81     Updated disclaimer.
 ***********************************************************************************************************************/
 #ifndef LVD_INTERFACE_HEADER_FILE
 #define LVD_INTERFACE_HEADER_FILE
@@ -116,13 +106,13 @@ typedef struct
 /***********************************************************************************************************************
 Imported global variables and functions (from other files)
 ***********************************************************************************************************************/
-extern lvd_err_t R_LVD_Open(lvd_channel_t channel, lvd_config_t const *p_cfg, void (*p_callback)(void *));
-extern lvd_err_t R_LVD_Close(lvd_channel_t channel);
-extern lvd_err_t R_LVD_GetStatus(lvd_channel_t channel, 
-                                 lvd_status_position_t *p_status_position, 
-                                 lvd_status_cross_t *p_status_cross);
-extern lvd_err_t R_LVD_ClearStatus(lvd_channel_t channel);
-extern uint32_t  R_LVD_GetVersion(void);
+extern lvd_err_t R_LVD_Open (lvd_channel_t channel, lvd_config_t const *p_cfg, void (*p_callback)(void *));
+extern lvd_err_t R_LVD_Close (lvd_channel_t channel);
+extern lvd_err_t R_LVD_GetStatus   (lvd_channel_t channel,
+                                    lvd_status_position_t * p_status_position,
+                                    lvd_status_cross_t * p_status_cross);
+extern lvd_err_t R_LVD_ClearStatus (lvd_channel_t channel);
+extern uint32_t  R_LVD_GetVersion (void);
 
 /***********************************************************************************************************************
 Exported global variables and functions (to be accessed by other files)

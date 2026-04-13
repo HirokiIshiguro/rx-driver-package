@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : mcu_mapped_interrupts.c
 * Description  : This module maps Interrupt A interrupts. Which interrupts are mapped depends on the macros in
@@ -25,6 +12,8 @@
 * History : DD.MM.YYYY Version   Description
 *         : 31.10.2018 1.00      First Release
 *         : 28.02.2019 1.01      Fixed coding style.
+*         : 21.11.2023 1.02      Added processing to clear the IR flag.
+*         : 26.02.2025 1.03      Changed the disclaimer.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -734,6 +723,13 @@ void bsp_mapped_interrupt_open (void)
     /* Casting is valid because it matches the type to the right side or argument. */
     BSP_PRV_INT_SELECT(BSP_PRV_A, BSP_MAPPED_INT_CFG_A_VECT_GPTW9_GTCIU9) = BSP_PRV_INT_A_NUM_GPTW9_GTCIU9;
 #endif
+
+    /* Write 0 to the IRn.IR flag. */
+    /* WAIT_LOOP */
+    for(uint16_t i = IR_PERIA_INTA208;i <= IR_PERIA_INTA255; i++)
+    {
+        ICU.IR[i].BIT.IR = 0;
+    }
 
 } /* End of function bsp_mapped_interrupt_open() */
 

@@ -5,12 +5,12 @@ r_mesh_rx23w
 
 Document Number
 ---------------
-R01AN4930EJ0101
-R01AN4930JJ0101
+R01AN4930EJ0131
+R01AN4930JJ0131
 
 Version
 -------
-v1.01
+v1.31
 
 Overview
 --------
@@ -55,6 +55,7 @@ Peripherals Used Directly
 -------------------------
 * BLE (Bluetooth Low Energy)
 * E2 Data Flash memory
+* 8-Bit Timer
 
 Required Packages
 -----------------
@@ -97,18 +98,18 @@ File Structure
 |   |   |   blemesh_api.chm
 |   |   |   
 |   |   +---en
-|   |   |       r01an4930ej0101-rx23w-blemesh.pdf
+|   |   |       r01an4930ej0131-rx23w-blemesh.pdf
 |   |   +---ja
-|   |           r01an4930jj0101-rx23w-blemesh.pdf
+|   |           r01an4930jj0131-rx23w-blemesh.pdf
 |   |           
+|   +---json
+|   |       mesh_provisioning.service.json
+|   |       mesh_proxy.service.json
+|   |       
 |   +---lib
 |   |       lib_ble_ms_ccrx.lib
 |   |       
-|   +---ref
-|   |       r_mesh_rx23w_config_reference.h
-|   |       
 |   +---src
-|       |   
 |       +---bearer
 |       |       blebrr.c
 |       |       blebrr.h
@@ -116,10 +117,8 @@ File Structure
 |       |       blebrr_pl.c
 |       |       gatt_clients.c
 |       |       gatt_clients.h
-|       |       gatt_db_prov.c
-|       |       gatt_db_prov.h
-|       |       gatt_db_proxy.c
-|       |       gatt_db_proxy.h
+|       |       gatt_db.c
+|       |       gatt_db.h
 |       |       gatt_services.c
 |       |       gatt_services.h
 |       |       
@@ -128,6 +127,8 @@ File Structure
 |       |       mesh_dataflash.h
 |       |       mesh_resources.c
 |       |       mesh_resources.h
+|       |       mesh_systemtime.c
+|       |       mesh_systemtime.h
 |       |       
 |       +---include
 |           |   MS_access_api.h
@@ -166,12 +167,16 @@ File Structure
 |                   EM_os.h
 |                   EM_platform.h
 |                   EM_timer.h
-|                   mempool_pl.h
+|                   MS_common_pl.h
 |                   MS_features.h
+|                   MS_logger.h
+|                   MS_mempool_pl.h
+|                   MS_monitor_pl.h
+|                   MS_prov_pl.h
+|                   MS_storage_pl.h
+|                   MS_systemtime_pl.h
 |                   nvs.h
 |                   nvsto.h
-|                   prov_pl.h
-|                   storage_pl.h
 |                   
 +---r_config
         r_mesh_rx23w_config.h

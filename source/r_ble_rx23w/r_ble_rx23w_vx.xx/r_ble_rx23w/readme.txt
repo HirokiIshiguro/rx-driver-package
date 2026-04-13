@@ -10,7 +10,7 @@ R01AN4860JJ
 
 Version
 -------
-v1.10
+v2.61
 
 Overview
 --------
@@ -46,6 +46,7 @@ Supported MCUs
 Boards Tested On
 ----------------
 * Target Board for RX23W
+* Target Board for RX23W module
 * RSSKRX23W
 
 Limitations
@@ -101,7 +102,7 @@ Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1
 Toolchain(s) Used
 -----------------
 * Renesas RX v2.08
-* IAR C/C++ Compiler for Renesas RX version 4.12.1
+* IAR C/C++ Compiler for Renesas RX version 4.20.1
 
 File Structure
 --------------
@@ -114,23 +115,20 @@ File Structure
  |  |    |  r_ble_api_spec.chm
  |  |    |
  |  |    +---en
- |  |    |      r01an4860ej0110-rx23w-ble.pdf
+ |  |    |      r01an4860ej0261-rx23w-ble.pdf
  |  |    +---ja
- |  |           r01an4860jj0110-rx23w-ble.pdf
+ |  |           r01an4860jj0261-rx23w-ble.pdf
  |  |
  |  +---lib
  |  |      ble_fit_lib_selector.bat
+ |  |      ble_fit_lib_selector.sh
  |  |      lib_ble_ps_ccrx.lib
  |  |      lib_ble_ps_ccrx_a.lib
  |  |      lib_ble_ps_ccrx_b.lib
  |  |      lib_ble_ps_ccrx_c.lib
- |  |      lib_ble_ps_hci_ccrx.lib
  |  |      lib_ble_ps_hci_ccrx_a.lib
  |  |      lib_ble_ps_hci_ccrx_b.lib
  |  |      lib_ble_ps_hci_ccrx_c.lib
- |  |
- |  +---ref
- |  |      r_ble_rx23w_config_reference.h
  |  |
  |  +---src
  |       +---app_lib
@@ -162,22 +160,13 @@ File Structure
  |       |    |      r_ble_cmd_vs.c
  |       |    |      r_ble_cmd_vs.h
  |       |    |
- |       |    +---discovery
- |       |    |      r_ble_disc.c
- |       |    |      r_ble_disc.h
- |       |    |
  |       |    +---logger
  |       |    |      r_ble_logger.c
  |       |    |      r_ble_logger.h
  |       |    |
- |       |    +---profile_cmn
- |       |    |      r_ble_profile_cmn.h
- |       |    |      r_ble_servc_if.c
- |       |    |      r_ble_servc_if.h
- |       |    |      r_ble_servs_if.c
- |       |    |      r_ble_servs_if.h
- |       |    |      r_ble_serv_common.c
- |       |    |      r_ble_serv_common.h
+ |       |    +---rtos
+ |       |    |      r_ble_rtos.c
+ |       |    |      r_ble_rtos.h
  |       |    |
  |       |    +---sec_data
  |       |    |      r_ble_sec_data.c

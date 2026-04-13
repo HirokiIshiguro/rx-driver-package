@@ -1,26 +1,8 @@
-/*******************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/***********************************************************************************************************************
+* Copyright (c) 2014 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
-*******************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /*******************************************************************************
 * File Name    : r_dtc_rx_if.h
 * Description  : Functions for DTC driver
@@ -33,13 +15,13 @@
 *         : 30.01.2015 2.02    Added RX71M.
 *         : 13.04.2015 2.03    Added RX231.
 *         : 24.12.2015 2.04    Added RX130, RX23T and RX24T.
-*         :                    Modified #define name from "DTC_CFG_SHORT_ADDRRESS_MODE"
-*         :                    to "DTC_CFG_SHORT_ADDRESS_MODE".
+*                              Modified #define name from "DTC_CFG_SHORT_ADDRRESS_MODE"
+*                              to "DTC_CFG_SHORT_ADDRESS_MODE".
 *         : 30.09.2016 2.05    Added RX65N.
-*         :                    Supported to the register added in DTCb.
-*         :                    Moved struct dtc_transfer_data_cfg_t to r_dtc_rx_target_if.h
-*         :                    Added include pass of target mcu interface header file.
-*         :                    Added R_DTC_CreateSeq() function.
+*                              Supported to the register added in DTCb.
+*                              Moved struct dtc_transfer_data_cfg_t to r_dtc_rx_target_if.h
+*                              Added include pass of target mcu interface header file.
+*                              Added R_DTC_CreateSeq() function.
 *         : 31.01.2017 2.06    Modified r_dtc_rx.c.
 *         : 31.03.2017 2.07    Added RX24U and RX24T-512KB.
 *         : 31.07.2017 2.08    Supported RX65N-2MB and RX130-512KB.
@@ -49,9 +31,30 @@
 *         : 18.06.2019 3.01    Modified r_dtc_rx_private.h.
 *         : 28.06.2019 3.10    Added support for RX23W.
 *         : 15.08.2019 3.20    Added support for RX72M.
-          : 12.11.2019 3.21    Removed definitions for MTU5 in DTC activation interrupt source for RX23W.
+*         : 12.11.2019 3.21    Removed definitions for MTU5 in DTC activation interrupt source for RX23W.
 *         : 25.11.2019 3.30    Added support for RX13T.
 *         : 30.12.2019 3.40    Added support for RX66N, RX72N.
+*         : 31.03.2020 3.50    Added support for RX23E-A.
+*         : 30.06.2020 3.60    Changed revision to reflect demo upgrade.
+*         : 31.03.2021 3.70    Added support for RX671.
+*         : 15.04.2021 3.80    Added support for RX140.
+*         : 13.09.2021 3.90    Added the Demo for RX671.
+*         : 14.03.2022 4.00    Added interrupt vector "DTCE_RNG_RNGRDI" for RX140.
+*                              Added support for RX66T-48pin.
+*         : 31.03.2022 4.10    Added support for RX660.
+*         : 28.06.2022 4.20    Updated demo projects.
+*         : 27.12.2022 4.21    Updated slash format of included header file paths for Linux compatibility.
+*         : 31.03.2023 4.30    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023 4.40    Added support for RX23E-B.
+*                              Fixed warnings in IAR.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 4.50    Added support for RX260, RX261.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 15.03.2025 4.51    Updated disclaimer.
+*         : 23.06.2025 4.52    Removed doc folder and updated .rcpc file in FITDemos.
+*         : 30.10.2025 4.60    Added support for RX14T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.6.0.
 *******************************************************************************/
 #ifndef DTC_RX_IF_H
 #define DTC_RX_IF_H
@@ -73,8 +76,8 @@ Macro definitions
 #endif
 
 /* Version Number of API. */
-#define DTC_VERSION_MAJOR  (3)
-#define DTC_VERSION_MINOR  (40)
+#define DTC_VERSION_MAJOR  (4)
+#define DTC_VERSION_MINOR  (60)
 
 /*******************************************************************************
 Typedef definitions
@@ -222,43 +225,61 @@ typedef struct st_transfer_data { /* 4 long-words */
 /* Moved struct dtc_transfer_data_cfg_t to r_dtc_rx_target_if.h */
 /* Include target mcu interface header file. */
 #if   defined(BSP_MCU_RX23T)
-    #include ".\src\targets\rx23t\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx23t/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX24T)
-    #include ".\src\targets\rx24t\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx24t/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX24U)
-    #include ".\src\targets\rx24u\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx24u/r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX260)
+    #include "./src/targets/rx260/r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX261)
+    #include "./src/targets/rx261/r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX26T)
+    #include "./src/targets/rx26t/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX130)
-    #include ".\src\targets\rx130\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx130/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX113)
-    #include ".\src\targets\rx113\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx113/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX111)
-    #include ".\src\targets\rx111\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx111/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX110)
-    #include ".\src\targets\rx110\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx110/r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX140)
+    #include "./src/targets/rx140/r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX14T)
+    #include "./src/targets/rx14t/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX64M)
-    #include ".\src\targets\rx64m\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx64m/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX71M)
-    #include ".\src\targets\rx71m\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx71m/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX72T)
-    #include ".\src\targets\rx72t\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx72t/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX231)
-    #include ".\src\targets\rx231\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx231/r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX23E_A)
+    #include "./src/targets/rx23e-a/r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX23E_B)
+    #include "./src/targets/rx23e-b/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX230)
-    #include ".\src\targets\rx230\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx230/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX65N)
-    #include ".\src\targets\rx65n\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx65n/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX66T)
-    #include ".\src\targets\rx66t\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx66t/r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX671)
+    #include "./src/targets/rx671/r_dtc_rx_target_if.h"
+#elif defined(BSP_MCU_RX660)
+    #include "./src/targets/rx660/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX66N)
-    #include ".\src\targets\rx66n\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx66n/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX23W)
-    #include ".\src\targets\rx23w\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx23w/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX72M)
-    #include ".\src\targets\rx72m\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx72m/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX13T)
-    #include ".\src\targets\rx13t\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx13t/r_dtc_rx_target_if.h"
 #elif defined(BSP_MCU_RX72N)
-    #include ".\src\targets\rx72n\r_dtc_rx_target_if.h"
+    #include "./src/targets/rx72n/r_dtc_rx_target_if.h"
 #else
     #error "This MCU is not supported by the current r_dtc_rx module."
 #endif
@@ -269,24 +290,71 @@ typedef struct st_dtc_stat {
 } dtc_stat_t;
 
 typedef struct st_dtc_cmd_arg {
-    dtc_activation_source_t act_src;                 /* The activation source will be controlled */
-    uint32_t                chain_transfer_nr;       /* Number of chain transfer when command is DTC_CMD_CHAIN_TRANSFER_ABORT. */
-    dtc_transfer_data_t     *p_transfer_data;        /* Pointer to start address of Transfer data area on RAM */
-    dtc_transfer_data_cfg_t *p_data_cfg;             /* Pointer to contains the settings for Transfer data */
+    dtc_activation_source_t   act_src;               /* The activation source will be controlled */
+    uint32_t                  chain_transfer_nr;     /* Number of chain transfer when command is DTC_CMD_CHAIN_TRANSFER_ABORT. */
+    dtc_transfer_data_t     * p_transfer_data;       /* Pointer to start address of Transfer data area on RAM */
+    dtc_transfer_data_cfg_t * p_data_cfg;            /* Pointer to contains the settings for Transfer data */
 } dtc_cmd_arg_t;
 
 /*******************************************************************************
 Exported global variables and functions (to be accessed by other files)
 *******************************************************************************/
-dtc_err_t R_DTC_Open(void);
-dtc_err_t R_DTC_Create(dtc_activation_source_t act_source, dtc_transfer_data_t *p_transfer_data,
-                       dtc_transfer_data_cfg_t *p_data_cfg, uint32_t chain_transfer_nr);
-dtc_err_t R_DTC_CreateSeq(dtc_activation_source_t act_source, dtc_transfer_data_t *p_transfer_data,
-                          dtc_transfer_data_cfg_t *p_data_cfg, uint32_t sequence_transfer_nr,
-                          uint8_t sequence_no);
-dtc_err_t R_DTC_Close(void);
-dtc_err_t R_DTC_Control(dtc_command_t command, dtc_stat_t *p_stat, dtc_cmd_arg_t *p_args);
-uint32_t  R_DTC_GetVersion(void);
+/******************************************************************************
+ * Function Name: R_DTC_Open
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
+dtc_err_t R_DTC_Open (void);
+
+/******************************************************************************
+ * Function Name: R_DTC_Create
+ * Description  : .
+ * Arguments    : act_source
+ *              : p_transfer_data
+ *              : p_data_cfg
+ *              : chain_transfer_nr
+ * Return Value : .
+ *****************************************************************************/
+dtc_err_t R_DTC_Create (dtc_activation_source_t act_source, dtc_transfer_data_t * p_transfer_data,
+                        dtc_transfer_data_cfg_t * p_data_cfg, uint32_t chain_transfer_nr);
+
+/******************************************************************************
+ * Function Name: R_DTC_CreateSeq
+ * Description  : .
+ * Arguments    : act_source
+ *              : p_transfer_data
+ *              : p_data_cfg
+ *              : sequence_transfer_nr
+ *              : sequence_no
+ * Return Value : .
+ *****************************************************************************/
+dtc_err_t R_DTC_CreateSeq (dtc_activation_source_t act_source, dtc_transfer_data_t * p_transfer_data,
+                            dtc_transfer_data_cfg_t * p_data_cfg, uint32_t sequence_transfer_nr,
+                            uint8_t sequence_no);
+
+/******************************************************************************
+ * Function Name: R_DTC_Close
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
+dtc_err_t R_DTC_Close (void);
+
+/******************************************************************************
+ * Function Name: R_DTC_Control
+ * Description  : .
+ * Arguments    : command
+ *              : p_stat
+ *              : p_args
+ * Return Value : .
+ *****************************************************************************/
+dtc_err_t R_DTC_Control (dtc_command_t command, dtc_stat_t * p_stat, dtc_cmd_arg_t * p_args);
+
+/******************************************************************************
+ * Function Name: R_DTC_GetVersion
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
+uint32_t  R_DTC_GetVersion (void);
 
 #endif /* DTC_RX_IF_H */
 

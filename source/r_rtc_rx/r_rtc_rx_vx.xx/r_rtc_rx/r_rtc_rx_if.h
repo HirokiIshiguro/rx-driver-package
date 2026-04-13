@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rtc_rx_if.h
@@ -47,6 +34,19 @@
 *           30.07.2019 2.77    Added support for RX72M.
 *           22.11.2019 2.78    Added support for RX66N.
 *                              Added support for RX72N.
+*           01.06.2020 2.79    Changed Minor version to 2.79.
+*           30.11.2020 2.80    Changed Minor version to 2.80 for e2studio 2020-10 support.
+*           30.06.2021 2.81    Added support for RX671.
+*           31.07.2021 2.82    Added support for RX140.
+*           31.12.2021 2.83    Added support for RX660.
+*           29.05.2023 2.90    Added support for RX23E-B.
+*                              Updated demo projects.
+*                              Updated according to GSCE Code Checker 6.50.
+*           28.06.2024 3.00    Added support for RX260, RX261.
+*                              Updated according to GSCE Code Checker 6.50.
+*           15.03.2025 3.01    Updated disclaimer.
+*           30.10.2025 3.10    Removed doc folder and updated .rcpc file in FITDemos.
+*                              Added support Nested interrupt.
 ***********************************************************************************************************************/
 
 #ifndef RTC_RX_INTERFACE_HEADER_FILE
@@ -62,8 +62,8 @@ Includes   <System Includes> , "Project Includes"
 Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
-#define RTC_RX_VERSION_MAJOR        (2)
-#define RTC_RX_VERSION_MINOR        (78)
+#define RTC_RX_VERSION_MAJOR        (3)
+#define RTC_RX_VERSION_MINOR        (10)
 
 /***********************************************************************************************************************
 BSP version detection
@@ -101,7 +101,13 @@ typedef enum e_rtc_periodic
     RTC_PERIODIC_2_SEC  = 15,
 } rtc_periodic_t;
 
-typedef void (*rtc_cb_func_t)(void *p_args);
+/******************************************************************************
+ * Function Name: rtc_cb_func_t
+ * Description  : .
+ * Arguments    : p_args
+ * Return Value : .
+ *****************************************************************************/
+typedef void (* rtc_cb_func_t)(void * p_args);
 
 typedef struct
 {
@@ -150,10 +156,11 @@ typedef enum
     RTC_CMD_ENABLE_ALARM,
     RTC_CMD_START_COUNTERS,
     RTC_CMD_STOP_COUNTERS,
-    RTC_CMD_PARTIAL_RESET,          // primarily output clock, alarms and capture registers
-#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130)
-    RTC_CMD_CONFIG_CAPTURE,         // configure capture pin; RX230, RX231, RX64M, RX65N, RX71M, RX72M, RX66N, RX72N
-    RTC_CMD_CHECK_PIN0_CAPTURE,     // see if capture event occurred; load time if yes
+    RTC_CMD_PARTIAL_RESET,          /* primarily output clock, alarms and capture registers */
+#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140) && !defined(BSP_MCU_RX23E_B)
+    RTC_CMD_CONFIG_CAPTURE,         /* configure capture pin; RX230, RX231, RX260, RX261, RX64M, RX65N, RX671,
+                                       RX71M, RX72M, RX660, RX66N, RX72N */
+    RTC_CMD_CHECK_PIN0_CAPTURE,     /* see if capture event occurred; load time if yes */
     RTC_CMD_CHECK_PIN1_CAPTURE,
     RTC_CMD_CHECK_PIN2_CAPTURE,
     RTC_CMD_DISABLE_CAPTURE,
@@ -233,10 +240,47 @@ typedef enum
 /***********************************************************************************************************************
 Exported global functions (to be accessed by other files)
 ***********************************************************************************************************************/
-rtc_err_t R_RTC_Open (rtc_init_t * p_init, tm_t *p_current_time);
-rtc_err_t R_RTC_Control (rtc_cmd_t cmd, void *p_args);
-rtc_err_t R_RTC_Read (tm_t *p_current_time, tm_t *p_alarm_time);
+/******************************************************************************
+ * Function Name: R_RTC_Open
+ * Description  : .
+ * Arguments    : p_init
+ *              : p_current_time
+ * Return Value : .
+ *****************************************************************************/
+rtc_err_t R_RTC_Open (rtc_init_t * p_init, tm_t * p_current_time);
+
+/******************************************************************************
+ * Function Name: R_RTC_Control
+ * Description  : .
+ * Arguments    : cmd
+ *              : p_args
+ * Return Value : .
+ *****************************************************************************/
+rtc_err_t R_RTC_Control (rtc_cmd_t cmd, void * p_args);
+
+/******************************************************************************
+ * Function Name: R_RTC_Read
+ * Description  : .
+ * Arguments    : p_current_time
+ *              : p_alarm_time
+ * Return Value : .
+ *****************************************************************************/
+rtc_err_t R_RTC_Read (tm_t * p_current_time, tm_t * p_alarm_time);
+
+/******************************************************************************
+ * Function Name: R_RTC_Close
+ * Description  : .
+ * Arguments    : .
+ * Return Value : .
+ *****************************************************************************/
 void      R_RTC_Close (void);
+
+/******************************************************************************
+ * Function Name: R_RTC_GetVersion
+ * Description  : .
+ * Arguments    : .
+ * Return Value : .
+ *****************************************************************************/
 uint32_t  R_RTC_GetVersion (void);
 
 #endif /* RTC_RX_INTERFACE_HEADER_FILE */

@@ -1,25 +1,12 @@
-/*****************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+/***********************************************************************************************************************
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
-******************************************************************************/
-/*****************************************************************************
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+/***********************************************************************************************************************
 * File Name    : r_longq.c
 * Description  : Functions for using 32-bit queues/circular buffers.
-******************************************************************************
+************************************************************************************************************************
 * History : DD.MM.YYYY Version Description  
 *         : 11.12.2013 1.0     Initial Release
 *         : 21.07.2014 1.10    Removed BSP dependency for parameter checking
@@ -28,11 +15,16 @@
 *                              Fixed a program according to the Renesas coding rules.
 *         : 01.06.2018 1.70    Added the comment to while statement.
 *         : 07.02.2019 1.80    Deleted the inline expansion of the R_LONGQ_GetVersion function.
-******************************************************************************/
+*         : 10.06.2020 1.81    Modified comment of API function to Doxygen style.
+*         : 29.10.2021 1.90    Updated for queue protection in R_LONGQ_Put, R_LONGQ_Get, R_LONGQ_Flush,
+*                              R_LONGQ_Used, R_LONGQ_Unused functions.
+*         : 15.03.2025 2.01    Updated disclaimer
+*         : 30.10.2025 2.02    Removed \e in Doxygen comment of API function.
+***********************************************************************************************************************/
 
-/*****************************************************************************
+/***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
-******************************************************************************/
+***********************************************************************************************************************/
 /* Used functions of malloc() and the free() */
 #include <stdlib.h>
 
@@ -44,17 +36,17 @@ Includes   <System Includes> , "Project Includes"
 #include "r_longq_if.h"
 #include "r_longq_config.h"
 
-/*****************************************************************************
+/***********************************************************************************************************************
 Typedef definitions
-******************************************************************************/
+***********************************************************************************************************************/
 
-/*****************************************************************************
+/***********************************************************************************************************************
 Macro definitions
-******************************************************************************/
+***********************************************************************************************************************/
 
-/*****************************************************************************
+/***********************************************************************************************************************
 Private global variables and functions
-******************************************************************************/
+***********************************************************************************************************************/
 
 /* QUEUE CONTROL BLOCK ALLOCATIONS */
 
@@ -63,33 +55,26 @@ static longq_ctrl_t     g_qcb[LONGQ_CFG_MAX_CTRL_BLKS];
 #endif
 
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_LONGQ_Open
-* Description  : Allocates or assigns a queue control block for the buffer 
-*                pointed to by p_buf (see LONGQ_CFG_USE_HEAP_FOR_CTRL_BLKS in
-*                config.h). Initializes the queue to an empty state and 
-*                provides a Handle to its control structure in p_hdl which is
-*                then used as a queue ID for the other API functions.
-* Arguments    : p_buf -
-*                    Pointer to buffer.
-*                size -
-*                    Buffer size in number of elements
-*                ignore_overflow -
-*                    true for continuous storage
-*                    false to generate error on queue full
-*                p_hdl -
-*                    Pointer to a handle for queue (value set here)
-* Return Value : LONGQ_SUCCESS -
-*                    queue initialized successfully
-*                LONGQ_ERR_NULL_PTR
-*                    received null ptr; missing required argument
-*                LONGQ_ERR_INVALID_ARG
-*                    size is too small
-*                LONGQ_ERR_MALLOC_FAIL
-*                    can't allocate memory for ctrl block; increase heap
-*                LONGQ_ERR_NO_MORE_CTRL_BLKS
-*                    no more control blocks, increase LONGQ_CFG_MAX_CTRL_BLKS
-******************************************************************************/
+*******************************************************************************************************************/ /**
+* @brief This function allocates and initializes a queue control block for a buffer provided by the user. A queue handle
+*        is provided for use with other API functions.
+* @param[in] p_buf Pointer to buffer.
+* @param[in] size Buffer size in number of elements.
+* @param[in] ignore_overflow true = continue to add entries when queue is full by overwriting oldest entry \n
+*            false = return error when a Put() call is made and the queue is full
+* @param[in,out] p_hdl Pointer to a handle for queue (value set here)
+* @retval    LONGQ_SUCCESS: Successful; queue initialized
+* @retval    LONGQ_ERR_NULL_PTR: Received null ptr; missing required argument
+* @retval    LONGQ_ERR_INVALID_ARG: Size is less than or equal to 1.
+* @retval    LONGQ_ERR_MALLOC_FAIL: Cannot allocate control block. Increase heap size.
+* @retval    LONGQ_ERR_NO_MORE_CTRL_BLKS: Cannot assign control block. Increase LONGQ_MAX_CTRL_BLKS in config.h.
+* @details   This function allocates or assigns a queue control block for the buffer pointed to by p_buf. Initializes
+*            the queue to an empty state and provides a Handle to its control structure in p_hdl which is then used 
+*            as a queue ID for the other API functions.
+* @note None
+*/
 longq_err_t R_LONGQ_Open(uint32_t * const       p_buf,
                          uint16_t const         size,
                          bool const             ignore_overflow,
@@ -177,25 +162,21 @@ longq_err_t R_LONGQ_Open(uint32_t * const       p_buf,
 }
 
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_LONGQ_Put
-* Description  : This function adds an entry to the queue.
-*
-* NOTE: This function does not disable/enable interrupts. If the queue is
-*       accessed from both the interrupt and application level, the app must
-*       disable/enable interrupts before/after calling this routine.
-*
-* Arguments    : hdl - 
-*                    Handle for queue.
-*                datum -
-*                    32-bit data to add to queue.
-* Return Value : LONGQ_SUCCESS -
-*                    Successful; datum added to queue
-*                LONGQ_ERR_NULL_PTR -
-*                    hdl is NULL
-*                LONGQ_ERR_QUEUE_FULL -
-*                    Queue full; cannot add datum to queue.
-******************************************************************************/
+*******************************************************************************************************************/ /**
+* @brief This function adds an entry to the queue.
+* @param[in,out] hdl Handle for queue.
+* @param[in] datum Entry to add to queue.
+* @retval    LONGQ_SUCCESS: Successful; entry added to queue
+* @retval    LONGQ_ERR_NULL_PTR: hdl is NULL
+* @retval    LONGQ_ERR_QUEUE_FULL: Queue full; cannot add entry to queue.
+* @details   This function adds the contents of datum to the queue associated with hdl. If the queue is full and 
+*            ignore_overflow was set to false during Open(), then LONG_ERR_QUEUE_FULL is returned. If the queue
+*            is full and ignore_overflow was set to true during Open(), then datum overwrites the oldest entry
+*            in the queue and LONGQ_SUCCESS is returned.
+* @note      None
+*/
 longq_err_t R_LONGQ_Put(longq_hdl_t const   hdl,
                         uint32_t const      datum)
 {
@@ -213,13 +194,79 @@ longq_err_t R_LONGQ_Put(longq_hdl_t const   hdl,
         return LONGQ_ERR_QUEUE_FULL;        // return if queue is full
     }
 
+#if ((LONGQ_CFG_CRITICAL_SECTION == 1)||(LONGQ_CFG_PROTECT_QUEUE == 1))
+    uint32_t    psw_bit_i_val;
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+#endif
+
+#if (LONGQ_CFG_CRITICAL_SECTION == 1)
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        /* load datum into queue */
+        hdl->buffer[hdl->in_index++] = datum;   // add entry
+        R_BSP_InterruptsEnable();
+
+        R_BSP_InterruptsDisable();
+        if (hdl->in_index >= hdl->size)         // adjust index
+        {
+            hdl->in_index = 0;
+        }
+        R_BSP_InterruptsEnable();
+    } 
+    else
+    {
+        /* load datum into queue */
+        hdl->buffer[hdl->in_index++] = datum;   // add entry
+        if (hdl->in_index >= hdl->size)         // adjust index
+        {
+            hdl->in_index = 0;
+        }
+    }
+#else
     /* load datum into queue */
     hdl->buffer[hdl->in_index++] = datum;   // add entry
     if (hdl->in_index >= hdl->size)         // adjust index
     {
         hdl->in_index = 0;
     }
+#endif
 
+#if (LONGQ_CFG_PROTECT_QUEUE == 1)
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        /* if queue is full but overflow allowed, adjust out index */
+        if ((hdl->count >= hdl->size) && (true == hdl->ignore_ovfl))
+        {
+            if ((++hdl->out_index) >= hdl->size)  // adjust index
+            {
+                hdl->out_index = 0;
+            }
+        }
+        else // otherwise adjust count
+        {
+            hdl->count++;
+        }
+        R_BSP_InterruptsEnable();
+    } 
+    else
+    {
+        /* if queue is full but overflow allowed, adjust out index */
+        if ((hdl->count >= hdl->size) && (true == hdl->ignore_ovfl))
+        {
+            if ((++hdl->out_index) >= hdl->size)  // adjust index
+            {
+                hdl->out_index = 0;
+            }
+        }
+        else // otherwise adjust count
+        {
+            hdl->count++;
+        }
+    }
+#else
     /* if queue is full but overflow allowed, adjust out index */
     if ((hdl->count >= hdl->size) && (true == hdl->ignore_ovfl))
     {
@@ -232,30 +279,25 @@ longq_err_t R_LONGQ_Put(longq_hdl_t const   hdl,
     {
         hdl->count++;
     }
+#endif
 
     return LONGQ_SUCCESS;
 }
 
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_LONGQ_Get
-* Description  : This function removes an entry from the queue.
-*
-* NOTE: This function does not disable/enable interrupts. If the queue is
-*       accessed from both the interrupt and application level, the app must
-*       disable/enable interrupts before/after calling this routine.
-*
-* Arguments    : hdl - 
-*                    Handle for queue.
-*                p_datum -
-*                    Pointer to load datum to.
-* Return Value : LONGQ_SUCCESS -
-*                    Successful; datum fetched
-*                LONGQ_ERR_NULL_PTR -
-*                    an argument is NULL
-*                LONGQ_ERR_QUEUE_EMPTY -
-*                    Queue empty; no data available to fetch
-******************************************************************************/
+*******************************************************************************************************************/ /**
+* @brief This function removes an entry from the queue.
+* @param[in,out] hdl Handle for queue.
+* @param[in,out] p_datum Pointer to load entry to.
+* @retval    LONGQ_SUCCESS: Successful; entry removed from queue
+* @retval    LONGQ_ERR_NULL_PTR: hdl or p_datum is NULL
+* @retval    LONGQ_ERR_QUEUE_EMPTY: Queue empty; no data available to fetch
+* @details   This function removes the oldest entry (if available) in the queue associated with hdl and loads it into 
+*            the location pointed to by p_datum.
+* @note      None
+*/
 longq_err_t R_LONGQ_Get(longq_hdl_t const   hdl,
                         uint32_t * const    p_datum)
 {
@@ -273,32 +315,71 @@ longq_err_t R_LONGQ_Get(longq_hdl_t const   hdl,
         return LONGQ_ERR_QUEUE_EMPTY;       // return if queue empty        
     }
 
+#if ((LONGQ_CFG_CRITICAL_SECTION == 1)||(LONGQ_CFG_PROTECT_QUEUE == 1))
+    uint32_t    psw_bit_i_val;
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+#endif
+
+#if (LONGQ_CFG_CRITICAL_SECTION == 1)
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        *p_datum = hdl->buffer[hdl->out_index++]; // get datum
+        R_BSP_InterruptsEnable();
+
+        R_BSP_InterruptsDisable();
+        if (hdl->out_index >= hdl->size)        // adjust index
+        {
+            hdl->out_index = 0;
+        }
+        R_BSP_InterruptsEnable();
+    }
+    else
+    {
+        *p_datum = hdl->buffer[hdl->out_index++]; // get datum
+        if (hdl->out_index >= hdl->size)        // adjust index
+        {
+            hdl->out_index = 0;
+        }
+    }
+#else
     *p_datum = hdl->buffer[hdl->out_index++]; // get datum
     if (hdl->out_index >= hdl->size)        // adjust index
     {
         hdl->out_index = 0;
     }
+#endif
+
+#if (LONGQ_CFG_PROTECT_QUEUE == 1)
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        hdl->count--;                           // adjust count
+        R_BSP_InterruptsEnable();
+    }
+     else
+    {
+        hdl->count--;                           // adjust count
+    }
+#else
     hdl->count--;                           // adjust count
+#endif
 
     return LONGQ_SUCCESS;
-}        
+}
 
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_LONGQ_Flush
-* Description  : This function resets a queue to an empty state.
-*
-* NOTE: This function does not disable/enable interrupts. If the queue is
-*       accessed from both the interrupt and application level, the app must
-*       disable/enable interrupts before/after calling this routine.
-*
-* Arguments    : hdl - 
-*                    Handle for queue.
-* Return Value : LONGQ_SUCCESS -
-*                    Successful; queue emptied
-*                LONGQ_ERR_NULL_PTR -
-*                    hdl is NULL
-******************************************************************************/
+*******************************************************************************************************************/ /**
+* @brief This function resets a queue to an empty state.
+* @param[in,out] hdl Handle for queue.
+* @retval    LONGQ_SUCCESS: Successful; queue reset
+* @retval    LONGQ_ERR_NULL_PTR: hdl is NULL
+* @details   This function resets the queue identified by hdl to an empty state.
+* @note      None
+*/
 longq_err_t R_LONGQ_Flush(longq_hdl_t const hdl)
 {
 #if (LONGQ_CFG_PARAM_CHECKING_ENABLE == 1)
@@ -308,28 +389,51 @@ longq_err_t R_LONGQ_Flush(longq_hdl_t const hdl)
     }
 #endif
 
+#if (LONGQ_CFG_PROTECT_QUEUE == 1)
+    uint32_t    psw_bit_i_val;
+
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        /* RESET QUEUE */
+        hdl->in_index = 0;
+        hdl->out_index = 0;
+        hdl->count = 0;
+        R_BSP_InterruptsEnable();
+    }
+    else
+    {
+        /* RESET QUEUE */
+        hdl->in_index = 0;
+        hdl->out_index = 0;
+        hdl->count = 0;
+    }
+#else
     /* RESET QUEUE */
-    
     hdl->in_index = 0;
     hdl->out_index = 0;
     hdl->count = 0;
+#endif
 
     return LONGQ_SUCCESS;
 }
 
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_LONGQ_Used
-* Description  : This function provides the number of entries in the queue.
-* Arguments    : hdl - 
-*                    Handle for queue.
-*                p_cnt -
-*                    Pointer to load queue data count to.
-* Return Value : LONGQ_SUCCESS -
-*                    Successful
-*                LONGQ_ERR_NULL_PTR -
-*                    argument is NULL
-******************************************************************************/
+*******************************************************************************************************************/ /**
+* @brief This function provides the number of entries in the queue.
+* @param[in] hdl Handle for queue.
+* @param[in,out] p_cnt Pointer to load queue data count to.
+* @retval    LONGQ_SUCCESS: Successful; *p_cnt loaded with number of entries in queue
+* @retval    LONGQ_ERR_NULL_PTR: hdl or p_cnt is NULL.
+* @details   This function loads the number of entries in the queue associated with hdl and into the location pointed
+*            to by p_cnt.
+* @note      None
+*/
 longq_err_t R_LONGQ_Used(longq_hdl_t const  hdl,
                          uint16_t * const   p_cnt)
 {
@@ -340,24 +444,41 @@ longq_err_t R_LONGQ_Used(longq_hdl_t const  hdl,
     }
 #endif
 
+#if (LONGQ_CFG_PROTECT_QUEUE == 1)
+    uint32_t    psw_bit_i_val;
+
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+        *p_cnt = hdl->count;
+        R_BSP_InterruptsEnable();
+    }
+    else
+    {
+        *p_cnt = hdl->count;
+    }
+#else
     *p_cnt = hdl->count;
+#endif
     return LONGQ_SUCCESS;
 }
 
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_LONGQ_Unused
-* Description  : This function provides the number of elements available
-*                for storage in the queue.
-* Arguments    : hdl - 
-*                    Handle for queue.
-*                p_cnt -
-*                    Pointer to load queue unused element count to.
-* Return Value : LONGQ_SUCCESS -
-*                    Successful
-*                LONGQ_ERR_NULL_PTR -
-*                    argument is NULL
-******************************************************************************/
+*******************************************************************************************************************/ /**
+* @brief This function provides the number of elements available for storage in the queue.
+* @param[in] hdl Handle for queue.
+* @param[in,out] p_cnt Pointer to load queue unused element count to.
+* @retval    LONGQ_SUCCESS: Successful; *p_cnt loaded with number of elements available in queue.
+* @retval    LONGQ_ERR_NULL_PTR: hdl or p_cnt is NULL.
+* @details   This function loads the number of unused elements in the queue associated with hdl and into the location 
+*            pointed to by p_cnt.
+* @note      None
+*/
 longq_err_t R_LONGQ_Unused(longq_hdl_t const  hdl,
                            uint16_t * const   p_cnt)
 {
@@ -368,28 +489,46 @@ longq_err_t R_LONGQ_Unused(longq_hdl_t const  hdl,
     }
 #endif
 
+#if (LONGQ_CFG_PROTECT_QUEUE == 1)
+    uint32_t    psw_bit_i_val;
+
+    /* Get current value bit I of PSW register. */
+    psw_bit_i_val = (R_BSP_GET_PSW() & 0x00010000);
+
+    if(0 != psw_bit_i_val)
+    {
+        R_BSP_InterruptsDisable();
+
+        /* Get p_cnt. */
+        *p_cnt = (uint16_t) (hdl->size - hdl->count);
+        R_BSP_InterruptsEnable();
+    }
+    else
+    {
+        /* Get p_cnt. */
+        *p_cnt = (uint16_t) (hdl->size - hdl->count);
+    }
+#else
     *p_cnt = (uint16_t) (hdl->size - hdl->count);
+#endif
     return LONGQ_SUCCESS;
 }
 
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_LONGQ_Close
-* Description  : If the control block associated with this Handle was allocated 
-*                dynamically at run time (LONGQ_CFG_USE_HEAP_FOR_CTRL_BLKS set to 1
-*                in config.h), then that memory is free()d by this function. If 
-*                the control block was statically allocated at compile time 
-*                (LONGQ_CFG_USE_HEAP_FOR_CTRL_BLKS set to 0 in config.h), then this
-*                function marks the control block as available for use by another 
-*                buffer. Nothing is done to the contents of the buffer referenced 
-*                by this Handle.
-* Arguments    : hdl - 
-*                    handle for queue
-* Return Value : LONGQ_SUCCESS -
-*                    Successful
-*                LONGQ_ERR_NULL_PTR -
-*                    hdl is NULL
-******************************************************************************/
+*******************************************************************************************************************/ /**
+* @brief This function releases the queue control block associated with a handle.
+* @param[in,out] hdl Handle for queue.
+* @retval    LONGQ_SUCCESS: Successful; control block freed
+* @retval    LONGQ_ERR_NULL_PTR: hdl is NULL
+* @details   If the control block associated with this Handle was allocated dynamically at run time 
+*            (LONGQ_USE_HEAP_FOR_CTRL_BLKS set to 1 in config.h), then that memory is freed by this function. If the 
+*            control block was statically allocated at compile time (LONGQ_USE_HEAP_FOR_CTRL_BLKS set to 0 in config.h),
+*            then this function marks the control block as available for use by another buffer. Nothing is done to the 
+*            contents of the buffer referenced by this Handle.
+* @note      None
+*/
 longq_err_t R_LONGQ_Close(longq_hdl_t const hdl)
 {
 
@@ -411,14 +550,15 @@ longq_err_t R_LONGQ_Close(longq_hdl_t const hdl)
 }
 
 
-/*****************************************************************************
+/***********************************************************************************************************************
 * Function Name: R_LONGQ_GetVersion
-* Description  : Returns the version of this module. The version number is 
-*                encoded such that the top two bytes are the major version
-*                number and the bottom two bytes are the minor version number.
-* Arguments    : none
-* Return Value : version number
-******************************************************************************/
+*******************************************************************************************************************/ /**
+* @brief This function returns the driver version number at runtime.
+* @returns Version number.
+* @details Returns the version of this module. The version number is encoded such that the top 2 bytes are the major 
+*          version number and the bottom 2 bytes are the minor version number.
+* @note    None
+*/
 uint32_t  R_LONGQ_GetVersion(void)
 {
 

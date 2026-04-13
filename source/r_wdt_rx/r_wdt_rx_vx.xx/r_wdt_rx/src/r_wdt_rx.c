@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2016 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_wdt_rx.c
@@ -32,6 +19,11 @@
 *           15.08.2019 2.20    Fixed warnings in IAR.
 *           30.12.2019 2.30    Added support RX66N, RX72N.
 *                              Modified comment of API function to Doxygen style.
+*           15.08.2022 3.00    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           28.06.2024 3.10    Added support for RX260, RX261.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*           15.03.2025 3.11    Updated disclaimer.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -58,15 +50,15 @@ Private global variables and functions
 static bool gs_already_opened = false;
 
 /* Internal functions. */
-static wdt_err_t wdt_init_register_start_mode(wdt_config_t *p_cfg);
+static wdt_err_t wdt_init_register_start_mode (wdt_config_t * p_cfg);
 #if (1 == WDT_CFG_PARAM_CHECKING_ENABLE)
-static bool wdt_parameter_check(wdt_config_t *p_cfg);
+static bool wdt_parameter_check (wdt_config_t * p_cfg);
 
 #endif /* WDT_CFG_PARAM_CHECKING_ENABLE */
 #endif /* BSP_CFG_OFS0_REG_VALUE */
 
-static inline bool acquire_hw_lock(void);
-static inline void release_hw_lock(void);
+static inline bool acquire_hw_lock (void);
+static inline void release_hw_lock (void);
 
 /***********************************************************************************************************************
 * Function Name: R_WDT_Open
@@ -197,27 +189,27 @@ static bool wdt_parameter_check(wdt_config_t *p_cfg)
     }
 
     if (((WDT_CLOCK_DIV_4    != p_cfg->wdtcks_div)  && \
-         (WDT_CLOCK_DIV_64   != p_cfg->wdtcks_div)) && \
-       (((WDT_CLOCK_DIV_128  != p_cfg->wdtcks_div)  && \
-         (WDT_CLOCK_DIV_512  != p_cfg->wdtcks_div)) && \
+        (WDT_CLOCK_DIV_64   != p_cfg->wdtcks_div)) && \
+        (((WDT_CLOCK_DIV_128  != p_cfg->wdtcks_div)  && \
+        (WDT_CLOCK_DIV_512  != p_cfg->wdtcks_div)) && \
         ((WDT_CLOCK_DIV_2048 != p_cfg->wdtcks_div)  && \
-         (WDT_CLOCK_DIV_8192 != p_cfg->wdtcks_div))))
+        (WDT_CLOCK_DIV_8192 != p_cfg->wdtcks_div))))
     {
         ret = false;
     }
 
     if (((WDT_WINDOW_END_75 != p_cfg->window_end)  && \
-         (WDT_WINDOW_END_50 != p_cfg->window_end)) && \
+        (WDT_WINDOW_END_50 != p_cfg->window_end)) && \
         ((WDT_WINDOW_END_25 != p_cfg->window_end)  && \
-         (WDT_WINDOW_END_0  != p_cfg->window_end)))
+        (WDT_WINDOW_END_0  != p_cfg->window_end)))
     {
         ret = false;
     }
 
     if (((WDT_WINDOW_START_25  != p_cfg->window_start)  && \
-         (WDT_WINDOW_START_50  != p_cfg->window_start)) && \
+        (WDT_WINDOW_START_50  != p_cfg->window_start)) && \
         ((WDT_WINDOW_START_75  != p_cfg->window_start)  && \
-         (WDT_WINDOW_START_100 != p_cfg->window_start)))
+        (WDT_WINDOW_START_100 != p_cfg->window_start)))
     {
         ret = false;
     }
@@ -247,7 +239,7 @@ End of function wdt_parameter_check
 *  the cmd argument.
 * @code
 * WDT_CMD_GET_STATUS,         // Get WDT status
-* WDT_CMD_REFRESH_COUNTING,  // Refresh the counter
+* WDT_CMD_REFRESH_COUNTING,   // Refresh the counter
 * @endcode
 * @retval [WDT_SUCCESS]          - Command completed successfully.
 * @retval [WDT_ERR_INVALID_ARG]  - Error: Argument is not valid.
@@ -298,7 +290,7 @@ wdt_err_t R_WDT_Control(wdt_cmd_t const cmd, uint16_t * p_status)
     switch (cmd)
     {
         case WDT_CMD_REFRESH_COUNTING:
-            {
+        {
             /* Make settings to WDTRR register to refresh the counter
             WDTRR - WDT Refresh Register
             Refresh the down-counter of WDT */
@@ -306,21 +298,21 @@ wdt_err_t R_WDT_Control(wdt_cmd_t const cmd, uint16_t * p_status)
 
             /* Set WDTRR register value to 0xFFu to refresh counting */
             WDT.WDTRR = 0xFFu;
-            }
-        break;
+            break;
+        }
 
         case WDT_CMD_GET_STATUS:
-            {
+        {
             /* Get WDT status from WDTSR register */
             *p_status = WDT.WDTSR.WORD;
-            }
-        break;
+            break;
+        }
 
         default:
-            {
-                R_BSP_NOP();
-            }
-        break;
+        {
+            R_BSP_NOP();
+            break;
+        }
     }
 
     release_hw_lock();

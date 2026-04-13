@@ -5,12 +5,12 @@ r_rspi_rx
 
 Document Number 
 ---------------
-R01AN1827EJ0204
-R01AN1827JJ0204
+R01AN1827EJ{VERSION_NUMBER}
+R01AN1827JJ{VERSION_NUMBER}
 
 Version
 -------
-v2.04
+v3.80
 
 Overview
 --------
@@ -34,6 +34,7 @@ RSPI transfer functions:
 Data format:
   * MSB-first/LSB-first selectable
   * Transfer bit length is selectable as 8, 9, 10, 11, 12, 13, 14, 15, 16, 20, 24, or 32 bits.
+  * Byte swapping of transmit and receive data is selectable.
 Bit rate:
   * In master mode, the on-chip baud rate generator generates RSPCK by frequency-dividing PCLK
     (Division ratio: 2 to 4096).
@@ -75,6 +76,7 @@ Supported/Tested MCUs
 * RX231
 * RX230
 * RX23W
+* RX23E-A
 * RX130
 * RX113
 * RX111
@@ -83,6 +85,13 @@ Supported/Tested MCUs
 * RX72M
 * RX72N
 * RX66N
+* RX671
+* RX140
+* RX660
+* RX26T
+* RX23E-B
+* RX260
+* RX261
 
 Boards Tested On
 ----------------
@@ -97,6 +106,7 @@ Boards Tested On
 * RSKRX231
 * RSKRX230
 * RSSKRX23W
+* RSSKRX23E-A
 * RSKRX130
 * RSKRX113
 * RSKRX111
@@ -105,6 +115,12 @@ Boards Tested On
 * RSKRX72T
 * RSKRX72M
 * RSKRX72N
+* RSKRX671
+* RSKRX140
+* RSKRX660
+* MCK-RX26T
+* RSSKRX23E-B
+* EK-RX261
 
 Limitations
 -----------
@@ -116,37 +132,39 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v5.50
+* r_bsp     v7.70
 
 How to add to your project
 --------------------------
 This module must be added to each project in which it is used.
-Renesas recommends using "Smart Configurator" described in (1) or (3).
+Renesas recommends using "Smart Configurator" described in (1) or (2) or (4).
 However, "Smart Configurator" only supports some RX devices.
-Please use the methods of (2) or (4) for unsupported RX devices.
+Please use the methods of (3) for unsupported RX devices.
 
 (1) Adding the FIT module to your project using "Smart Configurator" in e2 studio
 By using the "Smart Configurator" in e2 studio, 
 the FIT module is automatically added to your project.
-Refer to "Renesas e2 studio Smart Configurator User Guide (R20AN0451)" for details.
+Refer to "RX Smart Configurator User's Guide: e2 studio (R20AN0451)" for details.
 
-(2) Adding the FIT module to your project using "FIT Configurator" in e2 studio
-By using the "FIT Configurator" in e2 studio,
-the FIT module is automatically added to your project.
-Refer to "Adding Firmware Integration Technology Modules to Projects (R01AN1723)" for details.
-
-(3) Adding the FIT module to your project using "Smart Configurator" on CS+
+(2) Adding the FIT module to your project using "Smart Configurator" on CS+
 By using the "Smart Configurator Standalone version" in CS+,
 the FIT module is automatically added to your project.
-Refer to "Renesas e2 studio Smart Configurator User Guide (R20AN0451)" for details.
+Refer to "RX Smart Configurator User's Guide: CS+ (R20AN0470)" for details.
 
-(4) Adding the FIT module to your project in CS+
+(3) Adding the FIT module to your project in CS+
 In CS+, please manually add the FIT module to your project.
 Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1826)" for details.
 
+(4)Adding the FIT module to your project using the Smart Configurator in IAREW
+By using the Smart Configurator Standalone version,
+the FIT module is automatically added to your project.
+Refer to "RX Smart Configurator User's Guide: IAREW (R20AN0535)" for details.
+
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.01.00
+* Renesas RX
+* GCC for Renesas RX
+* IAR C/C++ Compiler for Renesas RX
 
 File Structure
 --------------
@@ -157,12 +175,9 @@ r_rspi_rx
 +---doc
 |   |
 |   +---en
-|   |       r01an1827ej0204-rx-serial.pdf
+|   |       r01an1827ej{VERSION_NUMBER}-rx-serial.pdf
 |   +---ja
-|           r01an1827jj0204-rx-serial.pdf
-|
-+---ref
-|       r_rspi_rx_config_reference.h
+|           r01an1827jj{VERSION_NUMBER}-rx-serial.pdf
 |
 +---src
         r_rspi_defaults.h

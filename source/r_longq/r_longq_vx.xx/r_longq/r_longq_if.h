@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_longq_if.h
@@ -31,6 +18,14 @@
 *         : 01.06.2018 1.70    Updated version to 1.70
 *         : 03.12.2018 1.71    Updated version to 1.71 for update of xml file.
 *         : 07.02.2019 1.80    Updated version to 1.80.
+*         : 10.06.2020 1.81    Updated version to 1.81.
+*         : 30.11.2020 1.82    Updated version to 1.82 for e2studio 2020-10 support.
+*         : 29.10.2021 1.90    Updated for queue protection.
+*                              Updated for critical section protection.
+*         : 30.11.2022 2.00    Updated and added new demo project.
+*         : 15.03.2025 2.01    Updated disclaimer
+*         : 30.10.2025 2.02    Removed doc folder and updated .rcpc file in FITDemos.
+*                              Removed \e in Doxygen comment of API function.
 ***********************************************************************************************************************/
 
 #ifndef LONGQ_IF_H
@@ -40,14 +35,20 @@
 Includes   <System Includes> , "Project Includes"
 ***********************************************************************************************************************/
 #include "platform.h"
+#include "r_longq_config.h"
 
 /***********************************************************************************************************************
 Macro definitions
 ***********************************************************************************************************************/
 /* Version Number of API. */
-#define LONGQ_VERSION_MAJOR (1)
-#define LONGQ_VERSION_MINOR (80)
+#define LONGQ_VERSION_MAJOR (2)
+#define LONGQ_VERSION_MINOR (02)
 
+#if ((LONGQ_CFG_CRITICAL_SECTION == 1)||(LONGQ_CFG_PROTECT_QUEUE == 1))
+#if (BSP_CFG_RUN_IN_USER_MODE == 1)
+    #error "Protect circular buffer must use in supervisor mode."
+#endif
+#endif
 
 /*****************************************************************************
 Typedef definitions

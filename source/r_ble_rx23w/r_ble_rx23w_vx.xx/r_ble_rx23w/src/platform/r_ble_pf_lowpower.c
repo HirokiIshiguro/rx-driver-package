@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2019-2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
 * File Name    : r_ble_pf_lowpower.c
@@ -34,7 +21,11 @@
 #include "board/r_ble_board.h"
 #include "timer/r_ble_timer.h"
 
-bool g_inhibit_software_standby = true;
+#if (BSP_CFG_RTOS_USED == 1)
+#include "rtos/r_ble_rtos.h"
+#endif /* (BSP_CFG_RTOS_USED == 1) */
+
+bool g_inhibit_software_standby;
 
 
 /* Check whether MCU can enter software standby mode. */
@@ -52,9 +43,11 @@ static bool check_software_standby(void)
     }
 #endif /* BLE_CFG_CMD_LINE_EN */
 
-    if( false != R_BLE_TIMER_IsActive() )
+    /* If CMT is in active, disallow enter to software standby. */
+    if ((0x0000 != (CMT.CMSTR0.WORD & 0x0003)) ||
+        (0x0000 != (CMT.CMSTR1.WORD & 0x0003)) )
     {
-    	return false;
+        return false;
     }
 
     /* If DTC/DMAC/DataFlash is in active, MCU can not enter software standby.
@@ -165,6 +158,12 @@ void R_BLE_LPC_Init(void)
     /* Disable writing to MSTP registers. */
     R_BSP_RegisterProtectEnable(BSP_REG_PROTECT_LPC_CGC_SWR);
 
+#if (BLE_CFG_CMD_LINE_EN == 1)
+    g_inhibit_software_standby = true;
+#else /*  (BLE_CFG_CMD_LINE_EN == 1) */
+    g_inhibit_software_standby = false;
+#endif /*  (BLE_CFG_CMD_LINE_EN == 1) */
+
 }
 
 void R_BLE_LPC_EnterLowPowerMode(void)
@@ -188,6 +187,10 @@ void R_BLE_LPC_EnterLowPowerMode(void)
     if(0 == R_BLE_IsTaskFree()) 
     {
         R_BSP_InterruptsEnable();
+
+#if (BSP_CFG_RTOS_USED == 1)
+        R_BLE_RTOS_WakeTask();
+#endif /* (BSP_CFG_RTOS_USED == 1) */
         return;
     }
 

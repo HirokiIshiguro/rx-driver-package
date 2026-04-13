@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.    
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_iwdt_rx_if.h
@@ -44,6 +31,22 @@
 *                              Removed support for Generation 1 devices.
 *                              Fixed to comply with GSCE Coding Standards Rev.6.00.
 *           30.12.2019 3.40    Added support for RX66N, RX72N.
+*           31.03.2020 3.50    Added support for RX23E-A.
+*           30.06.2020 3.60    Changed revision to reflect demo upgrade.
+*           31.03.2021 3.70    Added support for RX671.
+*           15.04.2021 3.80    Added support for RX140.
+*           13.09.2021 3.90    Added the demo for RX671.
+*           14.03.2022 4.00    Added support for RX66T-48Pin.
+*           31.03.2022 4.10    Added support for RX660.
+*           28.06.2022 4.20    Updated demo projects.
+*           15.08.2022 4.30    Added support for RX26T.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0
+*           29.05.2023 4.40    Added support for RX23E-B.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0
+*           28.06.2024 4.50    Added support for RX260, RX261.
+*           15.03.2025 4.51    Updated disclaimer
+*           23.06.2025 4.52    Removed doc folder and updated .rcpc file in FITDemos.
+*           30.10.2025 4.60    Added support for RX14T.
 ***********************************************************************************************************************/
 
 #ifndef IWDT_RX_IF_H
@@ -63,8 +66,8 @@ Macro definitions
     #error "This module must use BSP module of Rev.5.00 or higher. Please use the BSP module of Rev.5.00 or higher."
 #endif
 /* Version Number of API. */
-#define IWDT_RX_VERSION_MAJOR   (3)
-#define IWDT_RX_VERSION_MINOR   (40)
+#define IWDT_RX_VERSION_MAJOR   (4)
+#define IWDT_RX_VERSION_MINOR   (60)
 
 #define OFS0_IWDT_DISABLED      (0x00000002)
 
@@ -94,12 +97,14 @@ typedef enum e_iwdt_err       // IWDT API error codes
 
 typedef enum e_iwdt_timeout           // IWDT Time-Out Period
 {
-#if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23_ALL) || defined(BSP_MCU_RX24U)
-    IWDT_TIMEOUT_128 =0x0000u,        // 128  (cycles) 
+#if defined(BSP_MCU_RX11_ALL) || defined(BSP_MCU_RX130) || defined(BSP_MCU_RX13T) || defined(BSP_MCU_RX23_ALL) \
+    || defined(BSP_MCU_RX24U) || defined(BSP_MCU_RX140) || defined(BSP_MCU_RX14T) || defined(BSP_MCU_RX260) \
+    || defined(BSP_MCU_RX261)
+    IWDT_TIMEOUT_128 =0x0000u,        // 128  (cycles)
     IWDT_TIMEOUT_512 =0x0001u,        // 512  (cycles)
     IWDT_TIMEOUT_1024=0x0002u,        // 1024 (cycles)
     IWDT_TIMEOUT_2048=0x0003u,        // 2048 (cycles)
-#else /* RX64M, RX71M, RX65N, RX66T, RX66N, RX72T, RX72M, RX72N */
+#else /* RX64M, RX71M, RX65N, RX66T, RX66N, RX72T, RX72M, RX72N, RX671, RX660, RX26T */
     IWDT_TIMEOUT_1024 =0x0000u,        // 1024 (cycles)
     IWDT_TIMEOUT_4096 =0x0001u,        // 4096 (cycles)
     IWDT_TIMEOUT_8192 =0x0002u,        // 8192 (cycles)
@@ -154,10 +159,10 @@ typedef struct st_iwdt_config                 // IWDT configuration options used
     iwdt_window_end_t       window_end;       // Window end position
     iwdt_timeout_control_t  timeout_control;  // Reset or NMI output when time-out  
     iwdt_count_stop_t       count_stop_enable;// Sleep mode count stop function 
- } iwdt_config_t;
+} iwdt_config_t;
 
 
- /* Control() DEFINITIONS */
+/* Control() DEFINITIONS */
 
 typedef enum e_iwdt_cmd                 // Command used in Control and GetStatus function
 {
@@ -169,14 +174,28 @@ typedef enum e_iwdt_cmd                 // Command used in Control and GetStatus
 Public Functions
 ***********************************************************************************************************************/
 #if ((BSP_CFG_OFS0_REG_VALUE & OFS0_IWDT_DISABLED) == OFS0_IWDT_DISABLED) /* Register start mode */
-/* Initializes the IWDT counter options by initializing the associated registers */
-iwdt_err_t    R_IWDT_Open(void * const p_cfg);
+/******************************************************************************
+ * Function Name: R_IWDT_Open
+ * Description  : Initializes the IWDT counter options by initializing the associated registers
+ * Argument     : p_cfg
+ * Return Value : .
+ *****************************************************************************/
+iwdt_err_t    R_IWDT_Open (void * const p_cfg);
 #endif
+/******************************************************************************
+ * Function Name: R_IWDT_Control
+ * Description  : Getting the IWDT status and refreshing the down-counter of IWDT
+ * Arguments    : cmd
+ *              : p_status
+ * Return Value : .
+ *****************************************************************************/
+iwdt_err_t    R_IWDT_Control (iwdt_cmd_t const cmd, uint16_t * p_status);
 
-/* Getting the IWDT status and refreshing the down-counter of IWDT */
-iwdt_err_t    R_IWDT_Control(iwdt_cmd_t const cmd, uint16_t * p_status);
-
-/* Returns the version number of the module. */
-uint32_t      R_IWDT_GetVersion(void);
+/******************************************************************************
+ * Function Name: R_IWDT_GetVersion
+ * Description  : Returns the version number of the module
+ * Return Value : .
+ *****************************************************************************/
+uint32_t      R_IWDT_GetVersion (void);
 
 #endif /* IWDT_RX_IF_H */

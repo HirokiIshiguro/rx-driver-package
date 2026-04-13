@@ -1,26 +1,8 @@
-/*******************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only 
-* intended for use with Renesas products. No other uses are authorized. This 
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE 
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS 
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE 
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+/*
+* Copyright (C) 2012-2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2016 Renesas Electronics Corporation. All rights reserved.    
-*******************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /******************************************************************************
 * File Name    : r_flash_rx110.h
 * Description  : This file has specific information about the ROM and DF on 
@@ -30,6 +12,9 @@
 *         : 10.10.2012 1.00    First Release
 *         : 22.07.2016 2.00    Modified for BSPless flash. Modified values for
 *                              FLASH_CF_LOWEST_VALID_BLOCK and FLASH_CF_BLOCK_INVALID.
+*         : 24.06.2020 4.60    Deleted #define FLASH_CF_256KBOUNDARY.
+*         : 07.06.2021 4.80    Added WAIT_MAX_EXRDY_CMD_TIMEOUT.
+*         : 20.03.2025 5.22    Changed the disclaimer in program sources
 ******************************************************************************/
 
 #ifndef _FLASH_API_RX110_H
@@ -59,8 +44,6 @@ Macro definitions
 #define FLASH_CF_FULL_SIZE          (FLASH_NUM_BLOCKS_CF*FLASH_CF_BLOCK_SIZE)
 #define FLASH_CF_LOWEST_VALID_BLOCK (FLASH_CF_BLOCK_INVALID + 1)
 #define FLASH_CF_LAST_VALID_ADDR    (FLASH_CF_LOWEST_VALID_BLOCK)
-
-#define FLASH_CF_256KBOUNDARY       (0xFFFC0000)
 
 /* Delay function Setting */
 #define WAIT_DIV_LOOP_CYCLE         (5000) /* 4 cycle of 1 loop * 1000(us) */
@@ -270,6 +253,12 @@ typedef enum _flash_block_address
         
 #define WAIT_MAX_ERASE_DF   WAIT_MAX_ERASE_DF_1K
 
-
+/*  According to HW Manual the Max Setting Time for Start-up area switching and Access window is around 549ms.
+    This is with a FCLK of 1MHz. 
+    The calculation below calculates the number of ICLK ticks needed for the timeout delay.
+    The 549ms number is adjusted linearly depending on the FCLK frequency.
+*/
+#define WAIT_MAX_EXRDY_CMD_TIMEOUT \
+        ((int32_t)(549000 *(MCU_CFG_ICLK_HZ/1000000)))
 
 #endif /* _FLASH_API_RX110_H */

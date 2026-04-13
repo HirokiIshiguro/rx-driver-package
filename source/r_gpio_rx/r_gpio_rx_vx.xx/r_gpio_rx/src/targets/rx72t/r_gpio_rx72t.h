@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2019 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx72t.h
@@ -23,6 +10,10 @@
 /***********************************************************************************************************************
 * History : DD.MM.YYYY Version Description
 *         : 01.02.2019 2.50    First Release
+*         : 15.12.2022 3.00    Added P50 and P51 for RX72T 100pins.
+*                              Removed PIN package 112Pin, 80Pin and 64Pin.
+*         : 07.04.2023 4.00    Updated PORT2, PORTB, and PORTD for RX72T 100-pin.
+*         : 15.03.2025 5.11    Updated disclaimer.
 ***********************************************************************************************************************/
 #ifndef GPIO_RX72T
 #define GPIO_RX72T
@@ -45,16 +36,16 @@ Macro definitions
 
 #if   (BSP_PACKAGE_PINS == 144)
     #define GPIO_INFO_NUM_PINS              (119)
-#elif (BSP_PACKAGE_PINS == 112)                     
-    #define GPIO_INFO_NUM_PINS              (93)    
 #elif (BSP_PACKAGE_PINS == 100)
-    #define GPIO_INFO_NUM_PINS              (81)
-#elif (BSP_PACKAGE_PINS == 80)
-    #define GPIO_INFO_NUM_PINS              (61)
-#elif (BSP_PACKAGE_PINS == 64)
-    #define GPIO_INFO_NUM_PINS              (48)
+#if (0xC == BSP_CFG_MCU_PART_FUNCTION) || (0x10 == BSP_CFG_MCU_PART_FUNCTION)
+    #define GPIO_INFO_NUM_PINS              (78)
+#elif (0xB == BSP_CFG_MCU_PART_FUNCTION) || (0xF == BSP_CFG_MCU_PART_FUNCTION)
+    #define GPIO_INFO_NUM_PINS              (80)
 #else
-    #error "r_gpio_rx does not have information about this RX72T package. Please update r_gpio_rx72T.h"
+    #define GPIO_INFO_NUM_PINS              (81)
+#endif
+#else
+    #error "r_gpio_rx does not have information about this RX72T package. Please update r_gpio_rx72t.h"
 #endif
 
 /* For testing we will allocate virtual IO ports. */
@@ -256,148 +247,6 @@ typedef enum
     GPIO_PORT_K_PIN_2 = 0x1302,
 } gpio_port_pin_t;
 
-#elif (BSP_PACKAGE_PINS == 112)         
-/* This enumerator has each available GPIO port on this MCU. This list will change depending on the MCU chosen. */
-typedef enum
-{
-    GPIO_PORT_0 = 0x0000,
-    GPIO_PORT_1 = 0x0100,
-    GPIO_PORT_2 = 0x0200,
-    GPIO_PORT_3 = 0x0300,
-    GPIO_PORT_4 = 0x0400,
-    GPIO_PORT_5 = 0x0500,
-    GPIO_PORT_6 = 0x0600,
-    GPIO_PORT_7 = 0x0700,
-    GPIO_PORT_8 = 0x0800,
-    GPIO_PORT_9 = 0x0900,
-    GPIO_PORT_A = 0x0A00,
-    GPIO_PORT_B = 0x0B00,
-    GPIO_PORT_C = 0x0C00,
-    GPIO_PORT_D = 0x0D00,
-    GPIO_PORT_E = 0x0E00,
-    GPIO_PORT_G = 0x1000,
-    GPIO_PORT_H = 0x1100,
-} gpio_port_t;         
-
-/* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
-typedef enum
-{
-    GPIO_PORT0_PIN_MASK = 0x03,    /* Available pins: P00, P01             */
-    GPIO_PORT1_PIN_MASK = 0xFF,    /* Available pins: P10 to P17           */
-    GPIO_PORT2_PIN_MASK = 0x9F,    /* Available pins: P20 to P24, P27      */
-    GPIO_PORT3_PIN_MASK = 0xCF,    /* Available pins: P30 to P33, P36, P37 */
-    GPIO_PORT4_PIN_MASK = 0xFF,    /* Available pins: P40 to P47           */
-    GPIO_PORT5_PIN_MASK = 0x3C,    /* Available pins: P52 to P55           */
-    GPIO_PORT6_PIN_MASK = 0x3F,    /* Available pins: P60 to P65           */
-    GPIO_PORT7_PIN_MASK = 0x7F,    /* Available pins: P70 to P76           */
-    GPIO_PORT8_PIN_MASK = 0x07,    /* Available pins: P80 to P82           */
-    GPIO_PORT9_PIN_MASK = 0x7F,    /* Available pins: P90 to P96           */
-    GPIO_PORTA_PIN_MASK = 0x3F,    /* Available pins: PA0 to PA5           */
-    GPIO_PORTB_PIN_MASK = 0xFF,    /* Available pins: PB0 to PB7           */
-    GPIO_PORTC_PIN_MASK = 0x07,    /* Available pins: PC0 to PC2           */
-    GPIO_PORTD_PIN_MASK = 0xFF,    /* Available pins: PD0 to PD7           */
-    GPIO_PORTE_PIN_MASK = 0x3F,    /* Available pins: PE0 to PE5           */
-    GPIO_PORTG_PIN_MASK = 0x07,    /* Available pins: PG0 to PG2           */
-    GPIO_PORTH_PIN_MASK = 0x11,    /* Available pins: PH0, PH4          */
-} gpio_pin_bit_mask_t;         
-
-typedef enum
-{
-    GPIO_PORT_0_PIN_0 = 0x0000,
-    GPIO_PORT_0_PIN_1 = 0x0001,
-    GPIO_PORT_1_PIN_0 = 0x0100,
-    GPIO_PORT_1_PIN_1 = 0x0101,
-    GPIO_PORT_1_PIN_2 = 0x0102,
-    GPIO_PORT_1_PIN_3 = 0x0103,
-    GPIO_PORT_1_PIN_4 = 0x0104,
-    GPIO_PORT_1_PIN_5 = 0x0105,
-    GPIO_PORT_1_PIN_6 = 0x0106,
-    GPIO_PORT_1_PIN_7 = 0x0107,
-    GPIO_PORT_2_PIN_0 = 0x0200,
-    GPIO_PORT_2_PIN_1 = 0x0201,
-    GPIO_PORT_2_PIN_2 = 0x0202,
-    GPIO_PORT_2_PIN_3 = 0x0203,
-    GPIO_PORT_2_PIN_4 = 0x0204,
-    GPIO_PORT_2_PIN_7 = 0x0207,
-    GPIO_PORT_3_PIN_0 = 0x0300,
-    GPIO_PORT_3_PIN_1 = 0x0301,
-    GPIO_PORT_3_PIN_2 = 0x0302,
-    GPIO_PORT_3_PIN_3 = 0x0303,
-    GPIO_PORT_3_PIN_6 = 0x0306,
-    GPIO_PORT_3_PIN_7 = 0x0307,
-    GPIO_PORT_4_PIN_0 = 0x0400,
-    GPIO_PORT_4_PIN_1 = 0x0401,
-    GPIO_PORT_4_PIN_2 = 0x0402,
-    GPIO_PORT_4_PIN_3 = 0x0403,
-    GPIO_PORT_4_PIN_4 = 0x0404,
-    GPIO_PORT_4_PIN_5 = 0x0405,
-    GPIO_PORT_4_PIN_6 = 0x0406,
-    GPIO_PORT_4_PIN_7 = 0x0407,
-    GPIO_PORT_5_PIN_2 = 0x0502,
-    GPIO_PORT_5_PIN_3 = 0x0503,
-    GPIO_PORT_5_PIN_4 = 0x0504,
-    GPIO_PORT_5_PIN_5 = 0x0505,
-    GPIO_PORT_6_PIN_0 = 0x0600,
-    GPIO_PORT_6_PIN_1 = 0x0601,
-    GPIO_PORT_6_PIN_2 = 0x0602,
-    GPIO_PORT_6_PIN_3 = 0x0603,
-    GPIO_PORT_6_PIN_4 = 0x0604,
-    GPIO_PORT_6_PIN_5 = 0x0605,
-    GPIO_PORT_7_PIN_0 = 0x0700,
-    GPIO_PORT_7_PIN_1 = 0x0701,
-    GPIO_PORT_7_PIN_2 = 0x0702,
-    GPIO_PORT_7_PIN_3 = 0x0703,
-    GPIO_PORT_7_PIN_4 = 0x0704,
-    GPIO_PORT_7_PIN_5 = 0x0705,
-    GPIO_PORT_7_PIN_6 = 0x0706,
-    GPIO_PORT_8_PIN_0 = 0x0800,
-    GPIO_PORT_8_PIN_1 = 0x0801,
-    GPIO_PORT_8_PIN_2 = 0x0802,
-    GPIO_PORT_9_PIN_0 = 0x0900,
-    GPIO_PORT_9_PIN_1 = 0x0901,
-    GPIO_PORT_9_PIN_2 = 0x0902,
-    GPIO_PORT_9_PIN_3 = 0x0903,
-    GPIO_PORT_9_PIN_4 = 0x0904,
-    GPIO_PORT_9_PIN_5 = 0x0905,
-    GPIO_PORT_9_PIN_6 = 0x0906,
-    GPIO_PORT_A_PIN_0 = 0x0A00,
-    GPIO_PORT_A_PIN_1 = 0x0A01,
-    GPIO_PORT_A_PIN_2 = 0x0A02,
-    GPIO_PORT_A_PIN_3 = 0x0A03,
-    GPIO_PORT_A_PIN_4 = 0x0A04,
-    GPIO_PORT_A_PIN_5 = 0x0A05,
-    GPIO_PORT_B_PIN_0 = 0x0B00,
-    GPIO_PORT_B_PIN_1 = 0x0B01,
-    GPIO_PORT_B_PIN_2 = 0x0B02,
-    GPIO_PORT_B_PIN_3 = 0x0B03,
-    GPIO_PORT_B_PIN_4 = 0x0B04,
-    GPIO_PORT_B_PIN_5 = 0x0B05,
-    GPIO_PORT_B_PIN_6 = 0x0B06,
-    GPIO_PORT_B_PIN_7 = 0x0B07,
-    GPIO_PORT_C_PIN_0 = 0x0C00,
-    GPIO_PORT_C_PIN_1 = 0x0C01,
-    GPIO_PORT_C_PIN_2 = 0x0C02,
-    GPIO_PORT_D_PIN_0 = 0x0D00,
-    GPIO_PORT_D_PIN_1 = 0x0D01,
-    GPIO_PORT_D_PIN_2 = 0x0D02,
-    GPIO_PORT_D_PIN_3 = 0x0D03,
-    GPIO_PORT_D_PIN_4 = 0x0D04,
-    GPIO_PORT_D_PIN_5 = 0x0D05,
-    GPIO_PORT_D_PIN_6 = 0x0D06,
-    GPIO_PORT_D_PIN_7 = 0x0D07,
-    GPIO_PORT_E_PIN_0 = 0x0E00,
-    GPIO_PORT_E_PIN_1 = 0x0E01,
-    GPIO_PORT_E_PIN_2 = 0x0E02,
-    GPIO_PORT_E_PIN_3 = 0x0E03,
-    GPIO_PORT_E_PIN_4 = 0x0E04,
-    GPIO_PORT_E_PIN_5 = 0x0E05,
-    GPIO_PORT_G_PIN_0 = 0x1000,
-    GPIO_PORT_G_PIN_1 = 0x1001,
-    GPIO_PORT_G_PIN_2 = 0x1002,
-    GPIO_PORT_H_PIN_0 = 0x1100,
-    GPIO_PORT_H_PIN_4 = 0x1104,
-} gpio_port_pin_t;         
-
 #elif (BSP_PACKAGE_PINS == 100)
 /* This enumerator has each available GPIO port on this MCU. This list will change depending on the MCU chosen. */
 typedef enum
@@ -424,17 +273,30 @@ typedef enum
 {
     GPIO_PORT0_PIN_MASK = 0x03,    /* Available pins: P00, P01             */
     GPIO_PORT1_PIN_MASK = 0x03,    /* Available pins: P10, P11             */
+#if (0xB == BSP_CFG_MCU_PART_FUNCTION) || (0xF == BSP_CFG_MCU_PART_FUNCTION)
+    GPIO_PORT2_PIN_MASK = 0x1F,    /* Available pins: P20 to P24           */
+#else
     GPIO_PORT2_PIN_MASK = 0x9F,    /* Available pins: P20 to P24, P27      */
+#endif
     GPIO_PORT3_PIN_MASK = 0xCF,    /* Available pins: P30 to P33, P36, P37 */
     GPIO_PORT4_PIN_MASK = 0xFF,    /* Available pins: P40 to P47           */
+#if (0xB == BSP_CFG_MCU_PART_FUNCTION) || (0xF == BSP_CFG_MCU_PART_FUNCTION)
+    GPIO_PORT5_PIN_MASK = 0x3F,    /* Available pins: P50 to P55           */
+#else
     GPIO_PORT5_PIN_MASK = 0x3C,    /* Available pins: P52 to P55           */
+#endif
     GPIO_PORT6_PIN_MASK = 0x3F,    /* Available pins: P60 to P65           */
     GPIO_PORT7_PIN_MASK = 0x7F,    /* Available pins: P70 to P76           */
     GPIO_PORT8_PIN_MASK = 0x07,    /* Available pins: P80 to P82           */
     GPIO_PORT9_PIN_MASK = 0x7F,    /* Available pins: P90 to P96           */
     GPIO_PORTA_PIN_MASK = 0x3F,    /* Available pins: PA0 to PA5           */
+#if (0xC == BSP_CFG_MCU_PART_FUNCTION) || (0x10 == BSP_CFG_MCU_PART_FUNCTION)
+    GPIO_PORTB_PIN_MASK = 0x7F,    /* Available pins: PB0 to PB6           */
+    GPIO_PORTD_PIN_MASK = 0xFC,    /* Available pins: PD2 to PD7           */
+#else
     GPIO_PORTB_PIN_MASK = 0xFF,    /* Available pins: PB0 to PB7           */
     GPIO_PORTD_PIN_MASK = 0xFF,    /* Available pins: PD0 to PD7           */
+#endif
     GPIO_PORTE_PIN_MASK = 0x3F,    /* Available pins: PE0 to PE5           */
     GPIO_PORTH_PIN_MASK = 0x11,    /* Available pins: PH0, PH4             */
 } gpio_pin_bit_mask_t;
@@ -450,7 +312,9 @@ typedef enum
     GPIO_PORT_2_PIN_2 = 0x0202,
     GPIO_PORT_2_PIN_3 = 0x0203,
     GPIO_PORT_2_PIN_4 = 0x0204,
+#if (0xB != BSP_CFG_MCU_PART_FUNCTION) && (0xF != BSP_CFG_MCU_PART_FUNCTION)
     GPIO_PORT_2_PIN_7 = 0x0207,
+#endif
     GPIO_PORT_3_PIN_0 = 0x0300,
     GPIO_PORT_3_PIN_1 = 0x0301,
     GPIO_PORT_3_PIN_2 = 0x0302,
@@ -465,6 +329,10 @@ typedef enum
     GPIO_PORT_4_PIN_5 = 0x0405,
     GPIO_PORT_4_PIN_6 = 0x0406,
     GPIO_PORT_4_PIN_7 = 0x0407,
+#if (0xB == BSP_CFG_MCU_PART_FUNCTION) || (0xF == BSP_CFG_MCU_PART_FUNCTION)
+    GPIO_PORT_5_PIN_0 = 0x0500,
+    GPIO_PORT_5_PIN_1 = 0x0501,
+#endif	
     GPIO_PORT_5_PIN_2 = 0x0502,
     GPIO_PORT_5_PIN_3 = 0x0503,
     GPIO_PORT_5_PIN_4 = 0x0504,
@@ -505,9 +373,11 @@ typedef enum
     GPIO_PORT_B_PIN_4 = 0x0B04,
     GPIO_PORT_B_PIN_5 = 0x0B05,
     GPIO_PORT_B_PIN_6 = 0x0B06,
+#if (0xC != BSP_CFG_MCU_PART_FUNCTION) && (0x10 != BSP_CFG_MCU_PART_FUNCTION)
     GPIO_PORT_B_PIN_7 = 0x0B07,
     GPIO_PORT_D_PIN_0 = 0x0D00,
     GPIO_PORT_D_PIN_1 = 0x0D01,
+#endif
     GPIO_PORT_D_PIN_2 = 0x0D02,
     GPIO_PORT_D_PIN_3 = 0x0D03,
     GPIO_PORT_D_PIN_4 = 0x0D04,
@@ -520,199 +390,6 @@ typedef enum
     GPIO_PORT_E_PIN_3 = 0x0E03,
     GPIO_PORT_E_PIN_4 = 0x0E04,
     GPIO_PORT_E_PIN_5 = 0x0E05,
-    GPIO_PORT_H_PIN_0 = 0x1100,
-    GPIO_PORT_H_PIN_4 = 0x1104,
-} gpio_port_pin_t;
-
-#elif (BSP_PACKAGE_PINS == 80)
-/* This enumerator has each available GPIO port on this MCU. This list will change depending on the MCU chosen. */
-typedef enum
-{
-    GPIO_PORT_0 = 0x0000,
-    GPIO_PORT_1 = 0x0100,
-    GPIO_PORT_2 = 0x0200,
-    GPIO_PORT_3 = 0x0300,
-    GPIO_PORT_4 = 0x0400,
-    GPIO_PORT_5 = 0x0500,
-    GPIO_PORT_6 = 0x0600,
-    GPIO_PORT_7 = 0x0700,
-    GPIO_PORT_9 = 0x0900,
-    GPIO_PORT_A = 0x0A00,
-    GPIO_PORT_B = 0x0B00,
-    GPIO_PORT_D = 0x0D00,
-    GPIO_PORT_E = 0x0E00,
-    GPIO_PORT_H = 0x1100,
-} gpio_port_t;
-
-/* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
-typedef enum
-{
-    GPIO_PORT0_PIN_MASK = 0x03,    /* Available pins: P00, P01             */
-    GPIO_PORT1_PIN_MASK = 0x03,    /* Available pins: P10, P11             */
-    GPIO_PORT2_PIN_MASK = 0x87,    /* Available pins: P20 to P22, P27      */
-    GPIO_PORT3_PIN_MASK = 0xC3,    /* Available pins: P30, P31, P36, P37   */
-    GPIO_PORT4_PIN_MASK = 0xFF,    /* Available pins: P40 to P47           */
-    GPIO_PORT5_PIN_MASK = 0x3C,    /* Available pins: P52 to P55           */
-    GPIO_PORT6_PIN_MASK = 0x34,    /* Available pins: P62, P64, P65        */
-    GPIO_PORT7_PIN_MASK = 0x7F,    /* Available pins: P70 to P76           */
-    GPIO_PORT9_PIN_MASK = 0x7F,    /* Available pins: P90 to P96           */
-    GPIO_PORTA_PIN_MASK = 0x28,    /* Available pins: PA3, PA5             */
-    GPIO_PORTB_PIN_MASK = 0x7F,    /* Available pins: PB0 to PB6           */
-    GPIO_PORTD_PIN_MASK = 0xFC,    /* Available pins: PD2 to PD7           */
-    GPIO_PORTE_PIN_MASK = 0x1C,    /* Available pins: PE2 to PE4           */
-    GPIO_PORTH_PIN_MASK = 0x11,    /* Available pins: PH0, PH4             */
-} gpio_pin_bit_mask_t;
-
-typedef enum
-{
-    GPIO_PORT_0_PIN_0 = 0x0000,
-    GPIO_PORT_0_PIN_1 = 0x0001,
-    GPIO_PORT_1_PIN_0 = 0x0100,
-    GPIO_PORT_1_PIN_1 = 0x0101,
-    GPIO_PORT_2_PIN_0 = 0x0200,
-    GPIO_PORT_2_PIN_1 = 0x0201,
-    GPIO_PORT_2_PIN_2 = 0x0202,
-    GPIO_PORT_2_PIN_7 = 0x0207,
-    GPIO_PORT_3_PIN_0 = 0x0300,
-    GPIO_PORT_3_PIN_1 = 0x0301,
-    GPIO_PORT_3_PIN_6 = 0x0306,
-    GPIO_PORT_3_PIN_7 = 0x0307,
-    GPIO_PORT_4_PIN_0 = 0x0400,
-    GPIO_PORT_4_PIN_1 = 0x0401,
-    GPIO_PORT_4_PIN_2 = 0x0402,
-    GPIO_PORT_4_PIN_3 = 0x0403,
-    GPIO_PORT_4_PIN_4 = 0x0404,
-    GPIO_PORT_4_PIN_5 = 0x0405,
-    GPIO_PORT_4_PIN_6 = 0x0406,
-    GPIO_PORT_4_PIN_7 = 0x0407,
-    GPIO_PORT_5_PIN_2 = 0x0502,
-    GPIO_PORT_5_PIN_3 = 0x0503,
-    GPIO_PORT_5_PIN_4 = 0x0504,
-    GPIO_PORT_5_PIN_5 = 0x0505,
-    GPIO_PORT_6_PIN_2 = 0x0602,
-    GPIO_PORT_6_PIN_4 = 0x0604,
-    GPIO_PORT_6_PIN_5 = 0x0605,
-    GPIO_PORT_7_PIN_0 = 0x0700,
-    GPIO_PORT_7_PIN_1 = 0x0701,
-    GPIO_PORT_7_PIN_2 = 0x0702,
-    GPIO_PORT_7_PIN_3 = 0x0703,
-    GPIO_PORT_7_PIN_4 = 0x0704,
-    GPIO_PORT_7_PIN_5 = 0x0705,
-    GPIO_PORT_7_PIN_6 = 0x0706,
-    GPIO_PORT_9_PIN_0 = 0x0900,
-    GPIO_PORT_9_PIN_1 = 0x0901,
-    GPIO_PORT_9_PIN_2 = 0x0902,
-    GPIO_PORT_9_PIN_3 = 0x0903,
-    GPIO_PORT_9_PIN_4 = 0x0904,
-    GPIO_PORT_9_PIN_5 = 0x0905,
-    GPIO_PORT_9_PIN_6 = 0x0906,
-    GPIO_PORT_A_PIN_3 = 0x0A03,
-    GPIO_PORT_A_PIN_5 = 0x0A05,
-    GPIO_PORT_B_PIN_0 = 0x0B00,
-    GPIO_PORT_B_PIN_1 = 0x0B01,
-    GPIO_PORT_B_PIN_2 = 0x0B02,
-    GPIO_PORT_B_PIN_3 = 0x0B03,
-    GPIO_PORT_B_PIN_4 = 0x0B04,
-    GPIO_PORT_B_PIN_5 = 0x0B05,
-    GPIO_PORT_B_PIN_6 = 0x0B06,
-    GPIO_PORT_D_PIN_2 = 0x0D02,
-    GPIO_PORT_D_PIN_3 = 0x0D03,
-    GPIO_PORT_D_PIN_4 = 0x0D04,
-    GPIO_PORT_D_PIN_5 = 0x0D05,
-    GPIO_PORT_D_PIN_6 = 0x0D06,
-    GPIO_PORT_D_PIN_7 = 0x0D07,
-    GPIO_PORT_E_PIN_2 = 0x0E02,
-    GPIO_PORT_E_PIN_3 = 0x0E03,
-    GPIO_PORT_E_PIN_4 = 0x0E04,
-    GPIO_PORT_H_PIN_0 = 0x1100,
-    GPIO_PORT_H_PIN_4 = 0x1104,
-} gpio_port_pin_t;
-
-#elif (BSP_PACKAGE_PINS == 64)
-/* This enumerator has each available GPIO port on this MCU. This list will change depending on the MCU chosen. */
-typedef enum
-{
-    GPIO_PORT_0 = 0x0000,
-    GPIO_PORT_1 = 0x0100,
-    GPIO_PORT_2 = 0x0200,
-    GPIO_PORT_3 = 0x0300,
-    GPIO_PORT_4 = 0x0400,
-    GPIO_PORT_5 = 0x0500,
-    GPIO_PORT_6 = 0x0600,
-    GPIO_PORT_7 = 0x0700,
-    GPIO_PORT_9 = 0x0900,
-    GPIO_PORT_B = 0x0B00,
-    GPIO_PORT_D = 0x0D00,
-    GPIO_PORT_E = 0x0E00,
-    GPIO_PORT_H = 0x1100,
-} gpio_port_t;
-
-/* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
-typedef enum
-{
-    GPIO_PORT0_PIN_MASK = 0x03,    /* Available pins: P00, P01               */
-    GPIO_PORT1_PIN_MASK = 0x02,    /* Available pins: P11                    */
-    GPIO_PORT2_PIN_MASK = 0x07,    /* Available pins: P20 to P22             */
-    GPIO_PORT3_PIN_MASK = 0xC0,    /* Available pins: P36, P37               */
-    GPIO_PORT4_PIN_MASK = 0x77,    /* Available pins: P40 to P42, P44 to P46 */
-    GPIO_PORT5_PIN_MASK = 0x2C,    /* Available pins: P52 to P54             */
-    GPIO_PORT6_PIN_MASK = 0x30,    /* Available pins: P64, P65               */
-    GPIO_PORT7_PIN_MASK = 0x7F,    /* Available pins: P70 to P76             */
-    GPIO_PORT9_PIN_MASK = 0x7F,    /* Available pins: P90 to P96             */
-    GPIO_PORTB_PIN_MASK = 0x7F,    /* Available pins: PB0 to PB6             */
-    GPIO_PORTD_PIN_MASK = 0xF8,    /* Available pins: PD3 to PD7             */
-    GPIO_PORTE_PIN_MASK = 0x04,    /* Available pins: PE2                    */
-    GPIO_PORTH_PIN_MASK = 0x11,    /* Available pins: PH0, PH4               */
-} gpio_pin_bit_mask_t;
-
-typedef enum
-{
-    GPIO_PORT_0_PIN_0 = 0x0000,
-    GPIO_PORT_0_PIN_1 = 0x0001,
-    GPIO_PORT_1_PIN_1 = 0x0101,
-    GPIO_PORT_2_PIN_0 = 0x0200,
-    GPIO_PORT_2_PIN_1 = 0x0201,
-    GPIO_PORT_2_PIN_2 = 0x0202,
-    GPIO_PORT_3_PIN_6 = 0x0306,
-    GPIO_PORT_3_PIN_7 = 0x0307,
-    GPIO_PORT_4_PIN_0 = 0x0400,
-    GPIO_PORT_4_PIN_1 = 0x0401,
-    GPIO_PORT_4_PIN_2 = 0x0402,
-    GPIO_PORT_4_PIN_4 = 0x0404,
-    GPIO_PORT_4_PIN_5 = 0x0405,
-    GPIO_PORT_4_PIN_6 = 0x0406,
-    GPIO_PORT_5_PIN_2 = 0x0502,
-    GPIO_PORT_5_PIN_3 = 0x0503,
-    GPIO_PORT_5_PIN_4 = 0x0504,
-    GPIO_PORT_6_PIN_4 = 0x0604,
-    GPIO_PORT_6_PIN_5 = 0x0605,
-    GPIO_PORT_7_PIN_0 = 0x0700,
-    GPIO_PORT_7_PIN_1 = 0x0701,
-    GPIO_PORT_7_PIN_2 = 0x0702,
-    GPIO_PORT_7_PIN_3 = 0x0703,
-    GPIO_PORT_7_PIN_4 = 0x0704,
-    GPIO_PORT_7_PIN_5 = 0x0705,
-    GPIO_PORT_7_PIN_6 = 0x0706,
-    GPIO_PORT_9_PIN_0 = 0x0900,
-    GPIO_PORT_9_PIN_1 = 0x0901,
-    GPIO_PORT_9_PIN_2 = 0x0902,
-    GPIO_PORT_9_PIN_3 = 0x0903,
-    GPIO_PORT_9_PIN_4 = 0x0904,
-    GPIO_PORT_9_PIN_5 = 0x0905,
-    GPIO_PORT_9_PIN_6 = 0x0906,
-    GPIO_PORT_B_PIN_0 = 0x0B00,
-    GPIO_PORT_B_PIN_1 = 0x0B01,
-    GPIO_PORT_B_PIN_2 = 0x0B02,
-    GPIO_PORT_B_PIN_3 = 0x0B03,
-    GPIO_PORT_B_PIN_4 = 0x0B04,
-    GPIO_PORT_B_PIN_5 = 0x0B05,
-    GPIO_PORT_B_PIN_6 = 0x0B06,
-    GPIO_PORT_D_PIN_3 = 0x0D03,
-    GPIO_PORT_D_PIN_4 = 0x0D04,
-    GPIO_PORT_D_PIN_5 = 0x0D05,
-    GPIO_PORT_D_PIN_6 = 0x0D06,
-    GPIO_PORT_D_PIN_7 = 0x0D07,
-    GPIO_PORT_E_PIN_2 = 0x0E02,
     GPIO_PORT_H_PIN_0 = 0x1100,
     GPIO_PORT_H_PIN_4 = 0x1104,
 } gpio_port_pin_t;

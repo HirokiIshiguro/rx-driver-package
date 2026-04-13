@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
+/*
+* Copyright (c) 2014 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
   Purpose: Module Description File (MDF) Example (Schema Version 2.0)
            This is a description of a sample FIT module configuration file
@@ -177,7 +182,7 @@
       </peripheral>
     </resourceInfo>
     <configuration>
-        <property id="LCDC_CFG_PARAM_CHECKING_ENABLE" display="Parameter checking" default="1" type="combobox">
+        <property id="LCDC_CFG_PARAM_CHECKING_ENABLE" display="Parameter checking" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
             <option id="LCDC_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="System default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
             <option id="LCDC_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0"/>
             <option id="LCDC_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled" value="1"/>

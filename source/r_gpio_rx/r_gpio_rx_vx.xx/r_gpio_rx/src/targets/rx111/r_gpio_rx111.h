@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2015 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_gpio_rx111.h
@@ -25,6 +12,10 @@
 *         : 17.07.2013 1.00    First Release
 *         : 18.02.2014 1.10    Fixed PortJ enum bug, Added GPIO_PORTn_PIN_MASKs. Added support for all package pin types.
 *         : 24.04.2015 1.11    Added the compiler directive: "#if defined(BSP_MCU_RX111)"
+*         : 15.01.2021 3.70    Removed PH7 for RX111.
+*         : 15.12.2022 4.00    Added PH7 for RX111 64Pins, 48Pins.
+*         : 07.04.2023 5.00    Removed define PIN MASK is not provided.
+*         : 15.03.2025 5.11    Updated disclaimer.
 ***********************************************************************************************************************/
 #ifndef GPIO_RX111
 #define GPIO_RX111
@@ -46,10 +37,10 @@ Macro definitions
 #define GPIO_INFO_NUM_PORTS                 (19) //Range from first to last port. Useful for arrays.
 
 #if   (BSP_PACKAGE_PINS == 64)
-    #define GPIO_INFO_NUM_PINS              (50)
+    #define GPIO_INFO_NUM_PINS              (48)
 #elif (BSP_PACKAGE_PINS == 48)
-    #define GPIO_INFO_NUM_PINS              (36)
-#elif (BSP_PACKAGE_PINS == 48)
+    #define GPIO_INFO_NUM_PINS              (32)
+#elif (BSP_PACKAGE_PINS == 40)
     #define GPIO_INFO_NUM_PINS              (25)
 #elif (BSP_PACKAGE_PINS == 36)
     #define GPIO_INFO_NUM_PINS              (21)
@@ -90,7 +81,10 @@ typedef enum
     GPIO_PORT_B = 0x0B00,
     GPIO_PORT_C = 0x0C00,
     GPIO_PORT_E = 0x0E00,
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0)
+    /* Stop Oscillating the Sub Clock */
     GPIO_PORT_H = 0x1100,
+#endif
     GPIO_PORT_J = 0x1200,
 } gpio_port_t;
 
@@ -107,7 +101,10 @@ typedef enum
     GPIO_PORTB_PIN_MASK = 0xEB,    /* Available pins: PB0, PB1, PB3, PB5 to PB7 */
     GPIO_PORTC_PIN_MASK = 0xFF,    /* Available pins: PC0 to PC7                */
     GPIO_PORTE_PIN_MASK = 0xFF,    /* Available pins: PE0 to PE7                */
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0)
+    /* Stop Oscillating the Sub Clock */
     GPIO_PORTH_PIN_MASK = 0x80,    /* Available pins: PH7                       */
+#endif
     GPIO_PORTJ_PIN_MASK = 0xC0,    /* Available pins: PJ6, PJ7                  */
 } gpio_pin_bit_mask_t;
 
@@ -161,7 +158,10 @@ typedef enum
     GPIO_PORT_E_PIN_5 = 0x0E05,
     GPIO_PORT_E_PIN_6 = 0x0E06,
     GPIO_PORT_E_PIN_7 = 0x0E07,
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0)
+    /* Stop Oscillating the Sub Clock */
     GPIO_PORT_H_PIN_7 = 0x1107,
+#endif
     GPIO_PORT_J_PIN_6 = 0x1206,
     GPIO_PORT_J_PIN_7 = 0x1207,
 } gpio_port_pin_t;
@@ -178,24 +178,28 @@ typedef enum
     GPIO_PORT_B = 0x0B00,
     GPIO_PORT_C = 0x0C00,
     GPIO_PORT_E = 0x0E00,
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0)
+    /* Stop Oscillating the Sub Clock */
     GPIO_PORT_H = 0x1100,
+#endif
     GPIO_PORT_J = 0x1200,
 } gpio_port_t;
 
 /* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
 typedef enum
 {
-    GPIO_PORT0_PIN_MASK = 0x00,    /* Available pins: None               */
     GPIO_PORT1_PIN_MASK = 0xF0,    /* Available pins: P14, P15, P16,P17  */
     GPIO_PORT2_PIN_MASK = 0xC0,    /* Available pins: P26,P27            */
     GPIO_PORT3_PIN_MASK = 0x20,    /* Available pins: P35                */
     GPIO_PORT4_PIN_MASK = 0x47,    /* Available pins: P40 to P42, P46    */
-    GPIO_PORT5_PIN_MASK = 0x00,    /* Available pins: None               */
     GPIO_PORTA_PIN_MASK = 0x5A,    /* Available pins: PA1, PA3, PA4, PA6 */
     GPIO_PORTB_PIN_MASK = 0x2B,    /* Available pins: PB0, PB1, PB3, PB5 */
     GPIO_PORTC_PIN_MASK = 0xFF,    /* Available pins: PC0 to PC7         */
     GPIO_PORTE_PIN_MASK = 0x9F,    /* Available pins: PE0 to PE4, PE7    */
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0)
+    /* Stop Oscillating the Sub Clock */
     GPIO_PORTH_PIN_MASK = 0x80,    /* Available pins: PH7                */
+#endif
     GPIO_PORTJ_PIN_MASK = 0xC0,    /* Available pins: PJ6, PJ7           */
 } gpio_pin_bit_mask_t;
 
@@ -234,7 +238,10 @@ typedef enum
     GPIO_PORT_E_PIN_3 = 0x0E03,
     GPIO_PORT_E_PIN_4 = 0x0E04,
     GPIO_PORT_E_PIN_7 = 0x0E07,
+#if (BSP_CFG_SUB_CLOCK_OSCILLATE_ENABLE == 0)
+    /* Stop Oscillating the Sub Clock */
     GPIO_PORT_H_PIN_7 = 0x1107,
+#endif
     GPIO_PORT_J_PIN_6 = 0x1206,
     GPIO_PORT_J_PIN_7 = 0x1207,
 } gpio_port_pin_t;
@@ -257,17 +264,14 @@ typedef enum
 /* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
 typedef enum
 {
-    GPIO_PORT0_PIN_MASK = 0x00,    /* Available pins: None               */
     GPIO_PORT1_PIN_MASK = 0xF0,    /* Available pins: P14, P15, P16,P17  */
     GPIO_PORT2_PIN_MASK = 0xC0,    /* Available pins: P26,P27            */
     GPIO_PORT3_PIN_MASK = 0x24,    /* Available pins: P32, P35           */
     GPIO_PORT4_PIN_MASK = 0x56,    /* Available pins: P41, P42, P46      */
-    GPIO_PORT5_PIN_MASK = 0x00,    /* Available pins: None               */
     GPIO_PORTA_PIN_MASK = 0x5A,    /* Available pins: PA1, PA3, PA4, PA6 */
     GPIO_PORTB_PIN_MASK = 0x09,    /* Available pins: PB0, PB3           */
     GPIO_PORTC_PIN_MASK = 0x10,    /* Available pins: PC4                */
     GPIO_PORTE_PIN_MASK = 0x1F,    /* Available pins: PE0 to PE4         */
-    GPIO_PORTH_PIN_MASK = 0x00,    /* Available pins: None               */
     GPIO_PORTJ_PIN_MASK = 0xC0,    /* Available pins: PJ6, PJ7           */
 } gpio_pin_bit_mask_t;
 
@@ -318,17 +322,14 @@ typedef enum
 /* This enumerator has a bit mask for each available GPIO pin for the given port on this MCU. */
 typedef enum
 {
-    GPIO_PORT0_PIN_MASK = 0x00,    /* Available pins: None              */
     GPIO_PORT1_PIN_MASK = 0xF0,    /* Available pins: P14, P15, P16,P17 */
     GPIO_PORT2_PIN_MASK = 0x80,    /* Available pins: P27               */
     GPIO_PORT3_PIN_MASK = 0x20,    /* Available pins: P35               */
     GPIO_PORT4_PIN_MASK = 0x06,    /* Available pins: P41, P42          */
-    GPIO_PORT5_PIN_MASK = 0x00,    /* Available pins: None              */
     GPIO_PORTA_PIN_MASK = 0x58,    /* Available pins: PA3, PA4, PA6     */
     GPIO_PORTB_PIN_MASK = 0x09,    /* Available pins: PB0, PB3          */
     GPIO_PORTC_PIN_MASK = 0x10,    /* Available pins: PC4               */
     GPIO_PORTE_PIN_MASK = 0x1F,    /* Available pins: PE0 to PE4        */
-    GPIO_PORTH_PIN_MASK = 0x00,    /* Available pins: None              */
     GPIO_PORTJ_PIN_MASK = 0xC0,    /* Available pins: PJ6, PJ7          */
 } gpio_pin_bit_mask_t;
 

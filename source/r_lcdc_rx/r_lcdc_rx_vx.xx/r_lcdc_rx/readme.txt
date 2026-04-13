@@ -5,12 +5,12 @@ r_lcdc_rx
 
 Document Number
 ---------------
-R01AN1980JJ0101
-R01AN1980EJ0101
+R01AN1980JJ0201
+R01AN1980EJ0201
 
 Version
 -------
-v1.01
+v2.01
 
 Overview
 --------
@@ -32,10 +32,12 @@ switched.
 Supported MCUs
 --------------
 * RX113 Group
+* RX23E-B Grop
 
 Boards Tested On
 ----------------
 * RSKRX113
+* RSSKRX23E-B
 
 Limitations
 -----------
@@ -47,7 +49,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp     v5.20
+* r_bsp     v7.40
 
 How to add to your project
 --------------------------
@@ -87,14 +89,14 @@ The LCDC module uses the r_bsp package for certain MCU information
 and support functions. The r_bsp package is easily configured through the platform.h header file 
 which is located in the r_bsp folder. To configure the r_bsppackage, open up platform.h and uncomment the #include for the board you are using.
 For example, to run the demo on a RSKRX111 board, the user would uncomment the #include for 
-Åe./board/rskrx111/r_bsp.hÅf macro and make sure all other board #includes are commented out.
+'./board/rskrx111/r_bsp.h' macro and make sure all other board #includes are commented out.
 
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.01.00
-* GCC for Renesas RX 4.8.4.201801
-* IAR C/C++ Compiler for Renesas RX version 4.10.1
+* Renesas RX v3.07.00
+* GCC for Renesas RX 8.03.00.202411
+* IAR C/C++ Compiler for Renesas RX version 5.10.1
 
 
 File Structure
@@ -105,22 +107,14 @@ r_lcdc_rx
 |
 +---doc
 |   +---en
-|   |   r01an1980ej0101-rx113-lcdc.pdf
+|   |   r01an1980ej{VERSION_NUMBER}-rx-lcdc.pdf
 |   |
 |   +---ja
-|       r01an1980jj0101-rx113-lcdc.pdf
-|
-+---ref
-|       r_lcdc_config_reference.h
+|       r01an1980jj{VERSION_NUMBER}-rx-lcdc.pdf
 |
 +---src
-    |
-    +---targets
-        |
-        |
-        +---rx113
-              r_lcdc_rx.c
-              r_lcdc_rx_private.h
+      r_lcdc_rx.c
+      r_lcdc_rx_private.h
 
 r_config
     r_lcdc_rx_config.h

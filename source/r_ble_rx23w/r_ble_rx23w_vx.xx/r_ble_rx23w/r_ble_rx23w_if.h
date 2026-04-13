@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2019-2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
 * File Name    : r_ble_rx23w_if.h
@@ -26,6 +13,17 @@
 *         : 23.08.2019 1.00    First Release
 *         : 31.10.2019 1.01    Add comments about the BD_ADDR format.
 *         : 26.12.2019 1.10    Add macros for interrupt function and section.
+*         : 15.05.2020 1.20    Add R_BLE_VS_SetScanChMap()/R_BLE_VS_GetScanChMap() API.
+*         : 10.07.2020 2.00    Update to BLE FIT module v2.00.
+*         : 24.12.2020 2.10    Update to BLE FIT module v2.10.
+*         : 30.03.2021 2.11    Update to BLE FIT module v2.11.
+*         : 30.06.2021 2.20    Update to BLE FIT module v2.20.
+*         : 15.10.2021 2.30    Update to BLE FIT module v2.30.
+*         : 15.04.2022 2.31    Update to BLE FIT module v2.31.
+*         : 30.06.2022 2.40    Update to BLE FIT module v2.40.
+*         : 27.12.2022 2.50    Update to BLE FIT module v2.50.
+*         : 17.05.2024 2.60    Update to BLE FIT module v2.60.
+*         : 31.03.2025 2.61    Update to BLE FIT module v2.61.
 ***********************************************************************************************************************/
 
 /*******************************************************************************************************************//**
@@ -81,13 +79,13 @@
  * @def BLE_VERSION_MAJOR
  * BLE Module Major Version.
  */
-#define BLE_VERSION_MAJOR                                               (1)
+#define BLE_VERSION_MAJOR                                               (2)
 
 /** 
  * @def BLE_VERSION_MINOR
  * BLE Module Minor Version.
  */
-#define BLE_VERSION_MINOR                                               (10)
+#define BLE_VERSION_MINOR                                               (61)
 
 /** 
  * @def BLE_LIB_ALL_FEATS
@@ -554,9 +552,17 @@ typedef enum {
 
 /** 
  * @def BLE_GAP_WHITE_LIST_MAX_ENTRY
- * @brief The maximum entry number of White List.
+ * @brief The maximum entry number of White List. \n
+ *        The value changes depending on the BLE Protocol Stack library type.\n
+ *        All Features        : 4 \n
+ *        Balance and Compact : 8 \n
  */
+#if (BLE_CFG_LIB_TYPE == 0)
 #define BLE_GAP_WHITE_LIST_MAX_ENTRY                                    (0x04)
+#else /* (BLE_CFG_LIB_TYPE == 0) */
+#define BLE_GAP_WHITE_LIST_MAX_ENTRY                                    (0x08)
+#endif /* (BLE_CFG_LIB_TYPE == 0) */
+
 /** 
  * @def BLE_GAP_RSLV_LIST_MAX_ENTRY
  * @brief The maximum entry number of Resolving List.
@@ -1209,6 +1215,49 @@ typedef enum {
  * @brief GATT Attribute Handle End Range.
  */
 #define BLE_GATT_ATTR_HDL_END_RANGE                                     (0xFFFF)
+
+/* GATT Characteristic Properties */
+
+/** 
+ * @def BLE_GATT_CHAR_PROP_BROADCAST
+ * @brief Broadcast Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_BROADCAST                                    (0x01)
+/** 
+ * @def BLE_GATT_CHAR_PROP_READ
+ * @brief Read Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_READ                                         (0x02)
+/** 
+ * @def BLE_GATT_CHAR_PROP_WRITE_WITHOUT_RESP
+ * @brief Write Without Response Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_WRITE_WITHOUT_RESP                           (0x04)
+/** 
+ * @def BLE_GATT_CHAR_PROP_WRITE
+ * @brief Write Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_WRITE                                        (0x08)
+/** 
+ * @def BLE_GATT_CHAR_PROP_NOTIFY
+ * @brief Notify Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_NOTIFY                                       (0x10)
+/** 
+ * @def BLE_GATT_CHAR_PROP_INDICATE
+ * @brief Indicate Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_INDICATE                                     (0x20)
+/** 
+ * @def BLE_GATT_CHAR_PROP_AUTH_SIGN_WRITES
+ * @brief Authenticated Signed Writes Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_AUTH_SIGN_WRITES                             (0x40)
+/** 
+ * @def BLE_GATT_CHAR_PROP_EXT_PROP
+ * @brief Extended Properties Characteristic Property.
+ */
+#define BLE_GATT_CHAR_PROP_EXT_PROP                                     (0x80)
 
 
 /* GATT Server Macro */
@@ -2940,8 +2989,8 @@ typedef struct
     uint8_t o_addr_type;
 
     /**
-     *  @brief Random address set to the advertising set, when the o_addr_type field is BLE_GAP_ADDR_RAND.
-     *  @details When the o_addr_type field is other than BLE_GAP_ADDR_RAND, this field is ignored.
+     *  @brief Random address set to the advertising set, when the o_addr_type field is BLE_GAP_ADDR_RAND or BLE_GAP_ADDR_RPA_ID_RANDOM.
+     *  @details When the o_addr_type field is other than BLE_GAP_ADDR_RAND or BLE_GAP_ADDR_RPA_ID_RANDOM, this field is ignored.
      *  @note   The BD address setting format is little endian. \n
      *          If the address is "AA:BB:CC:DD:EE:FF", set the byte array in the order 
      *          {0xFF, 0xEE, 0xDD, 0xCC, 0xBB, 0xAA}.
@@ -3452,7 +3501,7 @@ typedef struct
  * 
  * Set the fields in this structure to match the following condition.
  * 
- * Supervision_timeout(ms) >= (1 + conn_latency) * conn_intv_max_Time(ms)
+ * Supervision_timeout(ms) > (1 + conn_latency) * conn_intv_max_Time(ms) * 2
  * 
  *  conn_intv_max_Time(ms) = conn_intv_max * 1.25 
  *  Supervision_timeout(ms) = sup_to * 10
@@ -5794,7 +5843,7 @@ typedef enum
      *                  <td>
      *                      The reason for this error is as follows.<BR/>
      *                      - Advertising parameters were configured to the advertising set in advertising.<BR/>
-     *                      - The sec_adv_phy field in adv_paran was not specified 
+     *                      - The sec_adv_phy field in adv_param was not specified 
      *                        when Periodic Advertising was started.
      *                  </td>
      *              </tr>
@@ -9505,6 +9554,18 @@ typedef struct
 } st_ble_vs_evt_data_t;
 
 /******************************************************************************************************************//**
+ *  @struct st_ble_vs_get_scan_ch_map_comp_evt_t
+ *  @brief  This structure notifies that current scan channel map.
+ **********************************************************************************************************************/
+typedef struct
+{
+    /**
+     *  @brief The result of current scan channel map.
+     */
+    uint8_t ch_map;
+} st_ble_vs_get_scan_ch_map_comp_evt_t;
+
+/******************************************************************************************************************//**
  * @typedef ble_vs_app_cb_t
  * @brief   ble_vs_app_cb_t is the Vendor Specific Event callback function type.
  * @param[in] event_type    The type of Vendor Specific Event.
@@ -9827,6 +9888,48 @@ typedef enum
      */
     BLE_VS_EVENT_FAIL_DETECT             = 0x800D,
     /**
+     *  @brief This event notifies that scan channel map has been set by R_BLE_VS_SetScanChMap().
+     * 
+     * ## <u>Event Code</u>: 0x800E
+     * 
+     *  ## <u>result</u>: 
+     *  <dl class="retval"><dd>
+     *          <table class="retval">
+     *              <tr>
+     *                  <td class="paramname">BLE_SUCCESS(0x0000)</td>
+     *                  <td>Success </td>
+     *              </tr>
+     *              <tr>
+     *                  <td class="paramname">BLE_ERR_INVALID_ARG(0x0003)</td>
+     *                  <td>The ch_map parameter specified by R_BLE_VS_SetScanChMap() is out of range.</td>
+     *              </tr>
+     *          </table>
+     *  </dd></dl>
+     * 
+     *  ## <u>Event Data</u>:
+     *  none
+     */
+    BLE_VS_EVENT_SET_SCAN_CH_MAP          = 0x800E,
+    /**
+     *  @brief This event notifies that scan channel map has been retrieved by R_BLE_VS_GetScanChMap().
+     * 
+     * ## <u>Event Code</u>: 0x800F
+     * 
+     *  ## <u>result</u>: 
+     *  <dl class="retval"><dd>
+     *          <table class="retval">
+     *              <tr>
+     *                  <td class="paramname">BLE_SUCCESS(0x0000)</td>
+     *                  <td>Success </td>
+     *              </tr>
+     *          </table>
+     *  </dd></dl>
+     * 
+     *  ## <u>Event Data</u>:
+     *  st_ble_vs_get_scan_ch_map_comp_evt_t
+     */
+    BLE_VS_EVENT_GET_SCAN_CH_MAP          = 0x800F,
+    /**
      *  @brief  Invalid VS Event.
      * 
      * ## <u>Event Code</u>: 0x80FF
@@ -10097,9 +10200,12 @@ ble_status_t R_BLE_GAP_UpdConn(uint16_t conn_hdl,
  * @param[in] conn_hdl  Connection handle identifying the link whose the transmission packet size or 
  *                      the transmission time to be changed.
  * @param[in] tx_octets Maximum transmission packet size.
- *                      Valid range is 0x001B - 0x00FB.
+ *                      Valid range is 0x001B - BLE_CFG_RF_CONN_DATA_MAX.
  * @param[in] tx_time   Maximum transmission time(us). 
- *                     Valid range is 0x0148 - 0x4290.
+ *                      It is recommended that you set the tx_time to the maximum value.
+ *                      Valid range changes depending on the BLE Protocol Stack library type.
+ *                      All Features and Balance     : 0x0148 - 0x4290
+ *                      Compact                      : 0x0148 - 0x0848
  * @retval  BLE_SUCCESS(0x0000) Success 
  * @retval  BLE_ERR_INVALID_STATE(0x0008) The task for host stack is not running. 
  * @retval  BLE_ERR_MEM_ALLOC_FAILED(0x000C) Insufficient memory is needed to generate this function. 
@@ -10226,7 +10332,7 @@ ble_status_t R_BLE_GAP_SetPrivMode(st_ble_dev_addr_t * p_addr,
  *                    The number of elements is specified by device_num.
  *                    If op_code is BLE_GAP_LIST_CLR, p_addr is ignored. 
  * @param[in]  device_num The number of devices add / delete to the list.
- *                        Valid range is 1-BLE_GAP_WHITE_LIST_MAX_ENTRY.
+ *                        Valid range is 1 - 4.
  *                        If op_code is BLE_GAP_LIST_CLR, device_num is ignored.
  * @retval  BLE_SUCCESS(0x0000) Success 
  * @retval  BLE_ERR_INVALID_PTR(0x0001) When op_code is BLE_GAP_LIST_ADD_DEV or BLE_GAP_LIST_REM_DEV, 
@@ -10519,6 +10625,8 @@ ble_status_t R_BLE_GAP_SetAdvSresData(st_ble_gap_adv_data_t * p_adv_srsp_data);
  *              When the duration expires, BLE_GAP_EVENT_ADV_OFF event notifies that advertising is stopped.
  *              The valid range is 0x0000 - 0xFFFF.
  *              The duration parameter is ignored when the value is set to 0x0000.
+ *              Note: If you have specified high duty cycle connectable directed advertising, 
+ *                    the duration shall be set in the range 0x0001 - 0x0080.
  * @param[in]   max_extd_adv_evts 
  *              The maximum number of advertising events that be sent during advertising.
  *              When all the advertising events(max_extd_adv_evts) have been sent, 
@@ -10654,7 +10762,7 @@ ble_status_t R_BLE_GAP_RemoveAdvSet(uint8_t op_code, uint8_t adv_hdl);
  *                                        in p_conn_param_1M field in p_param is specified as NULL.
  *                                      - When creating a link with 2M PHY, 
  *                                        p_conn_param in p_conn_param_2M field in p_param is specified as NULL.
- *                                      - When creating a link with coded MPHY, 
+ *                                      - When creating a link with coded PHY, 
  *                                        p_conn_param in p_conn_param_coded field in p_param is specified as NULL.
  * @retval  BLE_ERR_INVALID_ARG(0x0003) The reason for this error is as follows:
  *                                      - init_filter_policy in p_param is out of range.
@@ -12453,6 +12561,31 @@ ble_status_t R_BLE_VS_GetTxBufferNum(uint32_t * p_buffer_num);
  * @retval  BLE_ERR_INVALID_ARG(0x0003) The tx_queue_lwm parameter or the tx_queue_hwm parameter is out of range.
  **********************************************************************************************************************/
 ble_status_t R_BLE_VS_SetTxLimit(uint32_t tx_queue_lwm, uint32_t tx_queue_hwm);
+/******************************************************************************************************************//**
+ * @fn ble_status_t R_BLE_VS_SetScanChMap(uint16_t ch_map)
+ * @brief    This function sets the scan channel map.
+ * @details  Set specify the scan channel for use.\n
+ *           At least one channel must be enabled.
+ * @note     Calling this API while Scan is already running will not change the channel map.
+ * @param[in] ch_map  Specify the channel map for use.
+ *        | bit            |   description                                      |
+ *        |:-------------- |:-------------------------------------------------- |
+ *        | bit0           | Enable channel 37 for use (0:disable, 1:enable)    |
+ *        | bit1           | Enable channel 38 for use (0:disable, 1:enable)    |
+ *        | bit2           | Enable channel 39 for use (0:disable, 1:enable)    |
+ *        | All other bits | Reserved for future use.                           |
+ * @retval  BLE_SUCCESS(0x0000) Success 
+ * @retval  BLE_ERR_INVALID_ARG(0x0003) The ch_map parameter is out of range.
+ **********************************************************************************************************************/
+ble_status_t R_BLE_VS_SetScanChMap(uint16_t ch_map);
+/******************************************************************************************************************//**
+ * @fn ble_status_t R_BLE_VS_GetScanChMap(void)
+ * @brief    This function gets currently scan channel map.
+ * @details  The result of this API call is notified in BLE_VS_EVENT_GET_SCAN_CH_MAP event.
+ * @param   void
+ * @retval  BLE_SUCCESS(0x0000) Success 
+ **********************************************************************************************************************/
+ble_status_t R_BLE_VS_GetScanChMap(void);
 
 /*@}*/
 
@@ -12469,9 +12602,9 @@ ble_status_t R_BLE_VS_SetTxLimit(uint32_t tx_queue_lwm, uint32_t tx_queue_hwm);
  *  so if HCI defines HCI_PACK_2_BYTE for packing a parameter of size 2 byte,
  *  that shall be mapped to BT_PACK_LE_2_BYTE
  *
- *  By default both the packing and unpaking macros uses pointer to
+ *  By default both the packing and unpacking macros uses pointer to
  *  a single or multi-octet variable which to be packed to or unpacked from
- *  a buffer (unsinged character array).
+ *  a buffer (unsigned character array).
  *
  *  For the packing macro, another variation is available,
  *  where the single or multi-octet variable itself is used (not its pointer).
@@ -12706,10 +12839,15 @@ ble_status_t R_BLE_VS_SetTxLimit(uint32_t tx_queue_lwm, uint32_t tx_queue_hwm);
 
 #define BLE_SECTION_CHANGE(...)                                R_BLE_ATTRIB_SECTION_CHANGE(__VA_ARGS__)
 #define BLE_SECTION_CHANGE_P(...)                              R_BLE_ATTRIB_SECTION_CHANGE(__VA_ARGS__)
-#else /* __ICCRX__ */
+#else /* defined(__ICCRX__) && !defined(DISBALE_BLE_SECTION)  */
+#if !(defined(__CCRX__) && defined(__cplusplus))
 #define BLE_SECTION_CHANGE(...)
-#define BLE_SECTION_CHANGE_P(...) 
-#endif /* __ICCRX__ */
+#define BLE_SECTION_CHANGE_P(...)
+#else /* !(defined(__CCRX__) && defined(__cplusplus)) */
+#define BLE_SECTION_CHANGE(x, y, z)
+#define BLE_SECTION_CHANGE_P(x, y)
+#endif /* !(defined(__CCRX__) && defined(__cplusplus)) */
+#endif /* defined(__ICCRX__) && !defined(DISBALE_BLE_SECTION)  */
 
 #if defined(__CCRX__) || defined(__ICCRX__)
 #define BLE_NOP()      R_BSP_NOP() 

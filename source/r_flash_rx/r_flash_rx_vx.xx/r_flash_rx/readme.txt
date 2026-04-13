@@ -5,12 +5,12 @@ r_flash_rx
 
 Document Number 
 ---------------
-r01an2184ej0450
-r01an2184jj0450
+r01an2184ej0530
+r01an2184jj0530
 
 Version
 -------
-v4.50
+v5.30
 
 Overview
 --------
@@ -38,17 +38,24 @@ Supported MCUs
 * RX113 Group
 * RX130 Group
 * RX13T Group
+* RX140 Group
+* RX14T Group
 * RX230 Group
 * RX231 Group
 * RX23E-A Group
+* RX23E-B Group
 * RX23T Group
 * RX23W Group
 * RX24T Group
 * RX24U Group
+* RX260, RX261 Group
+* RX26T Group
 * RX64M Group
 * RX651, RX65N Group
+* RX660 Group
 * RX66N Group
 * RX66T Group
+* RX671 Group
 * RX71M Group
 * RX72M Group
 * RX72N Group
@@ -62,16 +69,23 @@ Boards Tested On
 * RSKRX113
 * RSKRX130
 * RX13T CPU Card
+* RX140 Target Board
+* MCB-RX14T
 * RSKRX231
 * RSSKRX23E-A
+* RSSKRX23E-B
 * RSKRX23T
 * RSSKRX23W
 * RSKRX24T
 * RSKRX24U
+* RX261 EK Board
+* MCK-RX26T
 * RSKRX64M
 * RSKRX65N
 * RSKRX65N-2MB
+* RSKRX660
 * RSKRX66T
+* RSKRX671
 * RSKRX71M
 * RSKRX72M
 * RSKRX72N
@@ -94,7 +108,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp      V5.50
+* r_bsp      V7.70
 
 How to add to your project
 --------------------------
@@ -125,9 +139,9 @@ How to add to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RXC 3.01.00
-* GNU GNURX 4.08.04.201902
-* IAR ICCRX 4.12.01
+* Renesas RXC 3.07.00
+* GNU GNURX 14.2.0.202505
+* IAR ICCRX 5.20.01
 
 
 File Structure
@@ -138,9 +152,9 @@ r_flash_rx
 |
 +---doc
 |   +-- en
-|   |   +-- r01an2184ej0450-rx-flash.pdf
+|   |   +-- r01an2184ej0530-rx-flash.pdf
 |   +-- ja
-|       +-- r01an2184jj0450-rx-flash.pdf
+|       +-- r01an2184jj0530-rx-flash.pdf
 |
 +---ref
 |   +-- r_flash_rx_config_reference.h
@@ -152,19 +166,14 @@ r_flash_rx
     +-- r_flash_group.h
     +-- r_flash_fcu.c
     +-- r_flash_fcu.h
+    +-- r_flash_nofcu.c
+    +-- r_flash_nofcu.h
+    +-- r_flash_targets.h
     |
     +-- flash_type_1
         |
-        +-- r_codeflash_extra.c
-        +-- r_codeflash_extra.h
-        +-- r_codeflash.c
-        +-- r_codeflash.h
-        +-- r_dataflash.c
-        +-- r_dataflash.h
-        +-- r_flash_common.h 
         +-- r_flash_type1.c
         +-- r_flash_type1_if.h
-        +-- r_flash_utils.c 
     |
     +-- flash_type_3
         |
@@ -175,6 +184,11 @@ r_flash_rx
         |
         +--r_flash_type4.c
         +--r_flash_type4_if.h
+    |
+    +-- flash_type_5
+        |
+        +--r_flash_type5.c
+        +--r_flash_type5_if.h
     |
     +-- targets
         |
@@ -193,11 +207,20 @@ r_flash_rx
         +--rx13t
              +-- r_flash_rx13t.h
         |
+        +--rx140
+             +-- r_flash_rx140.h
+        |
+        +--rx14t
+             +-- r_flash_rx14t.h
+        |
         +--rx231
              +-- r_flash_rx231.h
         |
         +--rx23e-a
              +-- r_flash_rx23e-a.h
+        |
+        +--rx23e-b
+             +-- r_flash_rx23e-b.h
         |
         +--rx23t
              +-- r_flash_rx23t.h
@@ -211,17 +234,32 @@ r_flash_rx
         +--rx24u
              +-- r_flash_rx24u.h
         |
+        +--rx260
+             +-- r_flash_rx260.h
+        |
+        +--rx261
+             +-- r_flash_rx261.h
+        |
+        +--rx26t
+             +-- r_flash_rx26t.h
+        |
         +--rx64m
              +-- r_flash_rx64m.h
         |
         +--rx65n
              +-- r_flash_rx65n.h
         |
+        +--rx660
+             +-- r_flash_rx660.h
+        |
         +--rx66n
              +-- r_flash_rx66n.h
         |
         +--rx66t
              +-- r_flash_rx66t.h
+        |
+        +--rx671
+             +-- r_flash_rx671.h
         |
         +--rx71m
              +-- r_flash_rx71m.h

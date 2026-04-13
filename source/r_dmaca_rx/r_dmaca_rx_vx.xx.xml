@@ -1,22 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
-* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
-* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
-* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
-* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
-* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
-* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2014 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 -->
 <refinfo>
@@ -31,12 +18,27 @@
         <version>2.07.00</version>
         <version>3.00.00</version>
         <version>3.01.00</version>
+        <version>3.02.00</version>
+        <version>3.03.00</version>
+        <version>3.04.00</version>
+        <version>3.05.00</version>
+        <version>3.06.00</version>
+        <version>3.07.00</version>
     </toolchain>
     <toolchain>
         <brand>GNU</brand>
         <product>GNURX</product>
         <version>4.08.04.201803</version>
         <version>4.08.04.201902</version>
+        <version>8.03.00.201904</version>
+        <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202104</version>
+        <version>8.03.00.202202</version>
+        <version>8.03.00.202204</version>
+        <version>8.03.00.202311</version>
+        <version>8.03.00.202405</version>
+        <version>8.03.00.202411</version>
     </toolchain>
     <toolchain>
         <brand>IAR</brand>
@@ -45,6 +47,10 @@
         <version>4.10.01</version>
         <version>4.11.01</version>
         <version>4.12.01</version>
+        <version>4.14.01</version>
+        <version>4.20.01</version>
+        <version>4.20.03</version>
+        <version>5.10.01</version>
     </toolchain>
 
     <!-- only one target entry allowed; multiple sub tags permitted -->
@@ -55,11 +61,18 @@
         <series>RX700</series>
         <group omit_board="true">RX230</group>
         <group omit_board="true">RX231</group>
+        <group omit_board="true">RX23E-A</group>
+        <group omit_board="true">RX23E-B</group>
         <group omit_board="true">RX23W</group>
+        <group omit_board="true">RX260</group>
+        <group omit_board="true">RX261</group>
+        <group omit_board="true">RX26T</group>
         <group omit_board="true">RX64M</group>
         <group omit_board="true">RX65N</group>
         <group omit_board="true">RX66N</group>
         <group omit_board="true">RX66T</group>
+        <group omit_board="true">RX660</group>
+        <group omit_board="true">RX671</group>
         <group omit_board="true">RX71M</group>
         <group omit_board="true">RX72T</group>
         <group omit_board="true">RX72M</group>
@@ -71,11 +84,11 @@
     <package>
         <type>fitmodule</type>
         <name>r_dmaca_rx</name>
-        <version>2.30</version>
-        <zipsource>r_dmaca_rx_v2.30.zip</zipsource>
+        <version>x.xx</version>
+        <zipsource>r_dmaca_rx_vx.xx.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>5.50</version>
+            <version>7.60</version>
         </dependency>
         <application>dmaca</application>
         <desc>DMAC driver</desc>

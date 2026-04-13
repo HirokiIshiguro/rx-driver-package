@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2014 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_cmtw_rx.c
@@ -34,6 +21,9 @@
 *                              Modified comment of API function to Doxygen style.
 *                              Added support for atomic control.
 *                              Removed support for Generation 1 devices.
+*         : 15.08.2022 2.80    Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 2.90    Added support Nested Interrupt.
+*         : 15.03.2025 2.91    Updated disclaimer.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -175,12 +165,12 @@ cmtw_prv_ch_ctrl_info_t * const g_cmtw_handles[] =
 };
 
 static const uint32_t g_cmtw_clock_divisors[] = {8, 32, 128, 512};
-static const float g_cmtw_time_units[] = {1e-9, 1e-6, 1e-3, 1};
+static const float    g_cmtw_time_units[]     = {1e-9, 1e-6, 1e-3, 1};
 
-static void power_on(cmtw_prv_ch_ctrl_info_t  * const hdl);
-static void power_off(cmtw_prv_ch_ctrl_info_t  * const hdl);
-static uint32_t calculate_count(cmtw_time_unit_t time_unit, cmtw_clock_divisor_t clock_divisor, uint32_t time);
-static void cmtw_isr_common(cmtw_event_t event, uint32_t count, cmtw_prv_ch_ctrl_info_t * const hdl);
+static void     power_on (cmtw_prv_ch_ctrl_info_t  * const hdl);
+static void     power_off (cmtw_prv_ch_ctrl_info_t  * const hdl);
+static uint32_t calculate_count (cmtw_time_unit_t time_unit, cmtw_clock_divisor_t clock_divisor, uint32_t time);
+static void     cmtw_isr_common (cmtw_event_t event, uint32_t count, cmtw_prv_ch_ctrl_info_t * const hdl);
 
 /***********************************************************************************************************************
 * Function Name: R_CMTW_Open
@@ -210,8 +200,8 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
                           cmtw_channel_settings_t *pconfig,
                           void                    (* const pcallback)(void *pdata))
 {
-    cmtw_prv_ch_ctrl_info_t *hdl;
-    uint32_t                count;
+    cmtw_prv_ch_ctrl_info_t * hdl;
+    uint32_t                  count;
 
 
 #if CMTW_CGF_REQUIRE_LOCK == 1
@@ -222,21 +212,21 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
     /* Parameter check - channel */
     if (CMTW_CHANNEL_MAX <= channel)
     {
-        return(CMTW_ERR_BAD_CHAN);
+        return (CMTW_ERR_BAD_CHAN);
     }
 
     /* Parameter check - pconfig */
     if ((NULL == (void *)pconfig) || (FIT_NO_FUNC == (void (*)(void *))pconfig))
     {
-        return(CMTW_ERR_NULL_PTR);
+        return (CMTW_ERR_NULL_PTR);
     }
 
     /* Parameter check - time unit, clock divisor, clear source */
-    if ((CMTW_TIME_MAX <= pconfig->time_unit) ||
+    if ((CMTW_TIME_MAX    <= pconfig->time_unit) ||
         (CMTW_CLK_DIV_MAX <= pconfig->clock_divisor) ||
-        (CMTW_CLR_MAX <= pconfig->clear_source) || (2 == pconfig->clear_source) || (3 == pconfig->clear_source))
+        (CMTW_CLR_MAX     <= pconfig->clear_source) || (2 == pconfig->clear_source) || (3 == pconfig->clear_source))
     {
-        return(CMTW_ERR_INVALID_ARG);
+        return (CMTW_ERR_INVALID_ARG);
     }
 
     /* Parameter check - compare match */
@@ -248,7 +238,7 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
             /* Return CMTW_ERR_NULL_PTR if NULL or FIT_NO_FUNC */
             if ((NULL == pcallback) || (FIT_NO_FUNC == pcallback))
             {
-                return(CMTW_ERR_NULL_PTR);
+                return (CMTW_ERR_NULL_PTR);
             }
         }
     }
@@ -262,7 +252,7 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
             /* Return CMTW_ERR_NULL_PTR if NULL or FIT_NO_FUNC */
             if ((NULL == pcallback) || (FIT_NO_FUNC == pcallback))
             {
-                return(CMTW_ERR_NULL_PTR);
+                return (CMTW_ERR_NULL_PTR);
             }
         }
 
@@ -302,9 +292,9 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
         {
             /* Return CMTW_ERR_NULL_PTR if NULL or FIT_NO_FUNC */
             if ((NULL == pcallback) || (FIT_NO_FUNC == pcallback))
-             {
-                 return (CMTW_ERR_NULL_PTR);
-             }
+                {
+                    return (CMTW_ERR_NULL_PTR);
+                }
         }
 
         /* Check parameters */
@@ -322,9 +312,9 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
         {
             /* Return CMTW_ERR_NULL_PTR if NULL or FIT_NO_FUNC */
             if ((NULL == pcallback) || (FIT_NO_FUNC == pcallback))
-             {
-                 return (CMTW_ERR_NULL_PTR);
-             }
+                {
+                    return (CMTW_ERR_NULL_PTR);
+                }
         }
 
         /* Check parameters */
@@ -341,7 +331,7 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
 
     if (false == lock_result)
     {
-        return(CMTW_ERR_LOCK);
+        return (CMTW_ERR_LOCK);
     }
 #endif
 
@@ -372,9 +362,9 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
     power_on(hdl);
 
     /* Set clock divisor, counter clear-source, 32-bit operation */
-    hdl->rom->regs->CMWCR.BIT.CKS = pconfig->clock_divisor;
+    hdl->rom->regs->CMWCR.BIT.CKS  = pconfig->clock_divisor;
     hdl->rom->regs->CMWCR.BIT.CCLR = pconfig->clear_source;
-    hdl->rom->regs->CMWCR.BIT.CMS = 0;
+    hdl->rom->regs->CMWCR.BIT.CMS  = 0;
 
     /* Save the callback */
     hdl->pcallback = pcallback;
@@ -396,7 +386,7 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
             R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_CMTW0 + (uint8_t)channel));
 #endif
             R_CMTW_Close(channel);
-            return(CMTW_ERR_OUT_OF_RANGE);
+            return (CMTW_ERR_OUT_OF_RANGE);
         }
 
         /* Set the compare match count */
@@ -411,8 +401,8 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
             hdl->cm_action = pconfig->cm_timer.actions;
 
             /* Clear ICU interrupt request, set level, and enable it */
-            *hdl->rom->ir_cm = 0;
-            *hdl->rom->ipr_cm = hdl->rom->cm_priorty;
+            *hdl->rom->ir_cm     = 0;
+            *hdl->rom->ipr_cm    = hdl->rom->cm_priorty;
             (*hdl->rom->ier_cm) |= hdl->rom->cm_enable_mask;
 
             /* Enable compare match interrupt */
@@ -439,7 +429,7 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
             R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_CMTW0 + (uint8_t)channel));
 #endif
             R_CMTW_Close(channel);
-            return(CMTW_ERR_OUT_OF_RANGE);
+            return (CMTW_ERR_OUT_OF_RANGE);
         }
 
         /* Set the output compare count */
@@ -457,8 +447,8 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
             hdl->oc0_action = pconfig->oc_timer_0.actions;
 
             /* Clear ICU interrupt request, set level, and enable it */
-            *hdl->rom->ir_oc0 = 0;
-            *hdl->rom->ipr_oc0 = hdl->rom->oc0_priorty;
+            *hdl->rom->ir_oc0     = 0;
+            *hdl->rom->ipr_oc0    = hdl->rom->oc0_priorty;
             (*hdl->rom->ier_oc0) |= hdl->rom->oc0_enable_mask;
 
             /* Enable output compare 0 interrupt */
@@ -485,7 +475,7 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
             R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_CMTW0 + (uint8_t)channel));
 #endif
             R_CMTW_Close(channel);
-            return(CMTW_ERR_OUT_OF_RANGE);
+            return (CMTW_ERR_OUT_OF_RANGE);
         }
 
         /* Set the output compare count */
@@ -503,8 +493,8 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
             hdl->oc1_action = pconfig->oc_timer_1.actions;
 
             /* Clear ICU interrupt request, set level, and enable it */
-            *hdl->rom->ir_oc1 = 0;
-            *hdl->rom->ipr_oc1 = hdl->rom->oc1_priorty;
+            *hdl->rom->ir_oc1     = 0;
+            *hdl->rom->ipr_oc1    = hdl->rom->oc1_priorty;
             (*hdl->rom->ier_oc1) |= (hdl->rom->oc1_enable_mask);
 
             /* Enable output compare 0 interrupt */
@@ -530,8 +520,8 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
             hdl->ic0_action = pconfig->ic_timer_0.actions;
 
             /* Clear ICU interrupt request, set level, and enable it */
-            *hdl->rom->ir_ic0 = 0;
-            *hdl->rom->ipr_ic0 = hdl->rom->ic0_priorty;
+            *hdl->rom->ir_ic0     = 0;
+            *hdl->rom->ipr_ic0    = hdl->rom->ic0_priorty;
             (*hdl->rom->ier_ic0) |= hdl->rom->ic0_enable_mask;
 
             /* Enable input capture 0 interrupt */
@@ -557,8 +547,8 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
             hdl->ic1_action = pconfig->ic_timer_1.actions;
 
             /* Clear ICU interrupt request, set level, and enable it */
-            *hdl->rom->ir_ic1 = 0;
-            *hdl->rom->ipr_ic1 = hdl->rom->ic1_priorty;
+            *hdl->rom->ir_ic1     = 0;
+            *hdl->rom->ipr_ic1    = hdl->rom->ic1_priorty;
             (*hdl->rom->ier_ic1) |= hdl->rom->ic1_enable_mask;
 
             /* Enable input capture 1 interrupt */
@@ -574,7 +564,7 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
     R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_CMTW0 + (uint8_t)channel));
 #endif
 
-    return(CMTW_SUCCESS);
+    return (CMTW_SUCCESS);
 } /* End of function R_CMTW_Open() */
 
 /***********************************************************************************************************************
@@ -594,7 +584,7 @@ cmtw_err_t    R_CMTW_Open(cmtw_channel_t          channel,
 */
 cmtw_err_t    R_CMTW_Close(cmtw_channel_t    channel)
 {
-    cmtw_prv_ch_ctrl_info_t *hdl;
+    cmtw_prv_ch_ctrl_info_t * hdl;
 
 #if CMTW_CGF_REQUIRE_LOCK == 1
     bool lock_result;
@@ -614,7 +604,7 @@ cmtw_err_t    R_CMTW_Close(cmtw_channel_t    channel)
 
     if (false == lock_result)
     {
-        return(CMTW_ERR_LOCK);
+        return (CMTW_ERR_LOCK);
     }
 #endif
 
@@ -643,34 +633,34 @@ cmtw_err_t    R_CMTW_Close(cmtw_channel_t    channel)
 
     /* Clear all registers */
     hdl->rom->regs->CMWSTR.WORD = 0;
-    hdl->rom->regs->CMWCR.WORD = 0;
+    hdl->rom->regs->CMWCR.WORD  = 0;
     hdl->rom->regs->CMWIOR.WORD = 0;
-    hdl->rom->regs->CMWCNT = 0;
-    hdl->rom->regs->CMWCOR = 0;
-    hdl->rom->regs->CMWICR0 = 0;
-    hdl->rom->regs->CMWICR1 = 0;
-    hdl->rom->regs->CMWOCR0 = 0;
-    hdl->rom->regs->CMWOCR1 = 0;
+    hdl->rom->regs->CMWCNT      = 0;
+    hdl->rom->regs->CMWCOR      = 0;
+    hdl->rom->regs->CMWICR0     = 0;
+    hdl->rom->regs->CMWICR1     = 0;
+    hdl->rom->regs->CMWOCR0     = 0;
+    hdl->rom->regs->CMWOCR1     = 0;
 
     /* Clear ICU interrupts */
-    *hdl->rom->ir_cm = 0;
-    *hdl->rom->ipr_cm = 0;
+    *hdl->rom->ir_cm     = 0;
+    *hdl->rom->ipr_cm    = 0;
     (*hdl->rom->ier_cm) &= (~hdl->rom->cm_enable_mask);
 
-    *hdl->rom->ir_oc0 = 0;
-    *hdl->rom->ipr_oc0 = 0;
+    *hdl->rom->ir_oc0     = 0;
+    *hdl->rom->ipr_oc0    = 0;
     (*hdl->rom->ier_oc0) &= (~hdl->rom->oc0_enable_mask);
 
-    *hdl->rom->ir_oc1 = 0;
-    *hdl->rom->ipr_oc1 = 0;
+    *hdl->rom->ir_oc1     = 0;
+    *hdl->rom->ipr_oc1    = 0;
     (*hdl->rom->ier_oc1) &= (~hdl->rom->oc1_enable_mask);
 
-    *hdl->rom->ir_ic0 = 0;
-    *hdl->rom->ipr_ic0 = 0;
+    *hdl->rom->ir_ic0     = 0;
+    *hdl->rom->ipr_ic0    = 0;
     (*hdl->rom->ier_ic0) &= (~hdl->rom->ic0_enable_mask);
 
-    *hdl->rom->ir_ic1 = 0;
-    *hdl->rom->ipr_ic1 = 0;
+    *hdl->rom->ir_ic1     = 0;
+    *hdl->rom->ipr_ic1    = 0;
     (*hdl->rom->ier_ic1) &= (~hdl->rom->ic1_enable_mask);
 
     /* Change state to closed */
@@ -685,7 +675,7 @@ cmtw_err_t    R_CMTW_Close(cmtw_channel_t    channel)
 #endif
 
 
-    return(CMTW_SUCCESS);
+    return (CMTW_SUCCESS);
 }  /* End of function R_CMTW_Close() */
 
 /***********************************************************************************************************************
@@ -715,7 +705,7 @@ cmtw_err_t    R_CMTW_Close(cmtw_channel_t    channel)
 cmtw_err_t    R_CMTW_Control(cmtw_channel_t     channel,
                              cmtw_cmd_t         cmd)
 {
-    cmtw_prv_ch_ctrl_info_t *hdl;
+    cmtw_prv_ch_ctrl_info_t * hdl;
 
 #if CMTW_CGF_REQUIRE_LOCK == 1
     bool lock_result;
@@ -725,13 +715,13 @@ cmtw_err_t    R_CMTW_Control(cmtw_channel_t     channel,
     /* Parameter check - channel */
     if (CMTW_CHANNEL_MAX <= channel)
     {
-        return(CMTW_ERR_BAD_CHAN);
+        return (CMTW_ERR_BAD_CHAN);
     }
 
     /* Parameter check - cmd */
     if (CMTW_CMD_MAX <= cmd)
     {
-        return(CMTW_ERR_UNKNOWN_CMD);
+        return (CMTW_ERR_UNKNOWN_CMD);
     }
 #endif
 
@@ -741,7 +731,7 @@ cmtw_err_t    R_CMTW_Control(cmtw_channel_t     channel,
 
     if (false == lock_result)
     {
-        return(CMTW_ERR_LOCK);
+        return (CMTW_ERR_LOCK);
     }
 #endif
 
@@ -765,7 +755,7 @@ cmtw_err_t    R_CMTW_Control(cmtw_channel_t     channel,
         /* Release lock for this channel */
         R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_CMTW0 + (uint8_t)channel));
 #endif
-        return(CMTW_ERR_CH_NOT_OPENED);
+        return (CMTW_ERR_CH_NOT_OPENED);
     }
     else if (CMTW_PRV_CHANNEL_STATE_OPENED == hdl->state)
     {
@@ -803,27 +793,27 @@ cmtw_err_t    R_CMTW_Control(cmtw_channel_t     channel,
         case CMTW_CMD_RESUME:
             {
             hdl->rom->regs->CMWSTR.BIT.STR = 1;
-            hdl->state = CMTW_PRV_CHANNEL_STATE_RUNNING;
+            hdl->state                     = CMTW_PRV_CHANNEL_STATE_RUNNING;
             }
-        break;
+            break;
 
         /* Stop the timers of the this channel */
         case CMTW_CMD_STOP:
             {
             hdl->rom->regs->CMWSTR.BIT.STR = 0;
-            hdl->state = CMTW_PRV_CHANNEL_STATE_OPENED;
+            hdl->state                     = CMTW_PRV_CHANNEL_STATE_OPENED;
             }
-        break;
+            break;
 
         /* Clears the counter and starts the timers of this channel */
         case CMTW_CMD_RESTART:
             {
             hdl->rom->regs->CMWSTR.BIT.STR = 0;
-            hdl->rom->regs->CMWCNT = 0;
+            hdl->rom->regs->CMWCNT         = 0;
             hdl->rom->regs->CMWSTR.BIT.STR = 1;
-            hdl->state = CMTW_PRV_CHANNEL_STATE_RUNNING;
+            hdl->state                     = CMTW_PRV_CHANNEL_STATE_RUNNING;
             }
-        break;
+            break;
 
         default:
             {
@@ -831,9 +821,9 @@ cmtw_err_t    R_CMTW_Control(cmtw_channel_t     channel,
             /* Release lock for this channel */
             R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_CMTW0 + (uint8_t)channel));
 #endif
-            return(CMTW_ERR_UNKNOWN_CMD);
+            return (CMTW_ERR_UNKNOWN_CMD);
             }
-        break;
+            break;
     }
 
 #if CMTW_CGF_REQUIRE_LOCK == 1
@@ -841,7 +831,7 @@ cmtw_err_t    R_CMTW_Control(cmtw_channel_t     channel,
     R_BSP_HardwareUnlock((mcu_lock_t)(BSP_LOCK_CMTW0 + (uint8_t)channel));
 #endif
 
-    return(CMTW_SUCCESS);
+    return (CMTW_SUCCESS);
 } /* End of function R_CMTW_Control() */
 
 /***********************************************************************************************************************
@@ -853,10 +843,10 @@ cmtw_err_t    R_CMTW_Control(cmtw_channel_t     channel,
 * the major version number and the bottom 2 bytes are the minor version number.
 * @note None
 */
-uint32_t R_CMTW_GetVersion (void)
+uint32_t R_CMTW_GetVersion(void)
 {
     /* These version macros are defined in r_cmtw_rx_if.h. */
-    return((((uint32_t)CMTW_RX_VERSION_MAJOR) << 16) | (uint32_t)CMTW_RX_VERSION_MINOR);
+    return ((((uint32_t)CMTW_RX_VERSION_MAJOR) << 16) | (uint32_t)CMTW_RX_VERSION_MINOR);
 } /* End of function R_CMTW_GetVersion() */
 
 /***********************************************************************************************************************
@@ -935,12 +925,12 @@ static uint32_t calculate_count(cmtw_time_unit_t time_unit, cmtw_clock_divisor_t
 {
     uint32_t divisor;
     uint32_t count;
-    float countf;
-    float unit;
+    float    countf;
+    float    unit;
 
-    unit = g_cmtw_time_units[time_unit];
+    unit    = g_cmtw_time_units[time_unit];
     divisor = g_cmtw_clock_divisors[clock_divisor];
-    countf = ((BSP_PCLKB_HZ / divisor) * time * unit) - 1;
+    countf  = ((BSP_PCLKB_HZ / divisor) * time * unit) - 1;
 
     /* Check if count is in range */
     if ((countf < CMTW_COUNTF_MIN) || (countf > CMTW_COUNTF_MAX))
@@ -962,7 +952,7 @@ static uint32_t calculate_count(cmtw_time_unit_t time_unit, cmtw_clock_divisor_t
         }
     }
 
-    return(count);
+    return (count);
 } /* End of function calculate_count() */
 
 #if CMTW_CFG_USE_CH0 == 1
@@ -972,14 +962,19 @@ static uint32_t calculate_count(cmtw_time_unit_t time_unit, cmtw_clock_divisor_t
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(cmtw_cm_ch0_isr,VECT(CMTW0, CMWI0))
+R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_cm_ch0_isr, VECT(CMTW0, CMWI0))
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_cm_ch0_isr(void)
 {
-    uint32_t                count;
-    cmtw_prv_ch_ctrl_info_t *hdl;
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
+    uint32_t                  count;
+    cmtw_prv_ch_ctrl_info_t * hdl;
 
     /* Get the handle for the channel */
-     hdl = g_cmtw_handles[CMTW_CHANNEL_0];
+    hdl = g_cmtw_handles[CMTW_CHANNEL_0];
 
     /* Call user callback if requested */
     if (CMTW_ACTION_CALLBACK & hdl->cm_action)
@@ -995,6 +990,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_cm_ch0_isr(void)
         hdl->rom->regs->CMWCR.BIT.CMWIE = 0;
         hdl->rom->regs->CMWIOR.BIT.CMWE = 0;
     }
+    
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_cm_ch0_isr() */
 
 /***********************************************************************************************************************
@@ -1003,14 +1003,19 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_cm_ch0_isr(void)
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(cmtw_oc0_ch0_isr, VECT_CMTW0_OC0I0)
+R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_oc0_ch0_isr, VECT_CMTW0_OC0I0)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc0_ch0_isr(void)
 {
-    uint32_t                count;
-    cmtw_prv_ch_ctrl_info_t *hdl;
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
+    uint32_t                  count;
+    cmtw_prv_ch_ctrl_info_t * hdl;
 
     /* Get the handle for the channel */
-     hdl = g_cmtw_handles[CMTW_CHANNEL_0];
+    hdl = g_cmtw_handles[CMTW_CHANNEL_0];
 
     /* Call user callback if requested */
     if (CMTW_ACTION_CALLBACK & hdl->oc0_action)
@@ -1023,10 +1028,15 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc0_ch0_isr(void)
     if (CMTW_ACTION_ONESHOT & hdl->oc0_action)
     {
         /* Disable interrupt and timer */
-        hdl->rom->regs->CMWIOR.BIT.OC0 = 0;
+        hdl->rom->regs->CMWIOR.BIT.OC0  = 0;
         hdl->rom->regs->CMWCR.BIT.OC0IE = 0;
         hdl->rom->regs->CMWIOR.BIT.OC0E = 0;
     }
+    
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_oc0_ch0_isr() */
 
 /***********************************************************************************************************************
@@ -1035,14 +1045,19 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc0_ch0_isr(void)
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(cmtw_oc1_ch0_isr,VECT_CMTW0_OC1I0)
+R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_oc1_ch0_isr, VECT_CMTW0_OC1I0)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc1_ch0_isr(void)
 {
-    uint32_t                count;
-    cmtw_prv_ch_ctrl_info_t *hdl;
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
+    uint32_t                  count;
+    cmtw_prv_ch_ctrl_info_t * hdl;
 
     /* Get the handle for the channel */
-     hdl = g_cmtw_handles[CMTW_CHANNEL_0];
+    hdl = g_cmtw_handles[CMTW_CHANNEL_0];
 
     /* Call user callback if requested */
     if (CMTW_ACTION_CALLBACK & hdl->oc1_action)
@@ -1055,10 +1070,15 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc1_ch0_isr(void)
     if (CMTW_ACTION_ONESHOT & hdl->oc1_action)
     {
         /* Disable interrupt and timer */
-        hdl->rom->regs->CMWIOR.BIT.OC1 = 0;
+        hdl->rom->regs->CMWIOR.BIT.OC1  = 0;
         hdl->rom->regs->CMWCR.BIT.OC1IE = 0;
         hdl->rom->regs->CMWIOR.BIT.OC1E = 0;
     }
+    
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_oc1_ch0_isr() */
 
 /***********************************************************************************************************************
@@ -1067,14 +1087,19 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc1_ch0_isr(void)
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(cmtw_ic0_ch0_isr, VECT_CMTW0_IC0I0)
+R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_ic0_ch0_isr, VECT_CMTW0_IC0I0)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic0_ch0_isr(void)
 {
-    uint32_t                count;
-    cmtw_prv_ch_ctrl_info_t *hdl;
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
+    uint32_t                  count;
+    cmtw_prv_ch_ctrl_info_t * hdl;
 
     /* Get the handle for the channel */
-     hdl = g_cmtw_handles[CMTW_CHANNEL_0];
+    hdl = g_cmtw_handles[CMTW_CHANNEL_0];
 
     /* Call user callback if requested */
     if (CMTW_ACTION_CALLBACK & hdl->ic0_action)
@@ -1090,6 +1115,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic0_ch0_isr(void)
         hdl->rom->regs->CMWCR.BIT.IC0IE = 0;
         hdl->rom->regs->CMWIOR.BIT.IC0E = 0;
     }
+    
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_ic0_ch0_isr() */
 
 /***********************************************************************************************************************
@@ -1098,14 +1128,19 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic0_ch0_isr(void)
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(cmtw_ic1_ch0_isr, VECT_CMTW0_IC1I0)
+R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_ic1_ch0_isr, VECT_CMTW0_IC1I0)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic1_ch0_isr(void)
 {
-    uint32_t                count;
-    cmtw_prv_ch_ctrl_info_t *hdl;
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
+    uint32_t                  count;
+    cmtw_prv_ch_ctrl_info_t * hdl;
 
     /* Get the handle for the channel */
-     hdl = g_cmtw_handles[CMTW_CHANNEL_0];
+    hdl = g_cmtw_handles[CMTW_CHANNEL_0];
 
     /* Call user callback if requested */
     if (CMTW_ACTION_CALLBACK & hdl->ic1_action)
@@ -1121,6 +1156,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic1_ch0_isr(void)
         hdl->rom->regs->CMWCR.BIT.IC1IE = 0;
         hdl->rom->regs->CMWIOR.BIT.IC1E = 0;
     }
+    
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_ic1_ch0_isr() */
 #endif /* End of #if CMTW_CFG_USE_CH0 == 1 */
 
@@ -1131,29 +1171,39 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic1_ch0_isr(void)
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(cmtw_cm_ch1_isr,VECT(CMTW1, CMWI1))
+R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_cm_ch1_isr, VECT(CMTW1, CMWI1))
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_cm_ch1_isr(void)
 {
-    uint32_t                count;
-    cmtw_prv_ch_ctrl_info_t *hdl;
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
+    uint32_t                  count;
+    cmtw_prv_ch_ctrl_info_t * hdl;
 
     /* Get the handle for the channel */
-     hdl = g_cmtw_handles[CMTW_CHANNEL_1];
+    hdl = g_cmtw_handles[CMTW_CHANNEL_1];
 
-     /* Call user callback if requested */
-     if (CMTW_ACTION_CALLBACK & hdl->cm_action)
-     {
-         count = hdl->rom->regs->CMWCOR;
-         cmtw_isr_common(CMTW_EVENT_CM, count, hdl);
-     }
+    /* Call user callback if requested */
+    if (CMTW_ACTION_CALLBACK & hdl->cm_action)
+    {
+        count = hdl->rom->regs->CMWCOR;
+        cmtw_isr_common(CMTW_EVENT_CM, count, hdl);
+    }
 
-     /* Disable if repeat not requested e.g. one-shot */
-     if (CMTW_ACTION_ONESHOT & hdl->cm_action)
-     {
-         /* Disable interrupt and timer */
-         hdl->rom->regs->CMWCR.BIT.CMWIE = 0;
-         hdl->rom->regs->CMWIOR.BIT.CMWE = 0;
-     }
+    /* Disable if repeat not requested e.g. one-shot */
+    if (CMTW_ACTION_ONESHOT & hdl->cm_action)
+    {
+        /* Disable interrupt and timer */
+        hdl->rom->regs->CMWCR.BIT.CMWIE = 0;
+        hdl->rom->regs->CMWIOR.BIT.CMWE = 0;
+    }
+
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_cm_ch1_isr() */
 
 /***********************************************************************************************************************
@@ -1162,14 +1212,19 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_cm_ch1_isr(void)
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(cmtw_oc0_ch1_isr, VECT_CMTW1_OC0I1)
+R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_oc0_ch1_isr, VECT_CMTW1_OC0I1)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc0_ch1_isr(void)
 {
-    uint32_t                count;
-    cmtw_prv_ch_ctrl_info_t *hdl;
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
+    uint32_t                  count;
+    cmtw_prv_ch_ctrl_info_t * hdl;
 
     /* Get the handle for the channel */
-     hdl = g_cmtw_handles[CMTW_CHANNEL_1];
+    hdl = g_cmtw_handles[CMTW_CHANNEL_1];
 
     /* Call user callback if requested */
     if (CMTW_ACTION_CALLBACK & hdl->oc0_action)
@@ -1182,10 +1237,15 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc0_ch1_isr(void)
     if (CMTW_ACTION_ONESHOT & hdl->oc0_action)
     {
         /* Disable interrupt and timer */
-        hdl->rom->regs->CMWIOR.BIT.OC0 = 0;
+        hdl->rom->regs->CMWIOR.BIT.OC0  = 0;
         hdl->rom->regs->CMWCR.BIT.OC0IE = 0;
         hdl->rom->regs->CMWIOR.BIT.OC0E = 0;
     }
+
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_oc0_ch1_isr() */
 
 /***********************************************************************************************************************
@@ -1194,14 +1254,19 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc0_ch1_isr(void)
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(cmtw_oc1_ch1_isr, VECT_CMTW1_OC1I1)
+R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_oc1_ch1_isr, VECT_CMTW1_OC1I1)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc1_ch1_isr(void)
 {
-    uint32_t                count;
-    cmtw_prv_ch_ctrl_info_t *hdl;
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
+    uint32_t                  count;
+    cmtw_prv_ch_ctrl_info_t * hdl;
 
     /* Get the handle for the channel */
-     hdl = g_cmtw_handles[CMTW_CHANNEL_1];
+    hdl = g_cmtw_handles[CMTW_CHANNEL_1];
 
     /* Call user callback if requested */
     if (CMTW_ACTION_CALLBACK & hdl->oc1_action)
@@ -1214,10 +1279,15 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc1_ch1_isr(void)
     if (CMTW_ACTION_ONESHOT & hdl->oc1_action)
     {
         /* Disable interrupt and timer */
-        hdl->rom->regs->CMWIOR.BIT.OC1 = 0;
+        hdl->rom->regs->CMWIOR.BIT.OC1  = 0;
         hdl->rom->regs->CMWCR.BIT.OC1IE = 0;
         hdl->rom->regs->CMWIOR.BIT.OC1E = 0;
     }
+
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_oc1_ch1_isr() */
 
 
@@ -1227,14 +1297,19 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_oc1_ch1_isr(void)
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(cmtw_ic0_ch1_isr, VECT_CMTW1_IC0I1)
+R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_ic0_ch1_isr, VECT_CMTW1_IC0I1)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic0_ch1_isr(void)
 {
-    uint32_t                count;
-    cmtw_prv_ch_ctrl_info_t *hdl;
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
+    uint32_t                  count;
+    cmtw_prv_ch_ctrl_info_t * hdl;
 
     /* Get the handle for the channel */
-     hdl = g_cmtw_handles[CMTW_CHANNEL_1];
+    hdl = g_cmtw_handles[CMTW_CHANNEL_1];
 
     /* Call user callback if requested */
     if (CMTW_ACTION_CALLBACK & hdl->ic0_action)
@@ -1250,6 +1325,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic0_ch1_isr(void)
         hdl->rom->regs->CMWCR.BIT.IC0IE = 0;
         hdl->rom->regs->CMWIOR.BIT.IC0E = 0;
     }
+
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_ic0_ch1_isr() */
 
 /***********************************************************************************************************************
@@ -1258,14 +1338,19 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic0_ch1_isr(void)
 * Arguments    : none
 * Return Value : none
 ***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(cmtw_ic1_ch1_isr, VECT_CMTW1_IC1I1)
+R_BSP_PRAGMA_STATIC_INTERRUPT (cmtw_ic1_ch1_isr, VECT_CMTW1_IC1I1)
 R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic1_ch1_isr(void)
 {
-    uint32_t                count;
-    cmtw_prv_ch_ctrl_info_t *hdl;
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* set bit PSW.I = 1 to allow nested interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
+    uint32_t                  count;
+    cmtw_prv_ch_ctrl_info_t * hdl;
 
     /* Get the handle for the channel */
-     hdl = g_cmtw_handles[CMTW_CHANNEL_1];
+    hdl = g_cmtw_handles[CMTW_CHANNEL_1];
 
     /* Call user callback if requested */
     if (CMTW_ACTION_CALLBACK & hdl->ic1_action)
@@ -1281,6 +1366,11 @@ R_BSP_ATTRIB_STATIC_INTERRUPT void cmtw_ic1_ch1_isr(void)
         hdl->rom->regs->CMWCR.BIT.IC1IE = 0;
         hdl->rom->regs->CMWIOR.BIT.IC1E = 0;
     }
+
+#if CMTW_CFG_EN_NESTED_INT == 1
+    /* clear bit PSW.I = 0 */
+    R_BSP_CLRPSW_I();
+#endif
 } /* End of function cmtw_ic1_ch1_isr() */
 #endif /* End of #if CMTW_CFG_USE_CH1 == 1 */
 
@@ -1303,8 +1393,8 @@ static void cmtw_isr_common(cmtw_event_t event, uint32_t count, cmtw_prv_ch_ctrl
     if ((NULL != hdl->pcallback) && (FIT_NO_FUNC != hdl->pcallback))
     {
         cb_data.channel = hdl->rom->channel;
-        cb_data.event = event;
-        cb_data.count = count;
+        cb_data.event   = event;
+        cb_data.count   = count;
 
         /* Execute registered callback function */
         hdl->pcallback((void *)&cb_data);

@@ -1,34 +1,18 @@
-/*******************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- * Copyright (C) 2015(2019) Renesas Electronics Corporation. All rights reserved.
- *****************************************************************************/
+/*
+* Copyright (c) 2014(2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /******************************************************************************
  * File Name    : r_usb_psignal.c
  * Description  : USB Peripheral signal control code
  ******************************************************************************/
 /*******************************************************************************
  * History : DD.MM.YYYY Version Description
- *         : 08.01.2014 1.00 First Release
+ *         : 08.01.2014 1.00    First Release
  *         : 30.11.2018 1.10    Supporting Smart Configurator
  *         : 31.05.2019 1.11    Added support for GNUC and ICCRX.
+ *         : 20.03.2025 1.31    Changed the disclaimer.
 *******************************************************************************/
 
 /******************************************************************************
@@ -108,8 +92,14 @@ void usb_pstd_attach_process (void)
     usb_pstd_bc_detect_process();
 
 #endif  /* USB_CFG_BC == USB_CFG_ENABLE */
-    hw_usb_pset_dprpu();
-
+    if (USB_LS  == g_usb_pstd_speed)
+    {
+        hw_usb_pset_dmrpu();
+    }
+    else
+    {
+        hw_usb_pset_dprpu();
+    }
 } /* End of function usb_pstd_attach_process */
 
 
@@ -125,7 +115,14 @@ void usb_pstd_detach_process (void)
     uint16_t i;
 
     /* Pull-up disable */
-    hw_usb_pclear_dprpu();
+    if (USB_LS  == g_usb_pstd_speed)
+    {
+        hw_usb_pclear_dmrpu();
+    }
+    else
+    {
+        hw_usb_pclear_dprpu();
+    }
 
     /* Configuration number */
     g_usb_pstd_config_no = 0;
@@ -163,13 +160,23 @@ void usb_pstd_suspend_process (void)
 {
     uint16_t intsts0;
     uint16_t buf;
+    uint16_t jsts;
 
     /* Resume interrupt enable */
     hw_usb_pset_enb_rsme();
 
     intsts0 = hw_usb_read_intsts();
     buf = hw_usb_read_syssts();
-    if (((uint16_t)0 !=(intsts0 & USB_DS_SUSP)) && (USB_FS_JSTS == (buf & USB_LNST)))
+    if (USB_LS  == g_usb_pstd_speed)
+	{
+		jsts = USB_LS_JSTS;
+	}
+	else
+	{
+		jsts = USB_FS_JSTS;
+	}
+    if ((intsts0 & USB_DS_SUSP) && ((buf & USB_LNST) == jsts))
+
     {
         /* Suspend */
         usb_pstd_suspend_function();

@@ -1,7 +1,7 @@
 /**
  * \file MS_generic_onoff_api.h
  *
- * \brief This file defines the Mesh Generic Onoff Model Application Interface
+ * \brief This file defines the Mesh Generic OnOff Model Application Interface
  * - includes Data Structures and Methods for both Server and Client.
  */
 
@@ -20,26 +20,25 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup generic_onoff_module GENERIC_ONOFF (Mesh Generic Onoff Model)
+ * \defgroup generic_onoff_module Generic OnOff Model (GENERIC_ONOFF)
+ * \ingroup generics_models
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Generic OnOff Model (GENERIC_ONOFF) module to the Application.
  */
-
-
 
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup generic_onoff_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Generic OnOff Model Layer.
  */
 
 /**
- * Generic Onoff Server application Asynchronous Notification Callback.
+ * Generic OnOff Server application Asynchronous Notification Callback.
  *
- * Generic Onoff Server calls the registered callback to indicate events occurred to the
+ * Generic OnOff Server calls the registered callback to indicate events occurred to the
  * application.
  *
  * \param [in] ctx           Context of the message received for a specific model instance.
@@ -59,28 +58,37 @@ typedef API_RESULT (* MS_GENERIC_ONOFF_SERVER_CB)
         ) DECL_REENTRANT;
 
 /**
- * Generic Onoff Client application Asynchronous Notification Callback.
+ * Generic OnOff Client application Asynchronous Notification Callback.
  *
- * Generic Onoff Client calls the registered callback to indicate events occurred to the
+ * Generic OnOff Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_GENERIC_ONOFF_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
-            UINT32                   opcode,
-            UCHAR                  * data_param,
-            UINT16                   data_len
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
+            UINT32                            opcode,
+            UCHAR                           * data_param,
+            UINT16                            data_len
         ) DECL_REENTRANT;
 /** \} */
 
 /**
+ * \defgroup generic_onoff_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind
+ * Mesh Generic OnOff Model Layer.
+ */
+
+/**
  *  \defgroup generic_onoff_structures Structures
  *  \{
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Generic OnOff Model Layer.
  */
 
 /**
@@ -146,25 +154,33 @@ typedef struct MS_generic_onoff_status_struct
 
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup generic_onoff_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Generic Onoff Model APIs.
- */
-/**
- * \defgroup generic_onoff_ser_api_defs Generic Onoff Server API Definitions
- * \{
- * This section describes the Generic Onoff Server APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Generic OnOff Model Layer to the Application.
  */
 
 /**
- *  \brief API to initialize Generic_Onoff Server model
+ * \defgroup generic_onoff_ser_api_defs Generic OnOff Server API Definitions
+ * \{
+ * \brief This section describes the EtherMind Mesh Generic OnOff Server
+ * Model APIs.
+ */
+
+/**
+ * \name Generic OnOff Server Interfaces
+ * \{
+ */
+
+/**
+ *  \brief API to initialize Generic_OnOff Server model
  *
  *  \par Description
- *  This is to initialize Generic_Onoff Server model and to register with Acess layer.
+ *  This is to initialize Generic_OnOff Server model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -174,7 +190,7 @@ typedef struct MS_generic_onoff_status_struct
  *                   After power cycle of an already provisioned node, the model handle will have
  *                   valid value and the same will be reused for registration.
  *
- *  \param [in] appl_cb    Application Callback to be used by the Generic_Onoff Server.
+ *  \param [in] appl_cb    Application Callback to be used by the Generic_OnOff Server.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -196,6 +212,8 @@ API_RESULT MS_generic_onoff_server_init
  * \param [in] target_state_params     Model specific target state parameters (NULL: to be ignored).
  * \param [in] remaining_time          Time from current state to target state (0: to be ignored).
  * \param [in] ext_params              Additional parameters (NULL: to be ignored).
+ * \param [in] reply                   If unicast response to be sent
+ * \param [in] publish                 If state to be published
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -205,21 +223,31 @@ API_RESULT MS_generic_onoff_server_state_update
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * current_state_params,
                /* IN */ MS_ACCESS_MODEL_STATE_PARAMS       * target_state_params,
                /* IN */ UINT16                               remaining_time,
-               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params
+               /* IN */ MS_ACCESS_MODEL_EXT_PARAMS         * ext_params,
+               /* IN */ UCHAR                                reply,
+               /* IN */ UCHAR                                publish
            );
 /** \} */
 
+/** \} */
+
 /**
- * \defgroup generic_onoff_cli_api_defs Generic Onoff Client API Definitions
+ * \defgroup generic_onoff_cli_api_defs Generic OnOff Client API Definitions
  * \{
- * This section describes the Generic Onoff Client APIs.
+ * \brief This section describes the EtherMind Mesh Generic OnOff Client
+ * Model APIs.
  */
 
 /**
- *  \brief API to initialize Generic_Onoff Client model
+ * \name Generic OnOff Client Interfaces
+ * \{
+ */
+
+/**
+ *  \brief API to initialize Generic_OnOff Client model
  *
  *  \par Description
- *  This is to initialize Generic_Onoff Client model and to register with Acess layer.
+ *  This is to initialize Generic_OnOff Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -229,7 +257,7 @@ API_RESULT MS_generic_onoff_server_state_update
  *                   After power cycle of an already provisioned node, the model handle will have
  *                   valid value and the same will be reused for registration.
  *
- *  \param [in] appl_cb    Application Callback to be used by the Generic_Onoff Client.
+ *  \param [in] appl_cb    Application Callback to be used by the Generic_OnOff Client.
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -241,10 +269,10 @@ API_RESULT MS_generic_onoff_client_init
            );
 
 /**
- *  \brief API to get Generic_Onoff client model handle
+ *  \brief API to get Generic_OnOff client model handle
  *
  *  \par Description
- *  This is to get the handle of Generic_Onoff client model.
+ *  This is to get the handle of Generic_OnOff client model.
  *
  *  \param [out] model_handle   Address of model handle to be filled/returned.
  *
@@ -253,6 +281,21 @@ API_RESULT MS_generic_onoff_client_init
 API_RESULT MS_generic_onoff_client_get_model_handle
            (
                /* OUT */ MS_ACCESS_MODEL_HANDLE  * model_handle
+           );
+
+/**
+ *  \brief API to set Generic_OnOff client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Generic_OnOff client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_generic_onoff_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
            );
 
 /**
@@ -273,6 +316,28 @@ API_RESULT MS_generic_onoff_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+/** \} */
+
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup generic_onoff_defines
+ * \{
+ */
+
+/**
+ * \defgroup generic_onoff_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Generic OnOff Model Layer.
+ */
+
+/**
+ * \name Generic OnOff Client Macro
+ * \{
+ */
 
 /**
  *  \brief API to get Generic OnOff state
@@ -295,11 +360,10 @@ API_RESULT MS_generic_onoff_client_send_reliable_pdu
  *  \brief API to set Generic OnOff state
  *
  *  \par Description
- *  The Generic OnOff Set is an acknowledged message used to get the Generic OnOff
+ *  The Generic OnOff Set is an Acknowledged message used to set the Generic OnOff
  *  state of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref MS_GENERIC_ONOFF_SET_STRUCT
+ *  \param [in] param Generic OnOff Set message parameter \ref MS_GENERIC_ONOFF_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -315,11 +379,10 @@ API_RESULT MS_generic_onoff_client_send_reliable_pdu
  *  \brief API to set Generic OnOff state unacknowledged
  *
  *  \par Description
- *  The Generic OnOff Set is an unacknowledged message used to get the Generic OnOff
+ *  The Generic OnOff Set Unacknowledged is an unacknowledged message used to set the Generic OnOff
  *  state of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref MS_GENERIC_ONOFF_SET_STRUCT
+ *  \param [in] param Generic OnOff Set Unacknowledged message parameter \ref MS_GENERIC_ONOFF_SET_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -331,7 +394,11 @@ API_RESULT MS_generic_onoff_client_send_reliable_pdu
             0xFFFFFFFF\
         )
 /** \} */
+
 /** \} */
+
+/** \} */
+
 /** \} */
 
 #endif /*_H_MS_GENERIC_ONOFF_API_ */

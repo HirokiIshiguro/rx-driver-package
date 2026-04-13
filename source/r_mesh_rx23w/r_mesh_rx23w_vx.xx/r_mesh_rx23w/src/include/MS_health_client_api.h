@@ -2,7 +2,7 @@
  * \file MS_health_client_api.h
  *
  * \brief This file defines the Mesh Health Model Application Interface
- * - includes Data Structures and Methods for both Server and Client.
+ * - includes Data Structures and Methods for Client.
  */
 
 /*
@@ -20,20 +20,19 @@
 
 /* --------------------------------------------- Global Definitions */
 /**
- * \defgroup health_module HEALTH (Mesh Health Model)
+ * \defgroup health_module Health Model (HEALTH)
+ * \ingroup foundation_models
  * \{
- *  This section describes the interfaces & APIs offered by the EtherMind
+ *  \brief This section describes the interfaces & APIs offered by the EtherMind
  *  Mesh Health Model (HEALTH) module to the Application.
  */
-
-
 
 /* --------------------------------------------- Data Types/ Structures */
 /**
  *  \defgroup health_cb Application Callback
  *  \{
- *  This Section Describes the module Notification Callback interface offered
- *  to the application
+ *  \brief This section describes the Notification Callback Interfaces offered
+ *  to the application by EtherMind Mesh Health Model Layer.
  */
 
 /**
@@ -42,14 +41,14 @@
  * Health Client calls the registered callback to indicate events occurred to the
  * application.
  *
- * \param handle        Model Handle.
- * \param opcode        Opcode.
- * \param data_param    Data associated with the event if any or NULL.
- * \param data_len      Size of the event data. 0 if event data is NULL.
+ * \param [in] ctx           Context of the message received for a specific model instance.
+ * \param [in] opcode        Opcode.
+ * \param [in] data_param    Data associated with the event if any or NULL.
+ * \param [in] data_len      Size of the event data. 0 if event data is NULL.
  */
 typedef API_RESULT (* MS_HEALTH_CLIENT_CB)
         (
-            MS_ACCESS_MODEL_HANDLE * handle,
+            MS_ACCESS_MODEL_REQ_MSG_CONTEXT * ctx,
             UINT32                   opcode,
             UCHAR                  * data_param,
             UINT16                   data_len
@@ -57,8 +56,17 @@ typedef API_RESULT (* MS_HEALTH_CLIENT_CB)
 /** \} */
 
 /**
+ * \defgroup health_defines Defines
+ * \{
+ * \brief This section describes the various Defines in EtherMind Mesh
+ * Health Model Layer.
+ */
+
+/**
  *  \defgroup health_structures Structures
  *  \{
+ *  \brief This section describes the various Data-Types and Structures in
+ *  EtherMind Mesh Health Model Layer.
  */
 
 /**
@@ -129,25 +137,30 @@ typedef struct MS_health_attention_struct
 
 /** \} */
 
-
+/** \} */
 
 /* --------------------------------------------- Function */
 /**
  * \defgroup health_api_defs API Definitions
  * \{
- * This section describes the EtherMind Mesh Health Model APIs.
+ * \brief This section describes the various APIs exposed by
+ * EtherMind Mesh Health Model Layer to the Application.
  */
 /**
  * \defgroup health_cli_api_defs Health Client API Definitions
  * \{
- * This section describes the Health Client APIs.
+ * \brief This section describes the EtherMind Mesh Health Client Model APIs.
  */
 
+/**
+ * \name Health Client Interfaces
+ * \{
+ */
 /**
  *  \brief API to initialize Health Client model
  *
  *  \par Description
- *  This is to initialize Health Client model and to register with Acess layer.
+ *  This is to initialize Health Client model and to register with Access layer.
  *
  *  \param [in] element_handle
  *              Element identifier to be associated with the model instance.
@@ -184,6 +197,21 @@ API_RESULT MS_health_client_get_model_handle
            );
 
 /**
+ *  \brief API to set Health client model handle
+ *
+ *  \par Description
+ *  This is to set the handle of Health client model.
+ *
+ *  \param [in] model_handle   Model handle to be assigned.
+ *
+ *  \return API_SUCCESS or an error code indicating reason for failure
+ */
+API_RESULT MS_health_client_set_model_handle
+           (
+               /* IN */ MS_ACCESS_MODEL_HANDLE  model_handle
+           );
+
+/**
  *  \brief API to send acknowledged commands
  *
  *  \par Description
@@ -201,6 +229,28 @@ API_RESULT MS_health_client_send_reliable_pdu
                /* IN */ void    * param,
                /* IN */ UINT32    rsp_opcode
            );
+/** \} */
+
+/** \} */
+
+/** \} */
+
+/**
+ * \addtogroup health_defines
+ * \{
+ */
+
+/**
+ * \defgroup health_marcos Utility Macros
+ * \{
+ * \brief This section describes the various Utility Macros in EtherMind
+ * Mesh Health Model Layer.
+ */
+
+/**
+ * \name Health Client Macros
+ * \{
+ */
 
 /**
  *  \brief API to report the registered fault state
@@ -209,8 +259,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Fault Get is an acknowledged message used to get the current
  *  Registered Fault state identified by Company ID of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_FAULT_GET_PARAM
+ *  \param [in] param Health Fault Get message parameter \ref MS_HEALTH_FAULT_GET_CLEAR_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -229,8 +278,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Fault Clear Unacknowledged is an unacknowledged message used
  *  to clear the current Registered Fault state identified by Company ID of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_FAULT_CLEAR_PARAM
+ *  \param [in] param Health Fault Clear Unacknowledged message parameter \ref MS_HEALTH_FAULT_GET_CLEAR_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -249,8 +297,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Fault Clear is an acknowledged message used to clear the
  *  current Registered Fault state identified by Company ID of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_FAULT_CLEAR_PARAM
+ *  \param [in] param Health Fault Clear message parameter \ref MS_HEALTH_FAULT_GET_CLEAR_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -270,8 +317,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  procedure of an element. The procedure is implementation specific and may
  *  result in changing the Health Fault state of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_FAULT_TEST_PARAM
+ *  \param [in] param Health Fault Test message parameter \ref MS_HEALTH_FAULT_TEST_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -290,6 +336,8 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Fault Test Unacknowledged is an unacknowledged message used
  *  to invoke a self-test procedure of an element. The procedure is implementation
  *  specific and may result in changing the Health Fault state of an element.
+ *
+ *  \param [in] param Health Fault Test Unacknowledged message parameter \ref MS_HEALTH_FAULT_TEST_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -325,8 +373,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Period Set Unacknowledged is an unacknowledged message used
  *  to set the current Health Period state of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_PERIOD_SET_PARAM
+ *  \param [in] param Health Period Set Unacknowledged message parameter \ref MS_HEALTH_PERIOD_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -345,8 +392,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Period Set is an acknowledged message used to set the
  *  current Health Period state of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_PERIOD_SET_PARAM
+ *  \param [in] param Health Period Set message parameter \ref MS_HEALTH_PERIOD_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -382,8 +428,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Attention Set is an acknowledged message used to set the
  *  Attention Timer state of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_ATTENTION_SET_PARAM
+ *  \param [in] param Health Attention Set message parameter \ref MS_HEALTH_ATTENTION_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -402,8 +447,7 @@ API_RESULT MS_health_client_send_reliable_pdu
  *  The Health Attention Set Unacknowledged is an unacknowledged message
  *  used to set the Attention Timer state of an element.
  *
- *  \param [in] param
- *         Pointer to the structure populated as in \ref ACCESS_HEALTH_ATTENTION_SET_PARAM
+ *  \param [in] param Health Attention Set Unacknowledged message parameter \ref MS_HEALTH_ATTENTION_STRUCT
  *
  *  \return API_SUCCESS or an error code indicating reason for failure
  */
@@ -415,7 +459,11 @@ API_RESULT MS_health_client_send_reliable_pdu
             0xFFFFFFFF\
         )
 /** \} */
+
 /** \} */
+
+/** \} */
+
 /** \} */
 
 #endif /* _H_MS_HEALTH_CLIENT_API_ */

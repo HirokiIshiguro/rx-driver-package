@@ -1,19 +1,24 @@
 MODULE_NAME = 	r_emwin_rx
-VERSION = 		5.50
+VERSION = 		6.52.1.00
+VERSION_STR = 	6.52_100
+MDF = V1
 
 CONFIG_FOLDER = r_config
 TARGET_FOLDER = ../../FITModules
 
-$(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).zip: $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml
-	cd ./$(MODULE_NAME)_vx.xx; \
-	mkdir $(CONFIG_FOLDER); \
-	cp $(MODULE_NAME)/ref/$(MODULE_NAME)_config_reference.h $(CONFIG_FOLDER)/$(MODULE_NAME)_config.h; \
-	zip ../$(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).zip -r ./$(MODULE_NAME) -r ./$(CONFIG_FOLDER); \
-	rm -rf $(CONFIG_FOLDER); \
+$(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION_STR).zip: $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION_STR).xml $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION_STR).mdf
+	cd ./$(MODULE_NAME)_vx.xx_xxx; \
+	zip ../$(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION_STR).zip -r ./$(MODULE_NAME) -r ./$(CONFIG_FOLDER); \
 	cd ../;	\
 
-$(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml:
-	cp ./$(MODULE_NAME)_vx.xx.xml $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION).xml
+$(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION_STR).xml:
+	cp ./$(MODULE_NAME)_vx.xx_xxx.xml tmp1.xml
+	sed s/x.xx.x.x.xx/$(VERSION)/ tmp1.xml > tmp2.xml
+	sed s/x.xx/$(VERSION_STR)/ tmp2.xml > $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION_STR).xml
+	rm -f tmp1.xml tmp2.xml
+
+$(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION_STR).mdf:
+	cp ./$(MODULE_NAME)_vx.xx_xxx.mdf $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION_STR).mdf
 
 clean:
-	rm -rf $(TARGET_FOLDER)/$(MODULE_NAME)_v$(VERSION)*.*
+	rm -rf $(TARGET_FOLDER)/$(MODULE_NAME)*.*

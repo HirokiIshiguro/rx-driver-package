@@ -1,25 +1,8 @@
-/*******************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only
- * intended for use with Renesas products. No other uses are authorized. This
- * software is owned by Renesas Electronics Corporation and is protected under
- * all applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
- * LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
- * AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
- * TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
- * ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
- * FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
- * ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
- * BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software
- * and to discontinue the availability of this software. By using this software,
- * you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- * Copyright (C) 2015(2019) Renesas Electronics Corporation. All rights reserved.
-  ******************************************************************************/
+/*
+* Copyright (c) 2014(2025) Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /*******************************************************************************
  * File Name    : r_usb_preg_access.c
  * Description  : USB IP Peripheral control register access code
@@ -28,7 +11,9 @@
  * History : DD.MM.YYYY Version Description
  *         : 08.01.2014 1.00 First Release
  *         : 31.11.2018 1.10 Supporting Smart Configurator
- *         : 31.05.2019 1.11    Added support for GNUC and ICCRX.
+ *         : 31.05.2019 1.11 Added support for GNUC and ICCRX.
+ *         : 30.06.2020 1.20 Added support for RTOS.
+ *         : 20.03.2025 1.31 Changed the disclaimer.
  *****************************************************************************/
 /******************************************************************************
  Includes   <System Includes> , "Project Includes"
@@ -83,6 +68,31 @@ void hw_usb_pclear_dprpu(void)
 } /* End of function hw_usb_pclear_dprpu */
 
 /******************************************************************************
+ Function Name   : hw_usb_pset_dmrpu
+ Description     : Set DMRPU-bit SYSCFG0 register.
+                 : (Enable D-Line pullup when PeripheralController function is selected)
+ Arguments       : none
+ Return value    : none
+ ******************************************************************************/
+void hw_usb_pset_dmrpu(void)
+{
+    USB0.SYSCFG.WORD |= USB_DMRPU;
+} /* End of function hw_usb_pset_dmrpu */
+
+/******************************************************************************
+ Function Name   : hw_usb_pclear_dmrpu
+ Description     : Clear DMRPU-bit of the SYSCFG0 register.
+                 : (Disable D-Line pullup when PeripheralController function is
+                 : selected.)
+ Arguments       : none
+ Return value    : none
+ ******************************************************************************/
+void hw_usb_pclear_dmrpu(void)
+{
+    USB0.SYSCFG.WORD &= (~USB_DMRPU);
+} /* End of function hw_usb_pclear_dmrpu */
+
+/******************************************************************************
  Function Name   : hw_usb_pset_wkup
  Description     : Set WKUP-bit DVSTCTR register.
                  : (Output Remote wakeup signal when PeripheralController function is selected)
@@ -92,7 +102,7 @@ void hw_usb_pclear_dprpu(void)
 void hw_usb_pset_wkup(void)
 {
     USB0.DVSTCTR0.WORD |= USB_WKUP;
-} /* End of function hw_usb_pset_dprpu */
+} /* End of function hw_usb_pset_wkup */
 /******************************************************************************
  End of function hw_usb_pset_wkup
  ******************************************************************************/
@@ -171,9 +181,9 @@ void hw_usb_pmodule_init( void )
     USB0.SYSCFG.WORD &= (~USB_DRPD);
 
     USB0.SYSCFG.WORD |= USB_USBE;
-    USB0.CFIFOSEL.WORD  = USB0_CFIFO_MBW;
-    USB0.D0FIFOSEL.WORD = USB0_D0FIFO_MBW;
-    USB0.D1FIFOSEL.WORD = USB0_D1FIFO_MBW;
+    USB0.CFIFOSEL.WORD  = USB_MBW_16;
+    USB0.D0FIFOSEL.WORD = USB_MBW_16;
+    USB0.D1FIFOSEL.WORD = USB_MBW_16;
 #if USB_CFG_ENDIAN == USB_CFG_BIG
     USB0.CFIFOSEL.WORD  |= USB_BIGEND;
     USB0.D0FIFOSEL.WORD |= USB_BIGEND;

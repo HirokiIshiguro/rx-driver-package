@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2015(2020) Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_usb_preg_abs.c
+ * Version      : 1.44
  * Description  : Call USB Peripheral register access function
  ***********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -31,6 +19,10 @@
  *         : 31.05.2019 1.26 Added support for GNUC and ICCRX.
  *         : 30.07.2019 1.27 RX72M is added.
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 31.05.2021 1.31 RX671 USB1 is added.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 30.09.2023 1.42 USBX HCDC is supported.
+ *         : 01.03.2025 1.44 Change Disclaimer.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -469,11 +461,11 @@ void usb_pstd_set_stall_pipe0(void)
 uint8_t *usb_pstd_write_fifo(uint16_t count, uint16_t pipemode, uint8_t *write_p)
 {
     uint16_t even;
-#if ((USB_CFG_USE_USBIP == USB_CFG_IP1) && (!defined(BSP_MCU_RX63N)))
+#if ((USB_CFG_USE_USBIP == USB_CFG_IP1) && (!(defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX671))))
     uint16_t odd;
 #endif  /* USB_CFG_USE_USBIP == USB_CFG_IP1 */
 
-#if (USB_CFG_USE_USBIP == USB_CFG_IP0) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)
+#if (USB_CFG_USE_USBIP == USB_CFG_IP0) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
     /* WAIT_LOOP */
     for (even = (uint16_t)(count >> 1); (0 != even); --even)
     {
@@ -556,18 +548,18 @@ uint8_t *usb_pstd_write_fifo(uint16_t count, uint16_t pipemode, uint8_t *write_p
 uint8_t *usb_pstd_read_fifo(uint16_t count, uint16_t pipemode, uint8_t *read_p)
 {
     uint16_t even;
-#if ((USB_CFG_USE_USBIP == USB_CFG_IP1) && (!defined(BSP_MCU_RX63N)))
+#if ((USB_CFG_USE_USBIP == USB_CFG_IP1) && (!(defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX671))))
     uint16_t odd;
 #endif  /* USB_CFG_USE_USBIP == USB_CFG_IP0 */
     uint32_t odd_byte_data_temp;
 
-#if !((USB_CFG_USE_USBIP == USB_CFG_IP0) || defined(BSP_MCU_RX63N)) || defined(BSP_MCU_RX62N)
+#if !((USB_CFG_USE_USBIP == USB_CFG_IP0) || defined(BSP_MCU_RX63N)) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
 #if USB_CFG_ENDIAN != USB_CFG_LITTLE
     uint16_t    i;
 #endif  /* USB_CFG_ENDIAN != USB_CFG_LITTLE */
 #endif /* !((USB_CFG_USE_USBIP == USB_CFG_IP0) || defined(BSP_MCU_RX63N)) */
 
-#if (USB_CFG_USE_USBIP == USB_CFG_IP0) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N)
+#if (USB_CFG_USE_USBIP == USB_CFG_IP0) || defined(BSP_MCU_RX63N) || defined(BSP_MCU_RX62N) || defined(BSP_MCU_RX671)
     /* WAIT_LOOP */
     for (even = (uint16_t)(count >> 1); (0 != even); --even)
     {
@@ -739,7 +731,6 @@ void usb_pstd_interrupt_clock(void)
     if (g_usb_cstd_suspend_mode != USB_NORMAL_MODE)
     {
         hw_usb_set_suspendm(); /* UTMI Normal Mode (Not Suspend Mode) */
-        usb_cpu_delay_1us(100);
         g_usb_cstd_suspend_mode = USB_NORMAL_MODE;
     }
 }

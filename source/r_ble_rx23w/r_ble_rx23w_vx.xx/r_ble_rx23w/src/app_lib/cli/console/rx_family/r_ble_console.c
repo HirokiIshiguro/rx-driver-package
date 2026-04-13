@@ -1,24 +1,11 @@
-/**********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2019-2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-**********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
+
 /**********************************************************************************************************************
  * File Name: r_ble_console.c
- * Version : 1.0
  * Description : Command Line Interface Library (For RX23W).
  *********************************************************************************************************************/
 #include <stdio.h>
@@ -59,6 +46,8 @@ volatile bool g_cli_tx_flg;
 volatile bool g_cli_rx_flg;
 static uint8_t state;
 static sci_hdl_t serial_hdl;
+static uint8_t gs_cli_buff[BLE_TX_BUFSIZ];
+static ble_cli_event_cb_t gs_cli_event_cb;
 
 /*********************************************************************************************************************
  * Function Name: sci_callback
@@ -99,6 +88,12 @@ static void sci_callback(void *p_args)
         default:
         {
         } break;
+    }
+
+    if( NULL != gs_cli_event_cb )
+    {
+        /* callback SCI event */
+        gs_cli_event_cb();
     }
 }
 
@@ -266,6 +261,19 @@ void console_init(void)
 
     g_cli_tx_flg = false;
     g_cli_rx_flg = false;
+
+    gs_cli_event_cb = NULL;
+}
+
+/*********************************************************************************************************************
+ * Function Name: console_register_cb
+ * Description  : Register console callback function
+ * Arguments    : cb       - callback function pointer
+ * Return Value : none
+ ********************************************************************************************************************/
+void console_register_event_cb(ble_cli_event_cb_t cb)
+{
+    gs_cli_event_cb = cb;
 }
 
 /*********************************************************************************************************************
@@ -292,6 +300,7 @@ bool console_getc(uint8_t *p_c, bool *p_escape)
 
     *p_c = 0x00;
 
+    /* WAIT_LOOP */
     while (R_SCI_Receive(serial_hdl, &ch, 1) == SCI_SUCCESS)
     {
         switch (state)
@@ -336,19 +345,28 @@ bool console_getc(uint8_t *p_c, bool *p_escape)
  ********************************************************************************************************************/
 void console_putsf(const char *p_format, ...)
 {
-    uint8_t b[BLE_TX_BUFSIZ] = {0};
     va_list va;
     sci_err_t ret;
 
+    /* WAIT_LOOP */
+    while(1)
+    {
+        if(false == g_cli_tx_flg)
+        {
+            break;
+        }
+    }
+
+    gs_cli_buff[0] = '\0';
+
     va_start(va, p_format);
-    vsnprintf((char *)b, BLE_TX_BUFSIZ, p_format, va);
+    vsnprintf((char *)gs_cli_buff, BLE_TX_BUFSIZ, p_format, va);
     va_end(va);
 
-    /* TODO: Remove this after support UART DMA transmission. */    
     do
     {
-        ret = R_SCI_Send(serial_hdl, b, (uint16_t)strlen((const char *)b));
-    } while ((ret == SCI_ERR_XCVR_BUSY) || (ret == SCI_ERR_INSUFFICIENT_SPACE));
+        ret = R_SCI_Send(serial_hdl, gs_cli_buff, (uint16_t)strlen((const char *)gs_cli_buff));
+    } while ((ret == SCI_ERR_XCVR_BUSY) || (ret == SCI_ERR_INSUFFICIENT_SPACE)); /* WAIT_LOOP */
 
     if( ret == SCI_SUCCESS )
     {

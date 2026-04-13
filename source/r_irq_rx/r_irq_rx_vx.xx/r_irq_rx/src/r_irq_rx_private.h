@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_irq_rx_private.h
@@ -46,19 +33,44 @@
 *         : 15.08.2019  3.20    Added support for RX72M.
 *         : 25.11.2019  3.30    Added support RX13T.
 *         : 30.12.2019  3.40    Added support RX66N, RX72N.
+*         : 31.03.2020  3.50    Added support RX23E-A.
+*         : 30.06.2020  3.60    Changed revision to reflect demo upgrade.
+*         : 31.03.2021  3.70    Added support RX671.
+*         : 15.04.2021  3.80    Added support RX140.
+*         : 13.09.2021  3.90    Added RX671 Demo.
+*         : 14.03.2022  4.00    Added support RX66T-48Pin.
+*         : 31.03.2022  4.10    Added support RX660.
+*         : 28.06.2022  4.20    Updated demo projects.
+*         : 15.08.2022  4.30    Added support RX26T.
+*                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 29.05.2023  4.40    Added support RX23E-B.
+*                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024  4.50    Added support RX260,RX261.
+*                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*                               Updated constraint in MDF file to disable configuration of unsupported channels for RX260, RX261.
+*                               Updated .ftl file to set register value using BYTE format.
+*         : 01.11.2024  4.60    Updated constraint in MDF file to disable configuration of unsupported channels for all devices.
+*         : 31.12.2024  4.70    Added support Nested Interrupt.
+*         : 15.03.2025  4.71    Updated disclaimer.
+*         : 23.06.2025  4.80    Added support for RX26T-32Pins.
+*                               Updated constraint in MDF file to disable configuration of unsupported channels for RX26T-32Pin.
+*                               Removed doc folder and updated .rcpc file in FITDemos.
+*         : 30.10.2025  4.90    Added support for RX14T.
+*                               Updated MDF using Category.
 ***********************************************************************************************************************/
-#ifndef R_IRQ_PRIVATE_H_
-#define R_IRQ_PRIVATE_H_
 
 #include "platform.h"
 #include "r_irq_rx_config.h"
+
+#ifndef R_IRQ_PRIVATE_H_
+#define R_IRQ_PRIVATE_H_
 
 /******************************************************************************
 Macro definitions
 ******************************************************************************/
 /* Version Number of API. */
-#define IRQ_RX_VERSION_MAJOR           (3)
-#define IRQ_RX_VERSION_MINOR           (40)
+#define IRQ_RX_VERSION_MAJOR           (4)
+#define IRQ_RX_VERSION_MINOR           (90)
 
 /* Bit position of interrupt enable bits in interrupt enable register. */
 #define IRQ_IEN_MASK_IRQ0   (0x01)
@@ -74,8 +86,8 @@ Macro definitions
 #endif
 
 #if defined(VECT_ICU_IRQ15)
-#define IRQ_IEN_MASK_IRQ8   (0x01)
-#define IRQ_IEN_MASK_IRQ9   (0x02)
+#define IRQ_IEN_MASK_IRQ8    (0x01)
+#define IRQ_IEN_MASK_IRQ9    (0x02)
 #define IRQ_IEN_MASK_IRQ10   (0x04)
 #define IRQ_IEN_MASK_IRQ11   (0x08)
 #define IRQ_IEN_MASK_IRQ12   (0x10)
@@ -83,37 +95,6 @@ Macro definitions
 #define IRQ_IEN_MASK_IRQ14   (0x40)
 #define IRQ_IEN_MASK_IRQ15   (0x80)
 #endif
-
-
-/******************************************************************************
-Typedef definitions
-******************************************************************************/
-typedef void(*irq_callback)(void *pargs);
-
-typedef enum
-{
-    IRQ_BIT0 = 0x01,
-    IRQ_BIT1 = 0x02,
-    IRQ_BIT2 = 0x04,
-    IRQ_BIT3 = 0x08,
-    IRQ_BIT4 = 0x10,
-    IRQ_BIT5 = 0x20,
-    IRQ_BIT6 = 0x40,
-    IRQ_BIT7 = 0x80,
-} irq_8bit_mask_t;
-
-/* Definition of  structure */
-typedef struct irq_init_block_s
-{
-    irq_number_t const irq_num;
-    uint8_t const ien_bit_mask;    /* Bit mask for the interrupt enable register bit for this IRQ. */
-    uint8_t const ier_reg_index;   /* An index to the Interrupt enable register location for this interrupt. */
-    uint8_t const filt_clk_div;    /* PCLK divisor setting for the input pin digital filter. */
-    uint8_t const filt_enable;     /* Filter enable setting (on or off) for the input pin digital filter. */
-    irq_callback *const pirq_callback; /* pointer to callback function pointer. */
-    uint8_t const *pirq_in_port;    /* Pointer to the I/O port input data register for this IRQ. */
-    irq_8bit_mask_t irq_port_bit;  /* I/O port input data bit mask for this IRQ. */
-} irq_init_block_t;
 
 
 /******************************************************************************
@@ -155,6 +136,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ0      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ0_PORT) || ('j' == IRQ_PORT_IRQ0_PORT))
 #define IRQ_PORT_IRQ0      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ0_PORT) || ('h' == IRQ_PORT_IRQ0_PORT))
+#define IRQ_PORT_IRQ0      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ0_PORT */
 
 #if ('0' == IRQ_PORT_IRQ0_BIT)
@@ -218,6 +201,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ1      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ1_PORT) || ('j' == IRQ_PORT_IRQ1_PORT))
 #define IRQ_PORT_IRQ1      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ1_PORT) || ('h' == IRQ_PORT_IRQ1_PORT))
+#define IRQ_PORT_IRQ1      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ1_PORT */
 
 #if ('0' == IRQ_PORT_IRQ1_BIT)
@@ -281,6 +266,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ2      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ2_PORT) || ('j' == IRQ_PORT_IRQ2_PORT))
 #define IRQ_PORT_IRQ2      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ2_PORT) || ('h' == IRQ_PORT_IRQ2_PORT))
+#define IRQ_PORT_IRQ2      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ2_PORT */
 
 #if ('0' == IRQ_PORT_IRQ2_BIT)
@@ -344,6 +331,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ3      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ3_PORT) || ('j' == IRQ_PORT_IRQ3_PORT))
 #define IRQ_PORT_IRQ3      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ3_PORT) || ('h' == IRQ_PORT_IRQ3_PORT))
+#define IRQ_PORT_IRQ3      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ3_PORT */
 
 #if ('0' == IRQ_PORT_IRQ3_BIT)
@@ -407,6 +396,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ4      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ4_PORT) || ('j' == IRQ_PORT_IRQ4_PORT))
 #define IRQ_PORT_IRQ4      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ4_PORT) || ('h' == IRQ_PORT_IRQ4_PORT))
+#define IRQ_PORT_IRQ4      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ4_PORT */
 
 #if ('0' == IRQ_PORT_IRQ4_BIT)
@@ -470,6 +461,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ5      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ5_PORT) || ('j' == IRQ_PORT_IRQ5_PORT))
 #define IRQ_PORT_IRQ5      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ5_PORT) || ('h' == IRQ_PORT_IRQ5_PORT))
+#define IRQ_PORT_IRQ5      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ5_PORT */
 
 #if ('0' == IRQ_PORT_IRQ5_BIT)
@@ -533,6 +526,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ6      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ6_PORT) || ('j' == IRQ_PORT_IRQ6_PORT))
 #define IRQ_PORT_IRQ6      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ6_PORT) || ('h' == IRQ_PORT_IRQ6_PORT))
+#define IRQ_PORT_IRQ6      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ6_PORT */
 
 #if ('0' == IRQ_PORT_IRQ6_BIT)
@@ -596,6 +591,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ7      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ7_PORT) || ('j' == IRQ_PORT_IRQ7_PORT))
 #define IRQ_PORT_IRQ7      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ7_PORT) || ('h' == IRQ_PORT_IRQ7_PORT))
+#define IRQ_PORT_IRQ7      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ7_PORT */
 
 #if ('0' == IRQ_PORT_IRQ7_BIT)
@@ -659,6 +656,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ8      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ8_PORT) || ('j' == IRQ_PORT_IRQ8_PORT))
 #define IRQ_PORT_IRQ8      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ8_PORT) || ('h' == IRQ_PORT_IRQ8_PORT))
+#define IRQ_PORT_IRQ8      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ8_PORT */
 
 #if ('0' == IRQ_PORT_IRQ8_BIT)
@@ -722,6 +721,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ9      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ9_PORT) || ('j' == IRQ_PORT_IRQ9_PORT))
 #define IRQ_PORT_IRQ9      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ9_PORT) || ('h' == IRQ_PORT_IRQ9_PORT))
+#define IRQ_PORT_IRQ9      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ9_PORT */
 
 #if ('0' == IRQ_PORT_IRQ9_BIT)
@@ -785,6 +786,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ10      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ10_PORT) || ('j' == IRQ_PORT_IRQ10_PORT))
 #define IRQ_PORT_IRQ10      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ10_PORT) || ('h' == IRQ_PORT_IRQ10_PORT))
+#define IRQ_PORT_IRQ10      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ10_PORT */
 
 #if ('0' == IRQ_PORT_IRQ10_BIT)
@@ -848,6 +851,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ11      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ11_PORT) || ('j' == IRQ_PORT_IRQ11_PORT))
 #define IRQ_PORT_IRQ11      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ11_PORT) || ('h' == IRQ_PORT_IRQ11_PORT))
+#define IRQ_PORT_IRQ11      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ11_PORT */
 
 #if ('0' == IRQ_PORT_IRQ11_BIT)
@@ -911,6 +916,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ12      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ12_PORT) || ('j' == IRQ_PORT_IRQ12_PORT))
 #define IRQ_PORT_IRQ12      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ12_PORT) || ('h' == IRQ_PORT_IRQ12_PORT))
+#define IRQ_PORT_IRQ12      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ12_PORT */
 
 #if ('0' == IRQ_PORT_IRQ12_BIT)
@@ -974,6 +981,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ13      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ13_PORT) || ('j' == IRQ_PORT_IRQ13_PORT))
 #define IRQ_PORT_IRQ13      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ13_PORT) || ('h' == IRQ_PORT_IRQ13_PORT))
+#define IRQ_PORT_IRQ13      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ13_PORT */
 
 #if ('0' == IRQ_PORT_IRQ13_BIT)
@@ -1037,6 +1046,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ14      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ14_PORT) || ('j' == IRQ_PORT_IRQ14_PORT))
 #define IRQ_PORT_IRQ14      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ14_PORT) || ('h' == IRQ_PORT_IRQ14_PORT))
+#define IRQ_PORT_IRQ14      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ14_PORT */
 
 #if ('0' == IRQ_PORT_IRQ14_BIT)
@@ -1100,6 +1111,8 @@ Port and pin definitions for Smart Configurator
 #define IRQ_PORT_IRQ15      (PORTG)
 #elif (('J' == IRQ_PORT_IRQ15_PORT) || ('j' == IRQ_PORT_IRQ15_PORT))
 #define IRQ_PORT_IRQ15      (PORTJ)
+#elif (('H' == IRQ_PORT_IRQ15_PORT) || ('h' == IRQ_PORT_IRQ15_PORT))
+#define IRQ_PORT_IRQ15      (PORTH)
 #endif  /* '0' == IRQ_PORT_IRQ15_PORT */
 
 #if ('0' == IRQ_PORT_IRQ15_BIT)
@@ -1125,6 +1138,44 @@ Port and pin definitions for Smart Configurator
 #else
 #define IRQ_CFG_USE_IRQ15   (0)
 #endif  /* defined(IRQ_PORT_IRQ15) && defined(IRQ_PORT_BIT_IRQ15) */
+
+/******************************************************************************
+Typedef definitions
+******************************************************************************/
+/**********************************************************************************************************************
+ * Function Name: irq_callback
+ * Description  : .
+ * Argument     : pargs
+ * Return Value : .
+ *********************************************************************************************************************/
+typedef void (*irq_callback)(void *pargs);
+
+typedef enum
+{
+    IRQ_BIT0 = 0x01,
+    IRQ_BIT1 = 0x02,
+    IRQ_BIT2 = 0x04,
+    IRQ_BIT3 = 0x08,
+    IRQ_BIT4 = 0x10,
+    IRQ_BIT5 = 0x20,
+    IRQ_BIT6 = 0x40,
+    IRQ_BIT7 = 0x80,
+} irq_8bit_mask_t;
+
+
+/* Definition of  structure */
+typedef struct irq_init_block_s
+{
+    irq_number_t const irq_num;
+    uint8_t const ien_bit_mask;    /* Bit mask for the interrupt enable register bit for this IRQ. */
+    uint8_t const ier_reg_index;   /* An index to the Interrupt enable register location for this interrupt. */
+    uint8_t const filt_clk_div;    /* PCLK divisor setting for the input pin digital filter. */
+    uint8_t const filt_enable;     /* Filter enable setting (on or off) for the input pin digital filter. */
+    irq_callback *const p_irq_callback; /* pointer to callback function pointer. */
+    uint8_t const *p_irq_in_port;    /* Pointer to the I/O port input data register for this IRQ. */
+    irq_8bit_mask_t irq_port_bit;  /* I/O port input data bit mask for this IRQ. */
+} irq_init_block_t;
+
 
 
 #endif /* R_IRQ_PRIVATE_H_ */

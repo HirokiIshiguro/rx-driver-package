@@ -1,27 +1,12 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2019-2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 
 /***********************************************************************************************************************
 * File Name    : r_ble_pf_configs.c
 * Description  : The Link Layer & Host Stack parameters for the BLE FIT module configurations.
-* History      : DD.MM.YYYY Version Description           
-*              : 23.08.2019 1.00    First Release
 ***********************************************************************************************************************/
 
 #include <stdio.h>
@@ -175,11 +160,11 @@ BLE_SECTION_C(2) const uint16_t g_ble_sync_set_max = BLE_CFG_RF_SYNC_SET_MAX;
 /**** LL connection entry area (1byte) ****/
 /******************************************/
 #if (BLE_CFG_LIB_TYPE == 1)
-#define BLE_CNTL_CONN_ENT         (328)
+#define BLE_CNTL_CONN_ENT         (308)
 #elif (BLE_CFG_LIB_TYPE == 2)
-#define BLE_CNTL_CONN_ENT         (316)
+#define BLE_CNTL_CONN_ENT         (264)
 #else /* (BLE_CFG_LIB_TYPE == x) */
-#define BLE_CNTL_CONN_ENT         (336)
+#define BLE_CNTL_CONN_ENT         (316)
 #endif /* (BLE_CFG_LIB_TYPE == x) */
 #define BLE_CNTL_CONN_ENT_MAX                       \
 (                                                   \
@@ -190,7 +175,7 @@ BLE_SECTION_C(2) const uint16_t g_ble_sync_set_max = BLE_CFG_RF_SYNC_SET_MAX;
 /******************************************/
 /**** LL Advertising set area (1byte)  ****/
 /******************************************/
-#define BLE_CNTL_ADV_SET          (152)
+#define BLE_CNTL_ADV_SET          (156)
 #define BLE_CNTL_ADV_SET_MAX                        \
 (                                                   \
     (BLE_CNTL_ADV_SET * BLE_CFG_RF_ADV_SET_MAX) +   \
@@ -229,11 +214,13 @@ BLE_SECTION_C(4) const uint32_t  g_ble_dev_data_cf_addr = BLE_DEV_DATA_CF_ADDR;
 BLE_SECTION_C(4) const uint32_t  g_ble_dev_data_cf_addr = 0U;
 #endif /* (BLE_CFG_DEV_DATA_CF_BLOCK >= 0) && (BLE_CFG_DEV_DATA_CF_BLOCK <= 255) */
 
+#if (BLE_CFG_EN_SEC_DATA != 0)
 #if ((BLE_CFG_DEV_DATA_DF_BLOCK  >= 0) && (BLE_CFG_DEV_DATA_DF_BLOCK  <= 7)) && \
     ((BLE_CFG_SECD_DATA_DF_BLOCK >= 0) && (BLE_CFG_SECD_DATA_DF_BLOCK <= 7)) && \
     (BLE_CFG_DEV_DATA_DF_BLOCK == BLE_CFG_SECD_DATA_DF_BLOCK)
 #error "error: The same block number is specified for BLE_CFG_DEV_DATA_DF_BLOCK and BLE_CFG_SECD_DATA_DF_BLOCK"
 #endif /* (BLE_CFG_DEV_DATA_DF_BLOCK == BLE_CFG_SECD_DATA_DF_BLOCK) */
+#endif /* (BLE_CFG_EN_SEC_DATA != 0) */
 
 #if (BLE_CFG_DEV_DATA_DF_BLOCK >= 0) && (BLE_CFG_DEV_DATA_DF_BLOCK <= 7)
 BLE_SECTION_C(4) const uint32_t  g_ble_dev_data_df_addr = BLE_DEV_DATA_DF_ADDR;
@@ -303,7 +290,7 @@ BLE_SECTION_C(1) const uint8_t g_ble_rf_config[] =
 /**** Tx Power setting              ****/
 /***************************************/
 #if (BLE_CFG_RF_DEF_TX_POW >= 0) && (BLE_CFG_RF_DEF_TX_POW <= 2)
-    /**** Defalut Tx Power Setting ****/
+    /**** Default Tx Power Setting ****/
     (BLE_CFG_RF_DEF_TX_POW << 0) | 
 #else /* BLE_CFG_RF_DEF_TX_POW */
     #error "error: default Tx Power setting (BLE_CFG_RF_DEF_TX_POW)"
@@ -328,10 +315,10 @@ BLE_SECTION_C(1) const uint8_t g_ble_rf_config[] =
     #error "error: Max Tx Power setting (BLE_CFG_RF_MAX_TX_POW)"
 #endif /* BLE_CFG_RF_MAX_TX_POW */
 #if (BLE_CFG_RF_CLKOUT_EN >= 0) && (BLE_CFG_RF_CLKOUT_EN <= 7)
-    /**** RF clock output settng ****/
+    /**** RF clock output setting ****/
     (BLE_CFG_RF_CLKOUT_EN << 4) |
 #else /* BLE_CFG_RF_CLKOUT_EN  */
-    #error "error: RF clock output settng (BLE_CFG_RF_CLKOUT_EN)"
+    #error "error: RF clock output setting (BLE_CFG_RF_CLKOUT_EN)"
 #endif /* BLE_CFG_RF_CLKOUT_EN */
 
     0x00 /* base value */

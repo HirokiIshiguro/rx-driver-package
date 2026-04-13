@@ -1,21 +1,8 @@
 /***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
- * No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
- * applicable laws, including copyright laws. 
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO 
- * THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the 
- * following link:
- * http://www.renesas.com/disclaimer 
- *
- * Copyright (C) 2013(2019) Renesas Electronics Corporation. All rights reserved.
- **********************************************************************************************************************/
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /***********************************************************************************************************************
  * File Name    : r_riic_private.h
  * Description  : Functions for using RIIC on RX devices. 
@@ -67,6 +54,16 @@
  *         : 30.07.2019 2.43     Added RX72M support.
  *         : 10.10.2019 2.44     Added RX13T support.
  *         : 22.11.2019 2.45     Added RX66N, RX72N support.
+ *         : 10.03.2020 2.46     Added RX23E-A support.
+ *         : 30.06.2021 2.48     Added RX671 support.
+ *         : 31.07.2021 2.49     Added RX140 support.
+ *         : 31.12.2021 2.50     Added RX660 support.
+ *         : 31.03.2023 2.70     Added RX26T support.
+ *         : 29.05.2023 2.80     Added RX23E-B support.
+ *                               Fixed to comply with GSCE Coding Standards Rev.6.5.0
+ *         : 08.08.2024 3.00     Added RX260, RX261 support.
+ *         : 15.03.2025 3.01     Updated disclaimer.
+ *         : 30.10.2025 3.10     Added RX14T support.
  **********************************************************************************************************************/
 /* Guards against multiple inclusion */
 #ifndef RIIC_PRIVATE_H
@@ -90,14 +87,22 @@
         #include "./targets/rx64m/r_riic_rx64m_private.h"
     #elif defined(BSP_MCU_RX65N)
         #include "./targets/rx65n/r_riic_rx65n_private.h"
+    #elif defined(BSP_MCU_RX660)
+        #include "./targets/rx660/r_riic_rx660_private.h"
     #elif defined(BSP_MCU_RX66T)
         #include "./targets/rx66t/r_riic_rx66t_private.h"
+    #elif defined(BSP_MCU_RX671)
+        #include "./targets/rx671/r_riic_rx671_private.h"
     #elif defined(BSP_MCU_RX71M)
         #include "./targets/rx71m/r_riic_rx71m_private.h"
     #elif defined(BSP_MCU_RX231)
         #include "./targets/rx231/r_riic_rx231_private.h"
     #elif defined(BSP_MCU_RX130)
         #include "./targets/rx130/r_riic_rx130_private.h"
+    #elif defined(BSP_MCU_RX140)
+        #include "./targets/rx140/r_riic_rx140_private.h"
+    #elif defined(BSP_MCU_RX14T)
+        #include "./targets/rx14t/r_riic_rx14t_private.h"
     #elif defined(BSP_MCU_RX230)
         #include "./targets/rx230/r_riic_rx230_private.h"
     #elif defined(BSP_MCU_RX23T)
@@ -118,6 +123,16 @@
         #include "./targets/rx66n/r_riic_rx66n_private.h"
     #elif defined(BSP_MCU_RX72N)
         #include "./targets/rx72n/r_riic_rx72n_private.h"
+    #elif defined(BSP_MCU_RX23E_A)
+        #include "./targets/rx23e-a/r_riic_rx23e_a_private.h"
+    #elif defined(BSP_MCU_RX26T)
+        #include "./targets/rx26t/r_riic_rx26t_private.h"
+    #elif defined(BSP_MCU_RX23E_B)
+        #include "./targets/rx23e-b/r_riic_rx23e_b_private.h"
+    #elif defined(BSP_MCU_RX260)
+        #include "./targets/rx260/r_riic_rx260_private.h"
+    #elif defined(BSP_MCU_RX261)
+        #include "./targets/rx261/r_riic_rx261_private.h"
     #else
         #error "This MCU is not supported by the current r_riic_rx module."
     #endif
@@ -610,31 +625,171 @@ typedef struct
 /***********************************************************************************************************************
  Exported global functions (to be accessed by other files)
  **********************************************************************************************************************/
+/******************************************************************************
+ * Function Name: riic_mcu_check_channel
+ * Description  : .
+ * Argument     : channe
+ * Return Value : .
+ *****************************************************************************/
 bool riic_mcu_check_channel (uint8_t channe);
+
+/******************************************************************************
+ * Function Name: riic_mcu_int_init
+ * Description  : .
+ * Argument     : channe
+ * Return Value : .
+ *****************************************************************************/
 void riic_mcu_int_init (uint8_t channe);
+
+/******************************************************************************
+ * Function Name: riic_mcu_check_ir_txi
+ * Description  : .
+ * Argument     : channel
+ * Return Value : .
+ *****************************************************************************/
 uint8_t riic_mcu_check_ir_txi (uint8_t channel);
+
+/******************************************************************************
+ * Function Name: riic_mcu_check_ir_rxi
+ * Description  : .
+ * Argument     : channel
+ * Return Value : .
+ *****************************************************************************/
 uint8_t riic_mcu_check_ir_rxi (uint8_t channel);
+
+/******************************************************************************
+ * Function Name: riic_mcu_clear_ir_txi
+ * Description  : .
+ * Argument     : channel
+ * Return Value : .
+ *****************************************************************************/
 void riic_mcu_clear_ir_txi (uint8_t channel);
+
+/******************************************************************************
+ * Function Name: riic_mcu_clear_ir_rxi
+ * Description  : .
+ * Argument     : channel
+ * Return Value : .
+ *****************************************************************************/
 void riic_mcu_clear_ir_rxi (uint8_t channel);
+
+/******************************************************************************
+ * Function Name: riic_mcu_int_enable
+ * Description  : .
+ * Argument     : channe
+ * Return Value : .
+ *****************************************************************************/
 void riic_mcu_int_enable (uint8_t channe);
+
+/******************************************************************************
+ * Function Name: riic_mcu_int_disable
+ * Description  : .
+ * Argument     : channe
+ * Return Value : .
+ *****************************************************************************/
 void riic_mcu_int_disable (uint8_t channe);
+
+/******************************************************************************
+ * Function Name: riic_mcu_power_on
+ * Description  : .
+ * Argument     : channel
+ * Return Value : .
+ *****************************************************************************/
 void riic_mcu_power_on (uint8_t channel);
+
+/******************************************************************************
+ * Function Name: riic_mcu_power_off
+ * Description  : .
+ * Argument     : channel
+ * Return Value : .
+ *****************************************************************************/
 void riic_mcu_power_off (uint8_t channel);
+
+/******************************************************************************
+ * Function Name: riic_mcu_hardware_lock
+ * Description  : .
+ * Argument     : channel
+ * Return Value : .
+ *****************************************************************************/
 bool riic_mcu_hardware_lock (uint8_t channel);
+
+/******************************************************************************
+ * Function Name: riic_mcu_hardware_unlock
+ * Description  : .
+ * Argument     : channel
+ * Return Value : .
+ *****************************************************************************/
 void riic_mcu_hardware_unlock (uint8_t channel);
+
+/******************************************************************************
+ * Function Name: riic_mcu_check_freq
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 double riic_mcu_check_freq (void);
+
+/******************************************************************************
+ * Function Name: riic_mcu_int_icier_setting
+ * Description  : .
+ * Arguments    : channel
+ *              : New_icier
+ * Return Value : .
+ *****************************************************************************/
 void riic_mcu_int_icier_setting (uint8_t channel, uint8_t New_icier);
 
     #if (1U == RIIC_CFG_PORT_SET_PROCESSING)
+/******************************************************************************
+ * Function Name: riic_mcu_io_open
+ * Description  : .
+ * Argument     : channe
+ * Return Value : .
+ *****************************************************************************/
 void riic_mcu_io_open (uint8_t channe);
+
+/******************************************************************************
+ * Function Name: riic_mcu_mpc_enable
+ * Description  : .
+ * Argument     : channe
+ * Return Value : .
+ *****************************************************************************/
 void riic_mcu_mpc_enable (uint8_t channe);
+
+/******************************************************************************
+ * Function Name: riic_mcu_mpc_disable
+ * Description  : .
+ * Argument     : channe
+ * Return Value : .
+ *****************************************************************************/
 void riic_mcu_mpc_disable (uint8_t channe);
     #endif
 
     #if (1U == RIIC_CFG_CH0_INCLUDED)
+/******************************************************************************
+ * Function Name: riic0_eei_sub
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 void riic0_eei_sub (void);
+
+/******************************************************************************
+ * Function Name: riic0_txi_sub
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 void riic0_txi_sub (void);
+
+/******************************************************************************
+ * Function Name: riic0_rxi_sub
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 void riic0_rxi_sub (void);
+
+/******************************************************************************
+ * Function Name: riic0_tei_sub
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
 void riic0_tei_sub (void);
     #endif
 

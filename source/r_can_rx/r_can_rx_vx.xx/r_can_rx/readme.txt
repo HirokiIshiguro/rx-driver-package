@@ -1,16 +1,7 @@
-PLEASE REFER TO THE APPLICATION NOTE r01an2472eu0215_can FOR THIS DRIVER FOR MORE INFORMATION
+PLEASE REFER TO THE APPLICATION NOTE FOR THIS DRIVER FOR MORE INFORMATION
 
 r_can_rx
 =========
-
-Document Number 
----------------
-R01AN2472EU0320
-R01AN2472JU0320
-
-Version
--------
-v3.20.
 
 Overview
 --------
@@ -24,7 +15,7 @@ Features
         - Multiple CAN channels.
         - Loopback modes for easy testing.
         - Remote frames.
-        - Bus error checking. 
+        - Bus error checking.
 
 Supported MCUs
 --------------
@@ -32,6 +23,7 @@ Supported MCUs
 * RX65N/RX651 Groups
 * RX66T Group
 * RX66N Group
+* RX671 Group
 * RX71M Group
 * RX72M Group
 * RX72N Group
@@ -45,15 +37,12 @@ Boards Tested On
 * RSKRX65N+ 2MB
 * RSKRX66N
 * RSKRX66T
+* RSKRX671
 * RSKRX71M+
 * RSKRX72M
 * RSKRX72N
 * RSKRX72T
 
-
-Limitations
------------
-* CAN FIFO not implemented.
 
 Peripherals Used Directly
 -------------------------
@@ -61,7 +50,7 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp_rx     v5.20 or greater (See platform.h)
+* r_bsp_rx     v7.70 or greater (See platform.h)
 
 How to add the driver to your project
 ----------------------------------------
@@ -75,9 +64,9 @@ How to add the driver to your project
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.01
-* GNURX 4.08.04
-* ICCRX 4.12.01
+* Renesas RX v3.07
+* GNURX 14.2.0.202505
+* ICCRX 5.20.01
 
 File Structure
 --------------
@@ -87,14 +76,13 @@ r_can_rx
 |
 +---doc
 |   +-- en
-|       r01an2472eu0320-rx-can.pdf
+|       r01an2472eu{VERSION_NUMBER}-rx-can.pdf
 |   +-- ja
-|       r01an2472ju0320-rx-can.pdf
-|
-+---ref
-|       r_can_rx_config_reference.h (copy to ../r_config)
+|       r01an2472ju{VERSION_NUMBER}-rx-can.pdf
 |
 +---src
         r_can_rx.c
-        r_can_rx.h
+r_config
+    r_can_rx_config.h
 
+r_can_rx.ftl

@@ -1,10 +1,9 @@
 <#--
-  Copyright(C) 2015 Renesas Electronics Corporation
-  RENESAS ELECTRONICS CONFIDENTIAL AND PROPRIETARY
-  This program must be used solely for the purpose for which it was furnished 
-  by Renesas Electronics Corporation. No part of this program may be reproduced
-  or disclosed to others, in any form, without the prior written permission of 
-  Renesas Electronics Corporation.
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 -->
 <#-- = DECLARE FUNCTION INFORMATION HERE =================== -->
 <#assign Function_Base_Name = "R_USB_PinSet">
@@ -26,10 +25,14 @@ void ${Function_Name}()
 </#macro> 
 
 <#macro channelpincode pin>
+<#if (headerInfo.device?contains("R5F5671") && (pin.pinName == 'USB0_DP' || pin.pinName == 'USB0_DM'))>
+    /* Skip setting for ${pin.pinName} - Delete this line if unnecessary */
+<#else>
 
     /* Set ${pin.pinName} pin */
     MPC.${pin.assignedPinName}PFS.BYTE = 0x${pin.pinMPC}U;
     PORT${pin.portNum}.PMR.BIT.B${pin.pinBitNum} = 1U;
+</#if>
 </#macro> 
 
 <#macro endsection>

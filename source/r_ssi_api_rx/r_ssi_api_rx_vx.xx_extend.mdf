@@ -1,23 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!--
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products.
-* No other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
-* applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIESREGARDING THIS SOFTWARE, WHETHER EXPRESS, IMPLIED
-* OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
-* NON-INFRINGEMENT.  ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY
-* LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE FOR ANY DIRECT,
-* INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR
-* ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability
-* of this software. By using this software, you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2014-2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
   Purpose: Module Description File (MDF) Example (Schema Version 2.0)
            This is a description of a sample FIT module configuration file
@@ -27,7 +14,91 @@
     <fileVersion>1.00</fileVersion>
     <formatVersion>2.00</formatVersion>
 
-    <fileTemplate></fileTemplate>
+    <fileTemplate>r_pinset_type2</fileTemplate>
+    <resourceInfo>
+      <peripheral name="SSI">
+        <channel number="SSI0">
+          <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSISCK0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SSIWS0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SSITXD0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SSIRXD0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="AUDIO_MCLK">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+        <channel number="SSI1">
+          <constraint display="This setting is only valid for SSI." actionOnFail="disable">"${SSIE}" == "0"</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSISCK1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SSIWS1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SSIDATA1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="AUDIO_MCLK">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+        <channel number="SSIE0">
+          <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSIBCK0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SSILRCK0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SSITXD0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SSIRXD0">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="AUDIO_CLK">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+        <channel number="SSIE1">
+          <constraint display="This setting is only valid for SSIE." actionOnFail="disable">"${SSIE}" == "1"</constraint>
+          <channelConfiguration>
+            <config>API</config>
+          </channelConfiguration>
+          <pin name="SSIBCK1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SSILRCK1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="SSIDATA1">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+          <pin name="AUDIO_CLK">
+            <pinConfiguration config="AUTO"/>
+          </pin>
+        </channel>
+      </peripheral>
+
+    </resourceInfo>
+
     <configuration>
         <property id="SSI_STANDARD_CONFIG" display="Use Standard configuration" default="" keyword="#define SSI_STANDARD_CONFIG" type="checkbox">
             <option id="SSI_STANDARD_CONFIG.#define SSI_USER_UNIQUE_CONFIG      //" display="User unique" value="#define SSI_USER_UNIQUE_CONFIG      //"/>

@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013-2019 Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rtc_rx.c
@@ -46,6 +33,17 @@
 *           30.07.2019 2.77    Added support for RX72M.
 *           22.11.2019 2.78    Added support for RX66N and RX72N.
 *                              Modified comment of API function to Doxygen style.
+*           30.06.2021 2.81    Added support for RX671.
+*           31.07.2021 2.82    Added support for RX140.
+*           31.12.2021 2.83    Added support for RX660.
+*           29.05.2023 2.90    Added support for RX23E-B.
+*                              Updated according to GSCE Code Checker 6.50.
+*           28.06.2024 3.00    Added support for RX260, RX261.
+*                              Added #if statements to avoid warning when declaring the leap_year_test function 
+*                              when RTC_CFG_PARAM_CHECKING_ENABLE or RTC_CFG_CALCULATE_YDAY are not enabled.
+*                              Updated according to GSCE Code Checker 6.50.
+*           15.03.2025 3.01    Updated disclaimer.
+*           30.10.2025 3.10    Added support Nested Interrupt.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -69,14 +67,16 @@ Private global variables and functions
 ***********************************************************************************************************************/
 
 /* Control block for RTC */
-static rtc_ctrl_t rcb = {false, FIT_NO_FUNC};
+static rtc_ctrl_t s_rcb = {false, FIT_NO_FUNC};
 
 #if (RTC_CFG_PARAM_CHECKING_ENABLE)
 static rtc_err_t rtc_check_periodic (rtc_periodic_t freq, uint8_t priority, rtc_cb_func_t p_callback);
-static bool check_valid_time (tm_t * p_time);
+static bool      check_valid_time (tm_t * p_time);
 #endif
 
+#if (RTC_CFG_PARAM_CHECKING_ENABLE) || (RTC_CFG_CALCULATE_YDAY)
 static bool leap_year_test (int curr_year);
+#endif
 
 /* Number of days in month. */
 const uint8_t g_days_in_month[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -117,7 +117,7 @@ const uint8_t g_days_in_month[12] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30
  *            with the R_RTC_Control function after calling the R_RTC_Open function.
  *            
  */
-rtc_err_t R_RTC_Open (rtc_init_t * p_init, tm_t *p_current)
+rtc_err_t R_RTC_Open(rtc_init_t * p_init, tm_t *p_current)
 {
     rtc_err_t err = RTC_SUCCESS;
 
@@ -129,8 +129,7 @@ rtc_err_t R_RTC_Open (rtc_init_t * p_init, tm_t *p_current)
 
 #if (RTC_CFG_PARAM_CHECKING_ENABLE)
     /* Check input values. */
-    if ((FIT_NO_PTR == p_init) || (NULL == p_init)
-     || (p_init->output_freq >= RTC_OUTPUT_END_ENUM))
+    if ((FIT_NO_PTR == p_init) || (NULL == p_init) || (p_init->output_freq >= RTC_OUTPUT_END_ENUM))
     {
         R_BSP_HardwareUnlock(BSP_LOCK_RTC);
         return RTC_ERR_BAD_PARAM;
@@ -156,6 +155,7 @@ rtc_err_t R_RTC_Open (rtc_init_t * p_init, tm_t *p_current)
         else
         {
             /* nothing to do */
+            R_BSP_NOP();
         }
 
         if (RTC_SUCCESS != err)
@@ -164,7 +164,7 @@ rtc_err_t R_RTC_Open (rtc_init_t * p_init, tm_t *p_current)
             return err;
         }
     }
-#endif
+#endif /* RTC_CFG_PARAM_CHECKING_ENABLE */
 
     /* Set the current time if specified (implied cold start) */
     if (true == p_init->set_time)
@@ -180,7 +180,7 @@ rtc_err_t R_RTC_Open (rtc_init_t * p_init, tm_t *p_current)
     rtc_enable_ints();
 
     /* Set callback function for interrupts */
-    rcb.p_callback = p_init->p_callback;
+    s_rcb.p_callback = p_init->p_callback;
 
     /* Set the periodic frequency */
     rtc_set_periodic(p_init->periodic_freq, p_init->periodic_priority);
@@ -189,7 +189,7 @@ rtc_err_t R_RTC_Open (rtc_init_t * p_init, tm_t *p_current)
     rtc_counter_run(RTC_COUNTER_START);
 
     /* Remember that RTC is initialized. */
-    rcb.initialized = true;
+    s_rcb.initialized = true;
 
     return err;     // SUCCESS
 }
@@ -209,7 +209,7 @@ End of function R_RTC_Open
 *                false -
 *                    Time information is invalid.
 ***********************************************************************************************************************/
-static bool check_valid_time (tm_t * p_time)
+static bool check_valid_time(tm_t * p_time)
 {
     /* Used for computing max day of the month. */
     uint32_t max_days;
@@ -294,7 +294,7 @@ End of function check_valid_time
 *                RTC_ERR_MISSING_CALLBACK
 *                   - callback function required but not specified
 ***********************************************************************************************************************/
-static rtc_err_t rtc_check_periodic (rtc_periodic_t freq, uint8_t priority, rtc_cb_func_t p_callback)
+static rtc_err_t rtc_check_periodic(rtc_periodic_t freq, uint8_t priority, rtc_cb_func_t p_callback)
 {
 
     if ((RTC_PERIODIC_OFF != freq) && ((freq < RTC_PERIODIC_256_HZ) || (freq > RTC_PERIODIC_2_SEC)))
@@ -319,9 +319,10 @@ static rtc_err_t rtc_check_periodic (rtc_periodic_t freq, uint8_t priority, rtc_
 /**********************************************************************************************************************
 End of function rtc_check_periodic
 ***********************************************************************************************************************/
-#endif  /* if parameter checking on */
+#endif /* RTC_CFG_PARAM_CHECKING_ENABLE */
 
 
+#if (RTC_CFG_PARAM_CHECKING_ENABLE) || (RTC_CFG_CALCULATE_YDAY)
 /***********************************************************************************************************************
 * Function Name: leap_year_test
 * Description  : Determines whether this is a leap year.
@@ -332,7 +333,7 @@ End of function rtc_check_periodic
 *                false
 *                    - Input year is not a leap year.
 ***********************************************************************************************************************/
-static bool leap_year_test (int curr_year)
+static bool leap_year_test(int curr_year)
 {
     /* Leap year or not? */
     bool is_leap = false;
@@ -352,6 +353,7 @@ static bool leap_year_test (int curr_year)
     else
     {
         /* Nothing to do */
+        R_BSP_NOP();
     }
 
     return is_leap;
@@ -359,6 +361,7 @@ static bool leap_year_test (int curr_year)
 /**********************************************************************************************************************
 End of function leap_year_test
 ***********************************************************************************************************************/
+#endif /* RTC_CFG_PARAM_CHECKING_ENABLE || RTC_CFG_CALCULATE_YDAY */
 
 
 /***********************************************************************************************************************
@@ -385,21 +388,21 @@ End of function leap_year_test
  *            And executing the RTC_CMD_SET_OUTPUT command or the RTC_CMD_SET_CURRENT_TIME command
  *            stops RTC counting while processing.
  */
-rtc_err_t R_RTC_Control (rtc_cmd_t cmd, void *p_args)
+rtc_err_t R_RTC_Control(rtc_cmd_t cmd, void * p_args)
 {
-    rtc_err_t           err=RTC_SUCCESS;
+    rtc_err_t           err = RTC_SUCCESS;
     rtc_output_t        output_freq;
-    rtc_periodic_cfg_t  *p_periodic;
-    rtc_alarm_ctrl_t    *p_alm_ctrl;
-    tm_t                *p_time;
-#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130)
-    rtc_capture_cfg_t   *p_capture;
+    rtc_periodic_cfg_t  * p_periodic;
+    rtc_alarm_ctrl_t    * p_alm_ctrl;
+    tm_t                * p_time;
+#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140) && !defined(BSP_MCU_RX23E_B)
+    rtc_capture_cfg_t   * p_capture;
     rtc_pin_t           pin;
 #endif
 
 
     /* Has RTC been initialized yet? */
-    if (!rcb.initialized)
+    if (!s_rcb.initialized)
     {
         return RTC_ERR_NOT_OPENED;
     }
@@ -424,7 +427,9 @@ rtc_err_t R_RTC_Control (rtc_cmd_t cmd, void *p_args)
     switch (cmd)
     {
         case RTC_CMD_SET_OUTPUT :
-            output_freq = *((rtc_output_t *) p_args);
+
+            /* Cast to 'rtc_output_t *' type */
+            output_freq = *((rtc_output_t *)(p_args));
 #if (RTC_CFG_PARAM_CHECKING_ENABLE)
             if (output_freq >= RTC_OUTPUT_END_ENUM)
             {
@@ -432,21 +437,25 @@ rtc_err_t R_RTC_Control (rtc_cmd_t cmd, void *p_args)
             }
 #endif
             rtc_set_output(output_freq);
-        break;
+            break;
 
         case RTC_CMD_SET_PERIODIC :
+
+            /* Cast to 'rtc_periodic_cfg_t *' type */
             p_periodic = (rtc_periodic_cfg_t *) p_args;
 #if (RTC_CFG_PARAM_CHECKING_ENABLE)
-            err = rtc_check_periodic(p_periodic->frequency, p_periodic->int_priority, rcb.p_callback);
+            err = rtc_check_periodic(p_periodic->frequency, p_periodic->int_priority, s_rcb.p_callback);
             if (RTC_SUCCESS != err)
             {
                 return err;
             }
 #endif
             rtc_set_periodic(p_periodic->frequency, p_periodic->int_priority);
-        break;
+            break;
 
         case RTC_CMD_SET_CURRENT_TIME :
+
+            /* cast to 'tm_t *' type */
             p_time = (tm_t *) p_args;
 #if (RTC_CFG_PARAM_CHECKING_ENABLE)
             if (!check_valid_time(p_time))
@@ -455,9 +464,11 @@ rtc_err_t R_RTC_Control (rtc_cmd_t cmd, void *p_args)
             }
 #endif
             rtc_set_current_time(p_time);
-        break;
+            break;
 
         case RTC_CMD_SET_ALARM_TIME :
+
+            /* cast to 'tm_t *' type */
             p_time = (tm_t *) p_args;
 #if (RTC_CFG_PARAM_CHECKING_ENABLE)
             if (!check_valid_time(p_time))
@@ -466,9 +477,11 @@ rtc_err_t R_RTC_Control (rtc_cmd_t cmd, void *p_args)
             }
 #endif
             rtc_set_alarm_time(p_time);
-        break;
+            break;
 
         case RTC_CMD_ENABLE_ALARM :
+
+            /* cast to 'rtc_alarm_ctrl_t *' type */
             p_alm_ctrl = (rtc_alarm_ctrl_t *) p_args;
 #if (RTC_CFG_PARAM_CHECKING_ENABLE)
             if (p_alm_ctrl->int_priority > 15)
@@ -477,60 +490,71 @@ rtc_err_t R_RTC_Control (rtc_cmd_t cmd, void *p_args)
             }
 #endif
             rtc_enable_alarms(p_alm_ctrl);
-        break;
+            break;
 
         case RTC_CMD_START_COUNTERS :
             rtc_counter_run(RTC_COUNTER_START);
-        break;
+            break;
 
         case RTC_CMD_STOP_COUNTERS :
             rtc_counter_run(RTC_COUNTER_STOP);
-        break;
+            break;
 
         case RTC_CMD_PARTIAL_RESET :     // primarily Output clock, Alarms and Capture registers
             rtc_reset();
-        break;
+            break;
 
-#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130)
+#if !defined(BSP_MCU_RX11_ALL) && !defined(BSP_MCU_RX130) && !defined(BSP_MCU_RX140) && !defined(BSP_MCU_RX23E_B)
         case RTC_CMD_CONFIG_CAPTURE :
+
+            /* cast to 'rtc_capture_cfg_t *' type */
             p_capture = (rtc_capture_cfg_t *) p_args;
 #if (RTC_CFG_PARAM_CHECKING_ENABLE)
-            if ((p_capture->pin >= RTC_NUM_PINS)
-             || (p_capture->edge >= RTC_EDGE_END_ENUM)
-             || ((RTC_FILTER_OFF != p_capture->filter) &&
-                 (RTC_FILTER_DIV1 != p_capture->filter) &&
-                 (RTC_FILTER_DIV32 != p_capture->filter)))
+            if ((p_capture->pin >= RTC_NUM_PINS) \
+                || (p_capture->edge >= RTC_EDGE_END_ENUM) \
+                || ((RTC_FILTER_OFF != p_capture->filter) && \
+                    (RTC_FILTER_DIV1 != p_capture->filter) && \
+                    (RTC_FILTER_DIV32 != p_capture->filter)))
             {
                 return RTC_ERR_BAD_PARAM;
             }
 #endif
             rtc_config_capture(p_capture);
-        break;
+            break;
 
         case RTC_CMD_CHECK_PIN0_CAPTURE :
-            err = rtc_check_capture(RTC_PIN_0, (tm_t *) p_args);
-        break;
+
+            /* cast to 'tm_t *' type */
+            err = rtc_check_capture(RTC_PIN_0, (tm_t *)p_args);
+            break;
 
         case RTC_CMD_CHECK_PIN1_CAPTURE :
-            err = rtc_check_capture(RTC_PIN_1, (tm_t *) p_args);
-        break;
+
+            /* cast to 'tm_t *' type */
+            err = rtc_check_capture(RTC_PIN_1, (tm_t *)p_args);
+            break;
 
         case RTC_CMD_CHECK_PIN2_CAPTURE :
-            err = rtc_check_capture(RTC_PIN_2, (tm_t *) p_args);
-        break;
+
+            /* cast to 'tm_t *' type */
+            err = rtc_check_capture(RTC_PIN_2, (tm_t *)p_args);
+            break;
 
         case RTC_CMD_DISABLE_CAPTURE :
-            pin = *((rtc_pin_t *) p_args);
-    #if (RTC_CFG_PARAM_CHECKING_ENABLE)
+
+            /* Cast to 'rtc_pin_t *' type */
+            pin = *((rtc_pin_t *)p_args);
+#if (RTC_CFG_PARAM_CHECKING_ENABLE)
             if (pin >= RTC_NUM_PINS)
             {
                 return RTC_ERR_BAD_PARAM;
             }
-    #endif
+#endif
             rtc_disable_capture(pin);
-        break;
+            break;
 
-#endif /* not RX11x, RX130 */
+#endif /* !definedBSP_MCU_RX11_ALL && !definedBSP_MCU_RX130 && !definedBSP_MCU_RX140 && !definedBSP_MCU_RX23E_B */
+
 
         default :
             return RTC_ERR_BAD_PARAM;
@@ -564,7 +588,7 @@ End of function R_RTC_Control
  *            For that, it enables carry interrupt (RCR1.CIE bit = 1).  So, do not clear this status flag
  *            in the application software.
  */
-rtc_err_t R_RTC_Read (tm_t *p_current, tm_t *p_alarm)
+rtc_err_t R_RTC_Read(tm_t *p_current, tm_t *p_alarm)
 {
 #if (RTC_CFG_CALCULATE_YDAY == 1)
     int32_t loop;     // Loop counter
@@ -572,7 +596,7 @@ rtc_err_t R_RTC_Read (tm_t *p_current, tm_t *p_alarm)
     rtc_err_t ret = RTC_SUCCESS;
 
 #if (RTC_CFG_PARAM_CHECKING_ENABLE)
-    if (!rcb.initialized)
+    if (!s_rcb.initialized)
     {
         return RTC_ERR_NOT_OPENED;
     }
@@ -633,10 +657,9 @@ End of function R_RTC_Read
  * @details   This function stops counting, resets the RTC, and disables all RTC interrupts.
  * @note      None.
  */
-void R_RTC_Close (void)
+void R_RTC_Close(void)
 {
-
-    if (false == rcb.initialized)
+    if (false == s_rcb.initialized)
     {
         return;
     }
@@ -647,7 +670,7 @@ void R_RTC_Close (void)
 
     /* Do NOT stop sub-clock in case needed by application */
 
-    rcb.initialized = false;
+    s_rcb.initialized = false;
     R_BSP_HardwareUnlock(BSP_LOCK_RTC);
 
     return;
@@ -666,8 +689,9 @@ End of function R_RTC_Close
  *            2 bytes are the minor version number.
  * @note      None.
  */
-uint32_t R_RTC_GetVersion (void)
+uint32_t R_RTC_GetVersion(void)
 {
+    /* Cast to 'uint32_t' type */
     return ((((uint32_t) RTC_RX_VERSION_MAJOR) << 16) | ((uint32_t) RTC_RX_VERSION_MINOR));
 }
 /**********************************************************************************************************************
@@ -682,9 +706,10 @@ End of function R_RTC_GetVersion
 *                    Value to convert.
 * Return Value : Converted value.
 ***********************************************************************************************************************/
-int rtc_bcd_to_dec (uint8_t to_convert)
+int rtc_bcd_to_dec(uint8_t to_convert)
 {
-    return (int) ((((to_convert & 0xF0) >> 4) * 10) + (to_convert & 0x0F));
+    /* cast to 'int' type */
+    return (int) ((((to_convert &(0xF0)) >> 4) *(10)) + (to_convert &(0x0F)));
 }
 /**********************************************************************************************************************
 End of function rtc_bcd_to_dec
@@ -698,9 +723,10 @@ End of function rtc_bcd_to_dec
 *                    Value to convert.
 * Return Value : Converted value.
 ***********************************************************************************************************************/
-uint8_t rtc_dec_to_bcd (uint8_t to_convert)
+uint8_t rtc_dec_to_bcd(uint8_t to_convert)
 {
-    return (uint8_t) ((((to_convert / 10) << 4) & 0xF0) | (to_convert % 10));
+    /* Cast to 'uint8_t' type */
+    return (uint8_t) ((((to_convert / 10) << 4) &(0xF0)) | (to_convert % 10));
 }
 /**********************************************************************************************************************
 End of function rtc_dec_to_bcd
@@ -714,15 +740,20 @@ End of function rtc_dec_to_bcd
 * Arguments    : None
 * Return Value : None
 ***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(rtc_alm_isr, VECT(RTC,ALM))
+R_BSP_PRAGMA_STATIC_INTERRUPT (rtc_alm_isr, VECT(RTC, ALM))
 R_BSP_ATTRIB_STATIC_INTERRUPT void rtc_alm_isr(void)
 {
-    if ((NULL != rcb.p_callback) && (FIT_NO_FUNC != rcb.p_callback))
+#if RTC_CFG_ALM_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow Nested Interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
+    if ((NULL != s_rcb.p_callback) && (FIT_NO_FUNC != s_rcb.p_callback))
     {
         rtc_cb_evt_t event = RTC_EVT_ALARM;
 
         /* presence of callback function verified in Control() */
-        rcb.p_callback(&event);
+        s_rcb.p_callback(&event);
     }
 }
 /**********************************************************************************************************************
@@ -737,18 +768,22 @@ End of function rtc_alm_isr
 * Arguments    : None
 * Return Value : None
 ***********************************************************************************************************************/
-R_BSP_PRAGMA_STATIC_INTERRUPT(rtc_prd_isr, VECT(RTC,PRD))
+R_BSP_PRAGMA_STATIC_INTERRUPT (rtc_prd_isr, VECT(RTC, PRD))
 R_BSP_ATTRIB_STATIC_INTERRUPT void rtc_prd_isr(void)
 {
-    if ((NULL != rcb.p_callback) && (FIT_NO_FUNC != rcb.p_callback))
+#if RTC_CFG_PRD_EN_NESTED_INT == 1
+    /* Set bit PSW.I = 1 to allow Nested Interrupt */
+    R_BSP_SETPSW_I();
+#endif
+
+    if ((NULL != s_rcb.p_callback) && (FIT_NO_FUNC != s_rcb.p_callback))
     {
         rtc_cb_evt_t event = RTC_EVT_PERIODIC;
 
         /* presence of callback function verified in Open() and Control() */
-        rcb.p_callback(&event);
+        s_rcb.p_callback(&event);
     }
 }
 /**********************************************************************************************************************
 End of function rtc_prd_isr
 ***********************************************************************************************************************/
-

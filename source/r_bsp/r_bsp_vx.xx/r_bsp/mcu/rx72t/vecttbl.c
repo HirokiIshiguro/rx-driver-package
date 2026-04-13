@@ -1,21 +1,8 @@
-/***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2018 Renesas Electronics Corporation. All rights reserved.
-***********************************************************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
 * File Name    : vecttbl.c
 * Device(s)    : RX72T
@@ -29,7 +16,18 @@
 *                                Added support for GNUC and ICCRX.
 *                                Fixed coding style.
 *         : 31.07.2019 3.00      Fixed initialization for option-setting memory.
-*         : 08.10.2019 2.01      Changed for added support of Renesas RTOS (RI600V4 or RI600PX).
+*         : 08.10.2019 3.01      Changed for added support of Renesas RTOS (RI600V4 or RI600PX).
+*         : 20.11.2020 3.02      Added the setting of ID code protection for BSP_CFG_ID_CODE_ENABLE.
+*         : 29.01.2021 3.03      Added the macro definition of BSP_PRV_SPCC_VALUE and modified the setting of 
+*                                ID code protection for BSP_CFG_ID_CODE_ENABLE.
+*         : 30.11.2021 3.04      Added the following macro definitions and changed the value of BSP_PRV_SPCC_VALUE.
+*                                - BSP_PRV_SPCC_IDE
+*                                - BSP_PRV_SPCC_SEPR
+*                                - BSP_PRV_SPCC_WRPR
+*                                - BSP_PRV_SPCC_RDPR
+*                                - BSP_PRV_SPCC_SPE
+*         : 25.11.2022 3.05      Deleted the duplicate definition.
+*         : 26.02.2025 3.06      Changed the disclaimer.
 ***********************************************************************************************************************/
 
 /***********************************************************************************************************************
@@ -97,6 +95,38 @@ R_BSP_ATTRIB_SECTION_CHANGE_END
     #define BSP_PRV_MDE_VALUE (0xffffffff)    /* little */
 #endif
 
+#if BSP_CFG_ID_CODE_ENABLE == 1
+    #define BSP_PRV_SPCC_IDE   (0xfeffffff)  /* ID code protection is enabled after a reset. */
+#else
+    #define BSP_PRV_SPCC_IDE   (0xffffffff)  /* ID code protection is disabled after a reset. */
+#endif
+
+#if (BSP_CFG_BLOCK_ERASE_CMD_PROTECT_ENABLE == 1) || (BSP_CFG_ID_CODE_ENABLE == 1)
+    #define BSP_PRV_SPCC_SEPR  (0xdfffffff)  /* Block erasure command protection after a reset is enabled. */
+#else
+    #define BSP_PRV_SPCC_SEPR  (0xffffffff)  /* Block erasure command protection after a reset is disabled. */
+#endif
+
+#if (BSP_CFG_PROGRAM_CMD_PROTECT_ENABLE == 1) || (BSP_CFG_ID_CODE_ENABLE == 1)
+    #define BSP_PRV_SPCC_WRPR  (0xbfffffff)  /* Programming command protection after a reset is enabled. */
+#else
+    #define BSP_PRV_SPCC_WRPR  (0xffffffff)  /* Programming command protection after a reset is disabled. */
+#endif
+
+#if (BSP_CFG_READ_CMD_PROTECT_ENABLE == 1) || (BSP_CFG_ID_CODE_ENABLE == 1)
+    #define BSP_PRV_SPCC_RDPR  (0x7fffffff)  /* Read command protection after a reset is enabled. */
+#else
+    #define BSP_PRV_SPCC_RDPR  (0xffffffff)  /* Read command protection after a reset is disabled. */
+#endif
+
+#if BSP_CFG_SERIAL_PROGRAMMER_CONECT_ENABLE == 0
+    #define BSP_PRV_SPCC_SPE   (0xf7ffffff)  /* Connection of a serial programmer after a reset is prohibited. */
+#else
+    #define BSP_PRV_SPCC_SPE   (0xffffffff)  /* Connection of a serial programmer after a reset is permitted. */
+#endif
+
+#define BSP_PRV_SPCC_VALUE ((((BSP_PRV_SPCC_IDE & BSP_PRV_SPCC_SEPR) & BSP_PRV_SPCC_WRPR) & BSP_PRV_SPCC_RDPR) & BSP_PRV_SPCC_SPE)
+
 #if defined(__CCRX__)
 
 #pragma address __SPCCreg    = 0x00120040
@@ -111,7 +141,7 @@ R_BSP_ATTRIB_SECTION_CHANGE_END
 #pragma address __OFS1reg    = 0x0012006c
 #pragma address __ROMCODEreg = 0x0012007c
 
-const uint32_t __SPCCreg    = 0xffffffff;
+const uint32_t __SPCCreg    = BSP_PRV_SPCC_VALUE;
 const uint32_t __TMEFreg    = BSP_CFG_TRUSTED_MODE_FUNCTION;
 const uint32_t __OSIS1reg   = BSP_CFG_ID_CODE_LONG_1;
 const uint32_t __OSIS2reg   = BSP_CFG_ID_CODE_LONG_2;
@@ -125,7 +155,7 @@ const uint32_t __ROMCODEreg = BSP_CFG_ROMCODE_REG_VALUE;
 
 #elif defined(__GNUC__)
 
-const uint32_t __SPCCreg    __attribute__ ((section(".ofs1"))) = 0xffffffff;
+const uint32_t __SPCCreg    __attribute__ ((section(".ofs1"))) = BSP_PRV_SPCC_VALUE;
 const uint32_t __TMEFreg    __attribute__ ((section(".ofs2"))) = BSP_CFG_TRUSTED_MODE_FUNCTION;
 const st_ofsm_sec_ofs3_t __ofsm_sec_ofs3   __attribute__ ((section(".ofs3"))) = {
     BSP_CFG_ID_CODE_LONG_1, /* __OSIS1reg */
@@ -143,7 +173,7 @@ const uint32_t __ROMCODEreg __attribute__ ((section(".ofs5"))) = BSP_CFG_ROMCODE
 
 #elif defined(__ICCRX__)
 
-#pragma public_equ = "__SPCC", 0xffffffff
+#pragma public_equ = "__SPCC", BSP_PRV_SPCC_VALUE
 #pragma public_equ = "__TMINF", 0xffffffff
 #pragma public_equ = "__OSIS_1", BSP_CFG_ID_CODE_LONG_1
 #pragma public_equ = "__OSIS_2", BSP_CFG_ID_CODE_LONG_2

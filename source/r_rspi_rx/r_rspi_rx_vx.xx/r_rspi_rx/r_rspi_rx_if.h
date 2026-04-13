@@ -1,20 +1,7 @@
 /***********************************************************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-* applicable laws, including copyright laws. 
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-* following link:
-* http://www.renesas.com/disclaimer 
+* Copyright (c) 2013 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2013 (2014-2019) Renesas Electronics Corporation. All rights reserved.
+* SPDX-License-Identifier: BSD-3-Clause
 ***********************************************************************************************************************/
 /***********************************************************************************************************************
 * File Name    : r_rspi_rx_if.h
@@ -39,15 +26,44 @@
 *         : 20.06.2019 2.02     Supported RX23W.
 *         : 30.07.2019 2.03     Supported RX72M.
 *         : 22.11.2019 2.04     Supported RX72N and RX66N.
+*         : 10.03.2020 2.05     Supported RX23E-A.
+*         : 10.09.2020 3.00     Added new API function R_RSPI_DisableRSPI() and R_RSPI_DisableSpti().
+*         : 30.06.2021 3.01     Supported RX671.
+*         : 31.07.2021 3.02     Supported RX140.
+*         : 31.10.2021 3.03     Version number change.
+*         : 31.12.2021 3.04     Supported RX660.
+*         : 31.03.2023 3.10     Added support for RX26T.
+*                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*                               Added new demo projects.
+*         : 29.05.2023 3.20     Supported RX23E-B.
+*                               Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 18.08.2023 3.30     Modified comments of the following API functions: R_RSPI_IntSptiIerClear, 
+*                               R_RSPI_IntSpriIerClear, R_RSPI_DisableSpti, R_RSPI_DisableRSPI.
+*         : 05.10.2023 3.40     Implemented code to clear the SPRF flag at the start of SPI communication.
+*                               Modified the order of disabling the error interrupt and canceling the error 
+*                               handler registration when disabling interrupts.
+*                               Modified the order of disabling interrupts between SPTI and SPRI
+*                               when disabling interrupts.
+*                               Added include header to fix missing #include platform.h issue in "r_rspi_rx_private.h".
+*         : 28.06.2024 3.50     Supported RX260, RX261.
+*                               Fixed the default value of RSPI_CFG_DUMMY_TXDATA in MDF file
+*                               to match the value in file r_rspi_rx_config.h.
+*         : 15.03.2025 3.51     Updated disclaimer.
+*         : 14.04.2025 3.60     Fixed a bug that could not receive 1 byte in slave mode by removing 
+*                               the "Master mode or tx_count > 1" condition in rspi_sptiX_isr (X = 0, 1, 2).
+*         : 30.10.2025 3.70     Removed support for RX26T-32 Pins.
+*                               Removed doc folder and updated .rcpc file in FITDemos.
+*                               Added byte swap feature.
+*         : 28.11.2025 3.80     Added support Nested interrupt.
+*                               Modified comment of API function to Doxygen style.
 ***********************************************************************************************************************/
-
 #ifndef RSPI_API_HEADER_FILE
 #define RSPI_API_HEADER_FILE
 
 /***********************************************************************************************************************
 Includes   <System Includes> , "Project Includes"
 ***********************************************************************************************************************/
-/* User settable configuration options for the RSPI code */
+/* User configuration options for the RSPI code */
 #include "r_rspi_rx_config.h"
 
 /* Defines of default settings used by the RSPI code */
@@ -64,8 +80,8 @@ Macro definitions
 #endif
 
 /* Version Number of API. */
-#define RSPI_RX_VERSION_MAJOR           (2)
-#define RSPI_RX_VERSION_MINOR           (04)
+#define RSPI_RX_VERSION_MAJOR           (3)
+#define RSPI_RX_VERSION_MINOR           (80)
 
 /***********************************************************************************************************************
 Typedef definitions
@@ -99,10 +115,11 @@ typedef enum {
 /* Define for data transfer mode */
 typedef enum e_rspi_str_tranmode
 {
-    RSPI_TRANS_MODE_SW         = 0,            // Data transfer mode is software.
-    RSPI_TRANS_MODE_DMAC,                      // Data transfer mode is DMAC.
-    RSPI_TRANS_MODE_DTC                        // Data transfer mode is DTC.
+    RSPI_TRANS_MODE_SW         = 0,   // Data transfer mode is software.
+    RSPI_TRANS_MODE_DMAC,             // Data transfer mode is DMAC.
+    RSPI_TRANS_MODE_DTC               // Data transfer mode is DTC.
 } rspi_str_tranmode_t;
+
 /* Hardware interface mode configuration settings. */
 typedef enum
 {
@@ -117,22 +134,31 @@ typedef enum
     RSPI_MS_MODE_SLAVE  = ~RSPI_SPCR_MSTR, // Channel operates as SPI slave
 } rspi_master_slave_mode_t;
 
+/* Byte swap configuration settings. */
+typedef enum
+{
+    RSPI_BYTE_SWAP_DISABLE  = 0,           // Don't use Byte swap
+    RSPI_BYTE_SWAP_ENABLE                  // Use Byte swap
+} rspi_byte_swap_t;
+
 /* Abstraction of channel handle data structure.
  * User application will use this as a reference to an opened channel. */
-typedef struct rspi_config_block_s *rspi_handle_t;
+typedef struct rspi_config_block_s * rspi_handle_t;
 
 typedef struct rspi_callback_data_s
 {
-    rspi_handle_t handle;
-    rspi_evt_t    event_code;
+    rspi_handle_t  handle;
+    rspi_evt_t     event_code;
 }rspi_callback_data_t;
 
 typedef struct rspi_chnl_settings_s
 {
-    rspi_interface_mode_t gpio_ssl; // RSPI_IF_MODE_4WIRE: RSPI slave selects, RSPI_IF_MODE_3WIRE: GPIO slave selects.
-    rspi_master_slave_mode_t master_slave_mode; // RSPI_MS_MODE_MASTER or RSPI_MS_MODE_SLAVE.
-    uint32_t    bps_target;         // The target bits per second setting value for the channel.
-    rspi_str_tranmode_t tran_mode;  // Data transfer mode
+    rspi_interface_mode_t     gpio_ssl;          /* RSPI_IF_MODE_4WIRE: RSPI slave selects,
+                                                  * RSPI_IF_MODE_3WIRE: GPIO slave selects. */
+    rspi_master_slave_mode_t  master_slave_mode; // RSPI_MS_MODE_MASTER or RSPI_MS_MODE_SLAVE.
+    uint32_t                  bps_target;        // The target bits per second setting value for the channel.
+    rspi_str_tranmode_t       tran_mode;         // Data transfer mode.
+    rspi_byte_swap_t          byte_swap;         // Data byte swap.
 } rspi_chnl_settings_t;
 
 /************ Type defines used with the R_RSPI_Control function. ***************/
@@ -140,10 +166,11 @@ typedef struct rspi_chnl_settings_s
 typedef enum rspi_cmd_e
 {
     RSPI_CMD_SET_BAUD = 1,
-    RSPI_CMD_ABORT,     // Stop the current read or write operation immediately.
-    RSPI_CMD_SETREGS,   // Set all supported RSPI regs in one operation. Expert use only!
-    RSPI_CMD_SET_TRANS_MODE,// Set the data transfer mode.
-    RSPI_CMD_UNKNOWN    // Not a valid command.
+    RSPI_CMD_ABORT,         /* Stop the current read or write operation immediately. */
+    RSPI_CMD_SETREGS,       /* Set all supported RSPI registers in one operation. Expert use only! */
+    RSPI_CMD_SET_TRANS_MODE,/* Set the data transfer mode. */
+    RSPI_CMD_SET_BYTE_SWAP, /* Set the data byte swap. */
+    RSPI_CMD_UNKNOWN        /* Not a valid command. */
 } rspi_cmd_t;
 
 /* Data structure for the Set Baud command. */
@@ -166,6 +193,9 @@ typedef struct rspi_cmd_setregs_s
     uint8_t spnd_val;   // RSPI Next-Access Delay Register (SPND)
     uint8_t spcr2_val;  // RSPI Control Register 2 (SPCR2)
     uint8_t spdcr2_val; // RSPI Data Control Register 2 (SPDCR2)
+#if defined BSP_MCU_RX671 || defined BSP_MCU_RX660 || defined BSP_MCU_RX26T
+    uint8_t spcr3_val;  // RSPI Control Register 3 (SPCR3)
+#endif
 } rspi_cmd_setregs_t;
 
 /* Data structure for the Set Transfer mode command. */
@@ -174,16 +204,22 @@ typedef struct rspi_cmd_trans_mode_s
     rspi_str_tranmode_t    transfer_mode;    // The transfer mode setting value for the channel.
 } rspi_cmd_trans_mode_t;
 
-/*************************************************************************************************
- * Type defines used with the R_RSPI_Write, R_RSPI_Read, and R_RSPI_WriteRead functions.
- * Enums are provided for each field of the command word for write and read operations.
- * A command word must be formed by complete initialization of a structure of these.
- * This word is passed as an argument to the R_RSPI_Write, R_RSPI_Read, and R_RSPI_WriteRead functions
- * and will get copied to the SPCMD register with each call. */
+/* Data structure for the Set Byte swap command. */
+typedef struct rspi_cmd_byte_swap_s
+{
+    rspi_byte_swap_t       byte_swap;       // The byte swap setting for the channel.
+} rspi_cmd_byte_swap_t;
 
+/***********************************************************************************************************************
+* Type defines used with the R_RSPI_Write, R_RSPI_Read, and R_RSPI_WriteRead functions.
+* Enums are provided for each field of the command word for write and read operations.
+* A command word must be formed by complete initialization of a structure of these.
+* This word is passed as an argument to the R_RSPI_Write, R_RSPI_Read, and R_RSPI_WriteRead functions
+* and will get copied to the SPCMD register with each call.
+**********************************************************************************************************************/
 /* Clock phase and polarity */
 typedef enum {
-    RSPI_SPCMD_CPHA_SAMPLE_ODD = (0x0),  // 0: Data sampling on odd edge, data variation on even edge.
+    RSPI_SPCMD_CPHA_SAMPLE_ODD   = (0x0),  // 0: Data sampling on odd edge, data variation on even edge.
     RSPI_SPCMD_CPHA_SAMPLE_EVEN  = (0x1)   // 1: Data variation on odd edge, data sampling on even edge.
 } rspi_spcmd_cpha_t;
 
@@ -214,7 +250,7 @@ typedef enum
 typedef enum
 {
     RSPI_SPCMD_SSL_NEGATE = (0x0),   // 0: Negates all SSL signals upon completion of transfer
-    RSPI_SPCMD_SSL_KEEP  = (0x1)    // 1: Keep SSL signal level from end of transfer until start of next.
+    RSPI_SPCMD_SSL_KEEP   = (0x1)    // 1: Keep SSL signal level from end of transfer until start of next.
 } rspi_spcmd_ssl_negation_t;
 
 /* Frame data length */
@@ -237,7 +273,7 @@ typedef enum
 /* Data transfer bit order. */
 typedef enum
 {
-    RSPI_SPCMD_ORDER_MSB_FIRST = (0x0),    // 0: MSB first.
+    RSPI_SPCMD_ORDER_MSB_FIRST = (0x0),   // 0: MSB first.
     RSPI_SPCMD_ORDER_LSB_FIRST = (0x1)    // 1: LSB first.
 } rspi_spcmd_bit_order_t;
 
@@ -269,7 +305,7 @@ typedef enum
  * above fields in the correct order to set all the bits of the SPCMD register. */
 typedef union rspi_command_word_s
 {
-    R_BSP_ATTRIB_STRUCT_BIT_ORDER_RIGHT_11(
+    R_BSP_ATTRIB_STRUCT_BIT_ORDER_RIGHT_11 (
         rspi_spcmd_cpha_t         cpha          :1,
         rspi_spcmd_cpol_t         cpol          :1,
         rspi_spcmd_br_div_t       br_div        :2,
@@ -281,51 +317,148 @@ typedef union rspi_command_word_s
         rspi_spcmd_slnden_t       ssl_neg_delay :1,
         rspi_spcmd_sckden_t       clock_delay   :1,
         rspi_spcmd_dummy_t        dummy         :16
-    );
+);
     uint16_t word[2];
 } rspi_command_word_t;
 
 /***********************************************************************************************************************
-Public Functions
+ Public Functions
 ***********************************************************************************************************************/
-rspi_err_t   R_RSPI_Open(uint8_t               channel,
-                         rspi_chnl_settings_t *pconfig,
-                         rspi_command_word_t  spcmd_command_word,
-                         void                (*pcallback)(void *pcbdat),
-                         rspi_handle_t        *phandle);
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_Open
+ * Description  : .
+ * Arguments    : channel
+ *              : pconfig
+ *              : spcmd_command_word
+ *              : pcbdat
+ *              : phandle
+ * Return Value : .
+ *********************************************************************************************************************/
+rspi_err_t R_RSPI_Open (uint8_t                 channel,
+                        rspi_chnl_settings_t  * pconfig,
+                        rspi_command_word_t     spcmd_command_word,
+                        void (*pcallback)(void* pcbdat),
+                        rspi_handle_t         * phandle);
 
-rspi_err_t  R_RSPI_Control(rspi_handle_t  handle,
-                           rspi_cmd_t     cmd,
-                           void          *pcmd_data);
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_Control
+ * Description  : .
+ * Arguments    : handle
+ *              : cmd
+ *              : pcmd_data
+ * Return Value : .
+ *********************************************************************************************************************/
+rspi_err_t R_RSPI_Control  (rspi_handle_t  handle,
+                            rspi_cmd_t     cmd,
+                            void         * pcmd_data);
 
-rspi_err_t  R_RSPI_Read(rspi_handle_t        handle,
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_Read
+ * Description  : .
+ * Arguments    : handle
+ *              : spcmd_command_word
+ *              : pdest
+ *              : length
+ * Return Value : .
+ *********************************************************************************************************************/
+rspi_err_t R_RSPI_Read (rspi_handle_t        handle,
                         rspi_command_word_t  spcmd_command_word,
-                        void                *pdest,
+                        void               * pdest,
                         uint16_t             length);
 
-rspi_err_t  R_RSPI_Write(rspi_handle_t        handle,
-                         rspi_command_word_t  spcmd_command_word,
-                         void                *psrc,
-                         uint16_t             length);
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_Write
+ * Description  : .
+ * Arguments    : handle
+ *              : spcmd_command_word
+ *              : psrc
+ *              : length
+ * Return Value : .
+ *********************************************************************************************************************/
+rspi_err_t R_RSPI_Write (rspi_handle_t      handle,
+                        rspi_command_word_t spcmd_command_word,
+                        void              * psrc,
+                        uint16_t            length);
 
-rspi_err_t  R_RSPI_WriteRead(rspi_handle_t        handle,
-                             rspi_command_word_t  spcmd_command_word,
-                             void                *psrc,
-                             void                *pdest,
-                             uint16_t             length);
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_WriteRead
+ * Description  : .
+ * Arguments    : handle
+ *              : spcmd_command_word
+ *              : psrc
+ *              : pdest
+ *              : length
+ * Return Value : .
+ *********************************************************************************************************************/
+rspi_err_t R_RSPI_WriteRead (rspi_handle_t       handle,
+                            rspi_command_word_t  spcmd_command_word,
+                            void               * psrc,
+                            void               * pdest,
+                            uint16_t             length);
 
-rspi_err_t  R_RSPI_Close(rspi_handle_t handle);
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_Close
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
+rspi_err_t R_RSPI_Close (rspi_handle_t handle);
 
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_GetVersion
+ * Description  : .
+ * Return Value : .
+ *********************************************************************************************************************/
+uint32_t   R_RSPI_GetVersion (void);
 
-uint32_t  R_RSPI_GetVersion(void);
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_GetBuffRegAddress
+ * Description  : .
+ * Arguments    : handle
+ *              : p_spdr_adr
+ * Return Value : .
+ *********************************************************************************************************************/
+rspi_err_t R_RSPI_GetBuffRegAddress (rspi_handle_t handle,
+                                    uint32_t *    p_spdr_adr);
 
-rspi_err_t R_RSPI_GetBuffRegAddress(rspi_handle_t handle,
-                                    uint32_t *p_spdr_adr);
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_IntSptiIerClear
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
+rspi_err_t R_RSPI_IntSptiIerClear (rspi_handle_t handle);
 
-rspi_err_t R_RSPI_IntSptiIerClear(rspi_handle_t handle);
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_IntSpriIerClear
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
+rspi_err_t R_RSPI_IntSpriIerClear (rspi_handle_t handle);
 
-rspi_err_t R_RSPI_IntSpriIerClear(rspi_handle_t handle);
-                                        
-rspi_err_t R_RSPI_SetLogHdlAddress(uint32_t user_long_que);
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_DisableSpti
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
+rspi_err_t R_RSPI_DisableSpti (rspi_handle_t handle);
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_DisableRSPI
+ * Description  : .
+ * Argument     : handle
+ * Return Value : .
+ *********************************************************************************************************************/
+rspi_err_t R_RSPI_DisableRSPI (rspi_handle_t handle);
+
+/**********************************************************************************************************************
+ * Function Name: R_RSPI_SetLogHdlAddress
+ * Description  : .
+ * Argument     : user_long_que
+ * Return Value : .
+ *********************************************************************************************************************/
+rspi_err_t R_RSPI_SetLogHdlAddress (uint32_t user_long_que);
 
 #endif /* RSPI_API_HEADER_FILE */

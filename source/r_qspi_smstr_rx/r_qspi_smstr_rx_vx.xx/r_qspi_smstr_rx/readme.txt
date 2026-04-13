@@ -5,12 +5,12 @@ r_qspi_smstr_rx (QSPI clock synchronous single master driver)
 
 Document Number 
 ---------------
-R01AN1940EJ0114
-R01AN1940JJ0114
+R01AN1940EJ0130
+R01AN1940JJ0130
      
 Version
 -------
-v1.14
+v1.30
 
 Overview
 --------
@@ -59,39 +59,34 @@ Peripherals Used Directly
 
 Required Packages
 -----------------
-* r_bsp    v5.50
+* r_bsp    v7.60
 
 How to add to your project
 --------------------------
 This module must be added to each project in which it is used.
-Renesas recommends using "Smart Configurator" described in (1) or (3).
+Renesas recommends using "Smart Configurator" described in (1) or (2).
 However, "Smart Configurator" only supports some RX devices.
-Please use the methods of (2) or (4) for unsupported RX devices.
+Please use the methods of (3) for unsupported RX devices.
 
 (1) Adding the FIT module to your project using "Smart Configurator" in e2 studio
 By using the "Smart Configurator" in e2 studio, 
 the FIT module is automatically added to your project.
 Refer to "Renesas e2 studio Smart Configurator User Guide (R20AN0451)" for details.
 
-(2) Adding the FIT module to your project using "FIT Configurator" in e2 studio
-By using the "FIT Configurator" in e2 studio,
-the FIT module is automatically added to your project.
-Refer to "Adding Firmware Integration Technology Modules to Projects (R01AN1723)" for details.
-
-(3) Adding the FIT module to your project using "Smart Configurator" on CS+
+(2) Adding the FIT module to your project using "Smart Configurator" on CS+
 By using the "Smart Configurator Standalone version" in CS+,
 the FIT module is automatically added to your project.
 Refer to "Renesas e2 studio Smart Configurator User Guide (R20AN0451)" for details.
 
-(4) Adding the FIT module to your project in CS+
+(3) Adding the FIT module to your project in CS+
 In CS+, please manually add the FIT module to your project.
 Refer to "Adding Firmware Integration Technology Modules to CS+ Projects (R01AN1826)" for details.
 
 Toolchain(s) Used
 -----------------
-* Renesas RX v3.01 release 00
-* GCC for Renesas RX 4.8.4
-* IAR C/C++ Compiler for Renesas RX 4.12.1
+* Renesas CCRX v3.07
+* GCC for Renesas RX 8.3.0.202411
+* IAR C/C++ Compiler for Renesas RX 5.10.1
 
 File Structure
 --------------
@@ -102,13 +97,9 @@ r_qspi_smstr_rx
 +---doc
 |   |
 |   +---en
-|   |       r01an1940ej0114-rx-serial.pdf
+|   |       r01an1940ej0130-rx-serial.pdf
 |   +---ja
-|           r01an1940jj0114-rx-serial.pdf
-|
-+---ref
-|       r_qspi_smstr_rx_config_reference.h
-|       r_qspi_smstr_rx_pin_config_reference.h
+|           r01an1940jj0130-rx-serial.pdf
 |
 +---src
     |   r_qspi_smstr.c

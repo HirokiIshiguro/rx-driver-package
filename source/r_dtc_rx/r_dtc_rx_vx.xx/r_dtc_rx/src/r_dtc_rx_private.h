@@ -1,26 +1,8 @@
-/*******************************************************************************
-* DISCLAIMER
-* This software is supplied by Renesas Electronics Corporation and is only
-* intended for use with Renesas products. No other uses are authorized. This
-* software is owned by Renesas Electronics Corporation and is protected under
-* all applicable laws, including copyright laws.
-* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT
-* LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE
-* AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED.
-* TO THE MAXIMUM EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS
-* ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES SHALL BE LIABLE
-* FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR
-* ANY REASON RELATED TO THIS SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE
-* BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-* Renesas reserves the right, without notice, to make changes to this software
-* and to discontinue the availability of this software. By using this software,
-* you agree to the additional terms and conditions found by accessing the
-* following link:
-* http://www.renesas.com/disclaimer
+/***********************************************************************************************************************
+* Copyright (c) 2014 - 2025 Renesas Electronics Corporation and/or its affiliates
 *
-* Copyright (C) 2014 Renesas Electronics Corporation. All rights reserved.
-*******************************************************************************/
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
 /*******************************************************************************
 * File Name    : r_dtc_rx_private.h
 * Description  : Functions for using DTC on RX devices.
@@ -50,6 +32,18 @@
 *         : 15.08.2019 3.20    Added support for RX72M.
 *         : 25.11.2019 3.30    Added support for RX13T.
 *         : 30.12.2019 3.40    Added support for RX66N, RX72N.
+*         : 31.03.2020 3.50    Added support for RX23E-A.
+*         : 31.03.2021 3.70    Added support for RX671.
+*         : 15.04.2021 3.80    Added support for RX140.
+*         : 31.03.2022 4.10    Added support for RX660.
+*         : 27.12.2022 4.21    Updated include target mcu interface header file path format for Linux compatibility.
+*         : 31.03.2023 4.30    Added support for RX26T.
+*         : 29.05.2023 4.40    Added support for RX23E-B.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 28.06.2024 4.50    Added support for RX260, RX261.
+*                              Fixed to comply with GSCE Coding Standards Rev.6.5.0.
+*         : 15.03.2025 4.51    Updated disclaimer.
+*         : 30.10.2025 4.60    Added support for RX14T.
 *******************************************************************************/
 #ifndef DTC_RX_PRIVATE_H
 #define DTC_RX_PRIVATE_H
@@ -63,7 +57,7 @@ Includes   <System Includes> , "Project Includes"
 #include <stdbool.h>
 
 #if   defined(BSP_MCU_RX23T)
-    #include ".\src\targets\rx23t\r_dtc_rx_target.h"
+    #include "./src/targets/rx23t/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_DMAC_FIT_MODULE == DTC_ENABLE)
         #error "This MCU does not have DMAC module."
         #error "Change to DTC_CFG_USE_DMAC_FIT_MODULE (DTC_DISABLE) in r_dtc_rx_config.h."
@@ -72,7 +66,7 @@ Includes   <System Includes> , "Project Includes"
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
 #elif defined(BSP_MCU_RX24T)
-    #include ".\src\targets\rx24t\r_dtc_rx_target.h"
+    #include "./src/targets/rx24t/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_DMAC_FIT_MODULE == DTC_ENABLE)
         #error "This MCU does not have DMAC module."
         #error "Change to DTC_CFG_USE_DMAC_FIT_MODULE (DTC_DISABLE) in r_dtc_rx_config.h."
@@ -81,7 +75,7 @@ Includes   <System Includes> , "Project Includes"
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
 #elif defined(BSP_MCU_RX24U)
-    #include ".\src\targets\rx24u\r_dtc_rx_target.h"
+    #include "./src/targets/rx24u/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_DMAC_FIT_MODULE == DTC_ENABLE)
         #error "This MCU does not have DMAC module."
         #error "Change to DTC_CFG_USE_DMAC_FIT_MODULE (DTC_DISABLE) in r_dtc_rx_config.h."
@@ -89,8 +83,23 @@ Includes   <System Includes> , "Project Includes"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
+#elif defined(BSP_MCU_RX260)
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #include "./src/targets/rx260/r_dtc_rx_target.h"
+#elif defined(BSP_MCU_RX261)
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #include "./src/targets/rx261/r_dtc_rx_target.h"
+#elif defined(BSP_MCU_RX26T)
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #include "./src/targets/rx26t/r_dtc_rx_target.h"
 #elif defined(BSP_MCU_RX130)
-    #include ".\src\targets\rx130\r_dtc_rx_target.h"
+    #include "./src/targets/rx130/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_DMAC_FIT_MODULE == DTC_ENABLE)
         #error "This MCU does not have DMAC module."
         #error "Change to DTC_CFG_USE_DMAC_FIT_MODULE (DTC_DISABLE) in r_dtc_rx_config.h."
@@ -99,7 +108,7 @@ Includes   <System Includes> , "Project Includes"
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
 #elif defined(BSP_MCU_RX13T)
-    #include ".\src\targets\rx13t\r_dtc_rx_target.h"
+    #include "./src/targets/rx13t/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_DMAC_FIT_MODULE == DTC_ENABLE)
         #error "This MCU does not have DMAC module."
         #error "Change to DTC_CFG_USE_DMAC_FIT_MODULE (DTC_DISABLE) in r_dtc_rx_config.h."
@@ -108,7 +117,7 @@ Includes   <System Includes> , "Project Includes"
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
 #elif defined(BSP_MCU_RX113)
-    #include ".\src\targets\rx113\r_dtc_rx_target.h"
+    #include "./src/targets/rx113/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_DMAC_FIT_MODULE == DTC_ENABLE)
         #error "This MCU does not have DMAC module."
         #error "Change to DTC_CFG_USE_DMAC_FIT_MODULE (DTC_DISABLE) in r_dtc_rx_config.h."
@@ -117,7 +126,7 @@ Includes   <System Includes> , "Project Includes"
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
 #elif defined(BSP_MCU_RX111)
-    #include ".\src\targets\rx111\r_dtc_rx_target.h"
+    #include "./src/targets/rx111/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_DMAC_FIT_MODULE == DTC_ENABLE)
         #error "This MCU does not have DMAC module."
         #error "Change to DTC_CFG_USE_DMAC_FIT_MODULE (DTC_DISABLE) in r_dtc_rx_config.h."
@@ -126,7 +135,7 @@ Includes   <System Includes> , "Project Includes"
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
 #elif defined(BSP_MCU_RX110)
-    #include ".\src\targets\rx110\r_dtc_rx_target.h"
+    #include "./src/targets/rx110/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_DMAC_FIT_MODULE == DTC_ENABLE)
         #error "This MCU does not have DMAC module."
         #error "Change to DTC_CFG_USE_DMAC_FIT_MODULE (DTC_DISABLE) in r_dtc_rx_config.h."
@@ -134,28 +143,56 @@ Includes   <System Includes> , "Project Includes"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
+#elif defined(BSP_MCU_RX140)
+    #if (DTC_CFG_USE_DMAC_FIT_MODULE == DTC_ENABLE)
+        #error "This MCU does not have DMAC module."
+        #error "Change to DTC_CFG_USE_DMAC_FIT_MODULE (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #include "./src/targets/rx140/r_dtc_rx_target.h"
+#elif defined(BSP_MCU_RX14T)
+    #include "./src/targets/rx14t/r_dtc_rx_target.h"
+    #if (DTC_CFG_USE_DMAC_FIT_MODULE == DTC_ENABLE)
+        #error "This MCU does not have DMAC module."
+        #error "Change to DTC_CFG_USE_DMAC_FIT_MODULE (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
 #elif defined(BSP_MCU_RX64M)
-    #include ".\src\targets\rx64m\r_dtc_rx_target.h"
+    #include "./src/targets/rx64m/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
 #elif defined(BSP_MCU_RX71M)
-    #include ".\src\targets\rx71m\r_dtc_rx_target.h"
+    #include "./src/targets/rx71m/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
 #elif defined(BSP_MCU_RX231)
-    #include ".\src\targets\rx231\r_dtc_rx_target.h"
+    #include "./src/targets/rx231/r_dtc_rx_target.h"
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+#elif defined(BSP_MCU_RX23E_A)
+    #include "./src/targets/rx23e-a/r_dtc_rx_target.h"
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+#elif defined(BSP_MCU_RX23E_B)
+    #include "./src/targets/rx23e-b/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
 #elif defined(BSP_MCU_RX23W)
-    #include ".\src\targets\rx23w\r_dtc_rx_target.h"
+    #include "./src/targets/rx23w/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
 #elif defined(BSP_MCU_RX230)
-    #include ".\src\targets\rx230\r_dtc_rx_target.h"
+    #include "./src/targets/rx230/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
@@ -163,19 +200,29 @@ Includes   <System Includes> , "Project Includes"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
-    #include ".\src\targets\rx65n\r_dtc_rx_target.h"
+    #include "./src/targets/rx65n/r_dtc_rx_target.h"
 #elif defined(BSP_MCU_RX66T)
-    #include ".\src\targets\rx66t\r_dtc_rx_target.h"
+    #include "./src/targets/rx66t/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
+#elif defined(BSP_MCU_RX660)
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #include "./src/targets/rx660/r_dtc_rx_target.h"
+#elif defined(BSP_MCU_RX671)
+    #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
+        #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
+    #endif
+    #include "./src/targets/rx671/r_dtc_rx_target.h"
 #elif defined(BSP_MCU_RX66N)
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
-    #include ".\src\targets\rx66n\r_dtc_rx_target.h"
+    #include "./src/targets/rx66n/r_dtc_rx_target.h"
 #elif defined(BSP_MCU_RX72T)
-    #include ".\src\targets\rx72t\r_dtc_rx_target.h"
+    #include "./src/targets/rx72t/r_dtc_rx_target.h"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
@@ -183,15 +230,15 @@ Includes   <System Includes> , "Project Includes"
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
-    #include ".\src\targets\rx72m\r_dtc_rx_target.h"
+    #include "./src/targets/rx72m/r_dtc_rx_target.h"
 #elif defined(BSP_MCU_RX72N)
     #if (DTC_CFG_USE_SEQUENCE_TRANSFER == DTC_ENABLE) && (DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE)
         #error "Change to DTC_CFG_USE_SEQUENCE_TRANSFER (DTC_DISABLE) in r_dtc_rx_config.h."
     #endif
-    #include ".\src\targets\rx72n\r_dtc_rx_target.h"
+    #include "./src/targets/rx72n/r_dtc_rx_target.h"
 #else
     #error "This MCU is not supported by the current r_dtc_rx module."
-#endif
+#endif /* definedBSP_MCU_RX23T */
 
 /*****************************************************************************
 Macro definitions
@@ -218,7 +265,7 @@ typedef union dtc_mra {
         uint8_t SZ:2, /* DTC Data Transfer Size */
         uint8_t SM:2, /* Transfer Source Address Addressing Mode */
         uint8_t rs:2 /* reserved */
-    ) BIT;
+) BIT;
 
 } dtc_mra_t;
 
@@ -232,7 +279,7 @@ typedef union dtc_mrb {
         uint8_t DTS  :1,  /* DTC Transfer Mode Select */
         uint8_t DM   :2,  /* Transfer Destination Address Addressing Mode */
         uint8_t rs   :2  /* reserved */
-    ) BIT;
+) BIT;
 
 } dtc_mrb_t;
 #else
@@ -244,7 +291,7 @@ typedef union dtc_mra {
         uint8_t SM:2, /* Transfer Source Address Addressing Mode */
         uint8_t rs:1, /* reserved */
         uint8_t WBDIS:1 /* Write-back Disable */
-    ) BIT;
+) BIT;
 
 } dtc_mra_t;
 
@@ -259,7 +306,7 @@ typedef union dtc_mrb {
         uint8_t DM   :2,  /* Transfer Destination Address Addressing Mode */
         uint8_t INDX:1,   /* Index Table Reference */
         uint8_t SQEND:1  /* Sequence Transfer End */
-    ) BIT;
+) BIT;
 
 } dtc_mrb_t;
 
@@ -269,7 +316,7 @@ typedef union dtc_mrc {
     R_BSP_ATTRIB_STRUCT_BIT_ORDER_LEFT_2 (
         uint8_t rs :7,    /* reserved */
         uint8_t DISPE :1
-    ) BIT;
+) BIT;
 
 } dtc_mrc_t;
 #endif /* (DTC_IP_VER_DTCa == DTC_IP) */
@@ -336,7 +383,7 @@ typedef struct st_dtc_short_transfer_data {
     } THIRD_LWORD;
 } dtc_internal_registers_t;
 
-#else /* Transfer data in full-address mode */
+#else /* DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE */
 typedef struct st_dtc_full_transfer_data {
     union {
         uint32_t LWORD;
@@ -383,17 +430,28 @@ typedef struct st_dtc_full_transfer_data {
     } FOURTH_LWORD;
 } dtc_internal_registers_t;
 
-#endif /* DTC_CFG_SHORT_ADDRESS_MODE */
+#endif /* DTC_ENABLE == DTC_CFG_SHORT_ADDRESS_MODE */
 
 R_BSP_PRAGMA_PACKOPTION;
 
 /*******************************************************************************
 Exported global variables and functions (to be accessed by other files)
 *******************************************************************************/
-void r_dtc_module_enable(void);
-void r_dtc_module_disable(void);
+/******************************************************************************
+ * Function Name: r_dtc_module_enable
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
+void r_dtc_module_enable (void);
+
+/******************************************************************************
+ * Function Name: r_dtc_module_disable
+ * Description  : .
+ * Return Value : .
+ *****************************************************************************/
+void r_dtc_module_disable (void);
 #if ((0 != BSP_CFG_USER_LOCKING_ENABLED) || (bsp_lock_t != BSP_CFG_USER_LOCKING_TYPE) \
-      || (DTC_ENABLE != DTC_CFG_USE_DMAC_FIT_MODULE))
+    || (DTC_ENABLE != DTC_CFG_USE_DMAC_FIT_MODULE))
 bool r_dtc_check_DMAC_locking_byUSER(void);
 #endif
 

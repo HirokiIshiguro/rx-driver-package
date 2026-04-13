@@ -1,23 +1,11 @@
-/***********************************************************************************************************************
- * DISCLAIMER
- * This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No
- * other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all
- * applicable laws, including copyright laws.
- * THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
- * THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM
- * EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES
- * SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS
- * SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
- * Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of
- * this software. By using this software, you agree to the additional terms and conditions found by accessing the
- * following link:
- * http://www.renesas.com/disclaimer
- *
- * Copyright (C) 2014(2020) Renesas Electronics Corporation. All rights reserved.
- ***********************************************************************************************************************/
+/*
+* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
+*
+* SPDX-License-Identifier: BSD-3-Clause
+*/
 /***********************************************************************************************************************
  * File Name    : r_usb_pcdc_driver.c
+ * Version      : 1.44
  * Description  : USB PCDC Driver code
  ***********************************************************************************************************************/
 /**********************************************************************************************************************
@@ -30,6 +18,9 @@
  *                           "pcdc_write_complete"->"usb_pcdc_write_complete"
  *         : 31.03.2018 1.23 Supporting Smart Configurator
  *         : 01.03.2020 1.30 RX72N/RX66N is added and uITRON is supported.
+ *         : 30.04.2021 1.31 RX671 is added and VCOM 2Port supported.
+ *         : 30.06.2022 1.40 USBX PCDC is supported.
+ *         : 01.03.2025 1.44 Change Disclaimer.
  ***********************************************************************************************************************/
 
 /******************************************************************************
@@ -43,6 +34,9 @@
 #include "r_usb_pcdc.h"
 #include "r_usb_bitdefine.h"
 
+#if (BSP_CFG_RTOS_USED != 5)    /* Other than Azure RTOS */
+
+#if defined(USB_CFG_PCDC_USE)
 /******************************************************************************
  Macro definitions
  ******************************************************************************/
@@ -78,15 +72,30 @@ void usb_pcdc_read_complete (usb_utr_t *mess, uint16_t data1, uint16_t data2)
     if ( USB_TRUE == g_usb_peri_connected)
     {
         /* Set Receive data length */
-        ctrl.size = mess->read_req_len - mess->tranlen;
+        ctrl.size = 0;
         ctrl.pipe = mess->keyword;  /* Pipe number setting */
-        ctrl.type = USB_PCDC;       /* Device class setting  */
+
+#if defined(USB_CFG_PCDC_2COM_USE)
+        if (USB_CFG_PCDC_BULK_OUT == ctrl.pipe)
+        {
+            ctrl.type = USB_PCDC; /* CDC Data class  */
+        }
+        else
+        {
+            ctrl.type = USB_PCDC2; /* CDC Data class  */
+        }
+#else  /* defined(USB_CFG_PCDC_2COM_USE) */
+        ctrl.type = USB_PCDC; /* CDC Data class  */
+#endif /* defined(USB_CFG_PCDC_2COM_USE) */
+
         switch (mess->status)
         {
             case USB_DATA_OK :
+                ctrl.size = mess->read_req_len - mess->tranlen;
                 ctrl.status = USB_SUCCESS;
             break;
             case USB_DATA_SHT :
+                ctrl.size = mess->read_req_len - mess->tranlen;
                 ctrl.status = USB_ERR_SHORT;
             break;
             case USB_DATA_OVR :
@@ -123,16 +132,38 @@ void usb_pcdc_write_complete (usb_utr_t *mess, uint16_t data1, uint16_t data2)
     if ( USB_TRUE == g_usb_peri_connected)
     {
         ctrl.pipe = mess->keyword; /* Pipe number setting */
+
+#if defined(USB_CFG_PCDC_2COM_USE)
         if (USB_CFG_PCDC_BULK_IN == ctrl.pipe)
         {
             ctrl.type = USB_PCDC; /* CDC Data class  */
         }
-
+        /* USB_CFG_PCDC_INT_IN */
+        else if (USB_CFG_PCDC_INT_IN == ctrl.pipe)
+        {
+            ctrl.type = USB_PCDCC; /* CDC Control class  */
+        }
+        else if (USB_CFG_PCDC_BULK_IN2 == ctrl.pipe)
+        {
+            ctrl.type = USB_PCDC2; /* CDC Data class  */
+        }
+        /* USB_CFG_PCDC_INT_IN2 */
+        else
+        {
+            ctrl.type = USB_PCDCC2; /* CDC Control class  */
+        }
+#else  /* defined(USB_CFG_PCDC_2COM_USE) */
+        if (USB_CFG_PCDC_BULK_IN == ctrl.pipe)
+        {
+            ctrl.type = USB_PCDC; /* CDC Data class  */
+        }
         /* USB_CFG_PCDC_INT_IN */
         else
         {
             ctrl.type = USB_PCDCC; /* CDC Control class  */
         }
+#endif /* defined(USB_CFG_PCDC_2COM_USE) */
+
         if (USB_DATA_NONE == mess->status)
         {
             ctrl.status = USB_SUCCESS;
@@ -151,7 +182,9 @@ void usb_pcdc_write_complete (usb_utr_t *mess, uint16_t data1, uint16_t data2)
 /******************************************************************************
  End of function usb_pcdc_write_complete
  ******************************************************************************/
+#endif /* defined(USB_CFG_PCDC_USE) */
 
+#endif /* (BSP_CFG_RTOS_USED != 5) */
 /******************************************************************************
  End  Of File
  ******************************************************************************/

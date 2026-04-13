@@ -1,21 +1,8 @@
-;;/***********************************************************************************************************************
-;;* DISCLAIMER
-;;* This software is supplied by Renesas Electronics Corporation and is only intended for use with Renesas products. No 
-;;* other uses are authorized. This software is owned by Renesas Electronics Corporation and is protected under all 
-;;* applicable laws, including copyright laws. 
-;;* THIS SOFTWARE IS PROVIDED "AS IS" AND RENESAS MAKES NO WARRANTIES REGARDING
-;;* THIS SOFTWARE, WHETHER EXPRESS, IMPLIED OR STATUTORY, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, 
-;;* FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT. ALL SUCH WARRANTIES ARE EXPRESSLY DISCLAIMED. TO THE MAXIMUM 
-;;* EXTENT PERMITTED NOT PROHIBITED BY LAW, NEITHER RENESAS ELECTRONICS CORPORATION NOR ANY OF ITS AFFILIATED COMPANIES 
-;;* SHALL BE LIABLE FOR ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES FOR ANY REASON RELATED TO THIS 
-;;* SOFTWARE, EVEN IF RENESAS OR ITS AFFILIATES HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
-;;* Renesas reserves the right, without notice, to make changes to this software and to discontinue the availability of 
-;;* this software. By using this software, you agree to the additional terms and conditions found by accessing the 
-;;* following link:
-;;* http://www.renesas.com/disclaimer 
+;;/*
+;;* Copyright (c) 2011 Renesas Electronics Corporation and/or its affiliates
 ;;*
-;;* Copyright (C) 2019 Renesas Electronics Corporation. All rights reserved.
-;;***********************************************************************************************************************/
+;;* SPDX-License-Identifier: BSD-3-Clause
+;;*/
 ;;/***********************************************************************************************************************
 ;;* File Name    : reset_program.asm
 ;;* Description  : Defines post-reset routines that are used to configure the MCU prior to the main program starting. 
@@ -24,7 +11,11 @@
 ;;/***********************************************************************************************************************
 ;;* History : DD.MM.YYYY Version   Description
 ;;*         : 28.02.2019 1.00      First Release
+;;*         : 25.11.2022 1.01      Added initialization processing for expansion RAM area.
+;;*         : 26.02.2025 1.02      Changed the disclaimer.
 ;;***********************************************************************************************************************/
+
+#include "r_bsp_config.h"
 
     .if __GNUC__
 
@@ -44,7 +35,13 @@
     .extern _ustack
     .extern _istack
     .extern _exit
-
+#if BSP_CFG_EXPANSION_RAM_ENABLE == 1
+    .extern _data_exram
+    .extern _mdata_exram
+    .extern _ebss_exram
+    .extern _bss_exram
+    .extern _edata_exram
+#endif
 
 _PowerON_Reset_PC :
 _PowerON_Reset :
@@ -70,12 +67,31 @@ __INITSCT:
     sub     r1,r3           ;;size of data section in R3 (R3=R3-R1)
     smovf                   ;;block copy R3 bytes from R2 to R1
 
+#if BSP_CFG_EXPANSION_RAM_ENABLE == 1
+;;load data section from ROM to Extra RAM
+    mov     #_mdata_exram,r2      ;;src ROM address of data_exram section in R2
+    mov     #_data_exram,r1       ;;dest start RAM address of data_exram section in R1
+    mov     #_edata_exram,r3      ;;end RAM address of data_exram section in R3
+    sub     r1,r3           ;;size of data section in R3 (R3=R3-R1)
+    smovf                   ;;block copy R3 bytes from R2 to R1
+#endif
+
 ;;bss initialisation : zero out bss
     mov    #00h,r2          ;;load R2 reg with zero
     mov    #_ebss, r3       ;;store the end address of bss in R3
     mov    #_bss, r1        ;;store the start address of bss in R1
     sub    r1,r3            ;;size of bss section in R3 (R3=R3-R1)
     sstr.b
+
+#if BSP_CFG_EXPANSION_RAM_ENABLE == 1
+;;bss initialisation : zero out bss_exram
+    mov    #00h,r2          ;;load R2 reg with zero
+    mov    #_ebss_exram, r3       ;;store the end address of bss_exram in R3
+    mov    #_bss_exram, r1        ;;store the start address of bss_exram in R1
+    sub    r1,r3            ;;size of bss_exram section in R3 (R3=R3-R1)
+    sstr.b
+#endif
+
     popm    r1-r3
     rts
 
