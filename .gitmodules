@@ -1,3 +1,3 @@
 [submodule "source/r_ssd1306_rx"]
 	path = source/r_ssd1306_rx
-	url = git@gitlab-claude:oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_ssd1306_rx/r_ssd1306_rx.git
+	url = https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_ssd1306_rx/r_ssd1306_rx.git
