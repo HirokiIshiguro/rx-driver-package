@@ -35,3 +35,35 @@
 - The r_emwin_rx module is not stored in the "FITModules" folder.
 - It is stored in the assets of the [Release page](https://github.com/renesas/rx-driver-package/releases).
 - Get it from the assets on the Release page, or use the Makefile command to generate the package.
+
+# Unofficial FIT Modules (SAFFTI)
+
+このフォークでは、Renesas 公式 FIT モジュールに加えて、SAFFTI 側で個別に開発した
+非公式 FIT モジュールを `source/` 配下に **git submodule** として取り込んでいます。
+正本リポジトリは別 GitLab プロジェクトで管理しており、本リポジトリの `Makefile`
+からも `make` で同様に `FITModules/` へ ZIP / XML / MDF を生成できます。
+
+| Module | Version | Source repository | Description |
+|---|---|---|---|
+| `r_ssd1306_rx` | 1.00 | [fitmodules/r_ssd1306_rx/r_ssd1306_rx](https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_ssd1306_rx/r_ssd1306_rx) | SSD1306 128x64 monochrome OLED driver. I2C backend selectable between `r_riic_rx` and `r_sci_iic_rx`. Optional `R_SSD1306_Gfx_*` and `R_SSD1306_FrameSched_*` helpers. Reference application: [128_64_display_badapple](https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/example/tb-rx671/128_64_display_badapple). |
+
+## How to use
+
+```bash
+git clone --recurse-submodules <this-fork>
+cd rx-driver-package
+make            # builds FITModules/r_ssd1306_rx_v1.00.{zip,xml,_extend.mdf} alongside official modules
+```
+
+`FITModules/` から下記の Smart Configurator 検出フォルダにコピーすれば、
+公式モジュールと同じ UI から追加できます。
+
+```
+C:\Users\<user_name>\.eclipse\com.renesas.platform_download\FITModules
+```
+
+## Contribution
+
+非公式 FIT モジュールの追加・変更は、各 source repository 側で Issue / MR を
+立ててください。本リポジトリ側では `Makefile` の `MODULE_NAME_LIST_LATEST` への
+追加と `versions.xml` への登録を別 MR で扱います。
