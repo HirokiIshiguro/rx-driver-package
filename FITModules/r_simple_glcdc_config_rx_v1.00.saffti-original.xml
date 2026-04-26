@@ -34,8 +34,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_simple_glcdc_config_rx</name>
-        <version>1.00</version>
-        <zipsource>r_simple_glcdc_config_rx_v1.00.zip</zipsource>
+        <version>1.00.saffti-original</version>
+        <zipsource>r_simple_glcdc_config_rx_v1.00.saffti-original.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>7.52</version>

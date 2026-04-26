@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/***********************************************************************************************************************
+* Copyright (c) 2026 SAFFTI (Smart Agriculture, Forestry & Fisheries Technology Institute) and contributors
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+-->
+<refinfo>
+
+    <!-- multiple versions permitted -->
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.03.00</version>
+        <version>3.04.00</version>
+        <version>3.05.00</version>
+        <version>3.06.00</version>
+        <version>3.07.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202202</version>
+        <version>8.03.00.202411</version>
+        <version>14.02.00.202505</version>
+    </toolchain>
+
+    <!-- only one target entry allowed; multiple sub tags permitted -->
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+
+    <!-- only one package entry allowed -->
+    <!-- multiple dependencies, applications, functions, and incdirs permitted -->
+    <package>
+        <type>fitmodule</type>
+        <name>r_ssd1306_rx</name>
+        <version>1.00.saffti-original</version>
+        <zipsource>r_ssd1306_rx_v1.00.saffti-original.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>7.70</version>
+        </dependency>
+        <!--
+            Optional backend / helper modules — declared in <details> so users
+            understand what to add manually, but NOT listed as <dependency> here.
+            Smart Configurator pulls in every <dependency> as a hard requirement
+            and unused backends raise compile errors (e.g. r_sci_iic_rx requires
+            at least one SCI_IIC_CFG_CHx_INCLUDED set to 1). Add only the
+            modules matching the user's SSD1306_CFG_I2C_BACKEND and
+            SSD1306_CFG_ENABLE_FRAME_SCHED selections:
+              SSD1306_CFG_I2C_BACKEND=0  -> add r_riic_rx
+              SSD1306_CFG_I2C_BACKEND=1  -> add r_sci_iic_rx
+              SSD1306_CFG_ENABLE_FRAME_SCHED=1 -> add r_cmt_rx
+        -->
+        <application>Display</application>
+        <application>Graphics</application>
+        <desc>SSD1306 128x64 monochrome OLED driver (I2C backend via r_riic_rx or r_sci_iic_rx).</desc>
+        <details>This module drives SSD1306 based 128x64 monochrome OLED displays over I2C. The underlying bus is selected at build time via SSD1306_CFG_I2C_BACKEND in r_ssd1306_rx_config.h: 0 = r_riic_rx (add r_riic_rx separately in Smart Configurator), 1 = r_sci_iic_rx (add r_sci_iic_rx separately, configure SCI_IIC_CFG_CHx_INCLUDED to match SSD1306_CFG_I2C_CHANNEL). The optional fixed-rate frame scheduler (SSD1306_CFG_ENABLE_FRAME_SCHED=1) requires r_cmt_rx. Provided API covers display open/close, framebuffer pixel primitives (R_SSD1306_Gfx_*), dirty-page-aware flush, raw command passthrough, and an 8x8 ASCII font. A reference implementation and demonstration is the TB-RX671 Bad Apple player (128_64_display_badapple).</details>
+        <incdir>r_config</incdir>
+        <incdir>r_ssd1306_rx</incdir>
+        <incdir>r_ssd1306_rx/src</incdir>
+    </package>
+
+</refinfo>

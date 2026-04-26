@@ -46,8 +46,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_cellular</name>
-        <version>1.14</version>
-        <zipsource>r_cellular_v1.14.zip</zipsource>
+        <version>1.13.saffti-custom</version>
+        <zipsource>r_cellular_v1.13.saffti-custom.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>7.10</version>
