@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* Copyright (c) 2026 SAFFTI (Smart Agriculture, Forestry & Fisheries Technology Institute) and contributors
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+/***********************************************************************************************************************
+  Purpose: Module Description File (MDF) for r_ssd1306_rx (Schema Version 2.0)
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="SSD1306_CFG_PARAM_CHECKING_ENABLE" display="Parameter check" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="SSD1306_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="Use system default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="SSD1306_CFG_PARAM_CHECKING_ENABLE.0" display="Disable parameter checks" value="0"/>
+            <option id="SSD1306_CFG_PARAM_CHECKING_ENABLE.1" display="Enable parameter checks" value="1"/>
+            <description>Selects whether to include parameter checking in the code.
+Use system default = Use the system default setting.
+Disable parameter checks = Omit parameter checking from the build.
+Enable parameter checks = Include parameter checking in the build.</description>
+        </property>
+        <property id="SSD1306_CFG_I2C_BACKEND" display="I2C bus backend" default="0" type="combobox">
+            <option id="SSD1306_CFG_I2C_BACKEND.0" display="r_riic_rx (RIIC, up to Fast Mode Plus 1 MHz)" value="0"/>
+            <option id="SSD1306_CFG_I2C_BACKEND.1" display="r_sci_iic_rx (SCI simple I2C, up to 384 kHz)" value="1"/>
+            <description>Selects which FIT I2C driver the SSD1306 module uses as the transport backend.
+r_riic_rx: Uses the RIIC peripheral. Required for speeds above 400 kHz.
+r_sci_iic_rx: Uses the SCI peripheral in simple I2C mode when an RIIC channel is unavailable.</description>
+        </property>
+        <property id="SSD1306_CFG_I2C_CHANNEL" display="I2C channel number" default="0" type="textbox">
+            <constraint display="Value must be an integer in 0..12" actionOnFail="error">testInteger("${SSD1306_CFG_I2C_CHANNEL}") &amp;&amp; ("${SSD1306_CFG_I2C_CHANNEL}" &gt;= 0) &amp;&amp; ("${SSD1306_CFG_I2C_CHANNEL}" &lt;= 12)</constraint>
+            <description>I2C channel number (RIIC channel when backend=0, SCI channel when backend=1).
+Valid channel availability depends on the RX device variant.</description>
+        </property>
+        <property id="SSD1306_CFG_SLAVE_ADDR" display="SSD1306 I2C slave address (7-bit)" default="0x3C" type="textbox">
+            <constraint display="Value must be 0x3C or 0x3D" actionOnFail="error">("${SSD1306_CFG_SLAVE_ADDR}" == "0x3C") || ("${SSD1306_CFG_SLAVE_ADDR}" == "0x3D")</constraint>
+            <description>7-bit I2C slave address of the SSD1306 panel. Depends on the SA0 strap on the OLED module.</description>
+        </property>
+        <property id="SSD1306_CFG_WIDTH" display="Display width in pixels" default="128" type="textbox">
+            <constraint display="Value must be 128" actionOnFail="error">"${SSD1306_CFG_WIDTH}" == "128"</constraint>
+            <description>Horizontal resolution. Fixed to 128 pixels for SSD1306 at this time.</description>
+        </property>
+        <property id="SSD1306_CFG_HEIGHT" display="Display height in pixels" default="64" type="combobox">
+            <option id="SSD1306_CFG_HEIGHT.64" display="64 lines" value="64"/>
+            <option id="SSD1306_CFG_HEIGHT.32" display="32 lines" value="32"/>
+            <description>Vertical resolution. Selects 64 or 32 line panels.</description>
+        </property>
+        <property id="SSD1306_CFG_ROTATE_180" display="Rotate display 180 degrees" default="1" type="combobox">
+            <option id="SSD1306_CFG_ROTATE_180.0" display="Normal orientation" value="0"/>
+            <option id="SSD1306_CFG_ROTATE_180.1" display="180 deg rotation (segment + COM remap)" value="1"/>
+            <description>Chooses segment remap (0xA0/0xA1) and COM scan direction (0xC0/0xC8) at init time.</description>
+        </property>
+        <property id="SSD1306_CFG_ENABLE_GFX" display="Include R_SSD1306_Gfx_* helpers" default="1" type="combobox">
+            <option id="SSD1306_CFG_ENABLE_GFX.0" display="Disabled" value="0"/>
+            <option id="SSD1306_CFG_ENABLE_GFX.1" display="Enabled" value="1"/>
+            <description>Enables the bundled graphics primitive library (lines, rectangles, circles, 8x8 font text).
+Disable to save flash when the application draws into the framebuffer directly.</description>
+        </property>
+        <property id="SSD1306_CFG_ENABLE_FRAME_SCHED" display="Include R_SSD1306_FrameSched_* helpers" default="1" type="combobox">
+            <option id="SSD1306_CFG_ENABLE_FRAME_SCHED.0" display="Disabled" value="0"/>
+            <option id="SSD1306_CFG_ENABLE_FRAME_SCHED.1" display="Enabled" value="1"/>
+            <description>Enables the r_cmt_rx based fixed-rate frame scheduler.
+Disable when the application already drives its own periodic tick.</description>
+        </property>
+        <property id="SSD1306_CFG_I2C_TIMEOUT_COUNT" display="Blocking I2C transfer timeout (loop iterations)" default="1000000" type="textbox">
+            <constraint display="Value must be a positive integer" actionOnFail="error">testInteger("${SSD1306_CFG_I2C_TIMEOUT_COUNT}") &amp;&amp; ("${SSD1306_CFG_I2C_TIMEOUT_COUNT}" &gt; 0)</constraint>
+            <description>Busy-wait iteration budget used by the blocking MasterSend wrapper while waiting for the I2C completion callback.
+Tune upward when running at lower clocks or with heavy interrupt load.</description>
+        </property>
+    </configuration>
+</module>

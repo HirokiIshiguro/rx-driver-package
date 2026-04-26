@@ -15907,14 +15907,41 @@
       <url>https://raw.githubusercontent.com/renesas/rx-driver-package/5e7a3d97ed5208111e46a451d00ba7164f1aa112/FITModules/rm_touch_qe_v3.20_extend.mdf</url>
     </urls>
   </module>
-  <!-- SAFFTI custom modules (hosted on gitlab.saffti.jp) -->
-  <module rdp_version="1.00">
-    <name>r_ssd1306_rx</name>
-    <version>1.00</version>
+  <!-- SAFFTI unofficial modules (hosted on gitlab.saffti.jp) -->
+  <module rdp_version="1.13.saffti-custom">
+    <name>r_cellular</name>
+    <version>1.13.saffti-custom</version>
     <urls>
-      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_ssd1306_rx/r_ssd1306_rx/-/releases/v1.00/downloads/r_ssd1306_rx_v1.00.zip</url>
-      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_ssd1306_rx/r_ssd1306_rx/-/releases/v1.00/downloads/r_ssd1306_rx_v1.00.xml</url>
-      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_ssd1306_rx/r_ssd1306_rx/-/releases/v1.00/downloads/r_ssd1306_rx_v1.00_extend.mdf</url>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_cellular/r_cellular/-/releases/v1.13.saffti-custom/downloads/r_cellular_v1.13.saffti-custom.zip</url>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_cellular/r_cellular/-/releases/v1.13.saffti-custom/downloads/r_cellular_v1.13.saffti-custom.xml</url>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_cellular/r_cellular/-/releases/v1.13.saffti-custom/downloads/r_cellular_v1.13.saffti-custom_extend.mdf</url>
+    </urls>
+  </module>
+  <module rdp_version="1.00.saffti-original">
+    <name>r_ssd1306_rx</name>
+    <version>1.00.saffti-original</version>
+    <urls>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_ssd1306_rx/r_ssd1306_rx/-/releases/v1.00.saffti-original/downloads/r_ssd1306_rx_v1.00.saffti-original.zip</url>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_ssd1306_rx/r_ssd1306_rx/-/releases/v1.00.saffti-original/downloads/r_ssd1306_rx_v1.00.saffti-original.xml</url>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_ssd1306_rx/r_ssd1306_rx/-/releases/v1.00.saffti-original/downloads/r_ssd1306_rx_v1.00.saffti-original_extend.mdf</url>
+    </urls>
+  </module>
+  <module rdp_version="1.00.saffti-original">
+    <name>r_simple_glcdc_config_rx</name>
+    <version>1.00.saffti-original</version>
+    <urls>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_glcdc_config_rx/r_simple_glcdc_config_rx/-/releases/v1.00.saffti-original/downloads/r_simple_glcdc_config_rx_v1.00.saffti-original.zip</url>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_glcdc_config_rx/r_simple_glcdc_config_rx/-/releases/v1.00.saffti-original/downloads/r_simple_glcdc_config_rx_v1.00.saffti-original.xml</url>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_glcdc_config_rx/r_simple_glcdc_config_rx/-/releases/v1.00.saffti-original/downloads/r_simple_glcdc_config_rx_v1.00.saffti-original_extend.mdf</url>
+    </urls>
+  </module>
+  <module rdp_version="1.00.saffti-original">
+    <name>r_simple_graphic_rx</name>
+    <version>1.00.saffti-original</version>
+    <urls>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_graphic_rx/r_simple_graphic_rx/-/releases/v1.00.saffti-original/downloads/r_simple_graphic_rx_v1.00.saffti-original.zip</url>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_graphic_rx/r_simple_graphic_rx/-/releases/v1.00.saffti-original/downloads/r_simple_graphic_rx_v1.00.saffti-original.xml</url>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_graphic_rx/r_simple_graphic_rx/-/releases/v1.00.saffti-original/downloads/r_simple_graphic_rx_v1.00.saffti-original_extend.mdf</url>
     </urls>
   </module>
 </modules>
