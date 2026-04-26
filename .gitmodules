@@ -9,3 +9,6 @@
 	path = source/r_simple_graphic_rx
 	url = https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_graphic_rx/r_simple_graphic_rx.git
 	branch = codex/add-initial-fit-module
+[submodule "source/r_cellular"]
+	path = source/r_cellular
+	url = https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_cellular/r_cellular.git

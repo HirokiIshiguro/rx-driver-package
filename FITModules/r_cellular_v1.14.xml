@@ -46,8 +46,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_cellular</name>
-        <version>1.13</version>
-        <zipsource>r_cellular_v1.13.zip</zipsource>
+        <version>1.14</version>
+        <zipsource>r_cellular_v1.14.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>7.10</version>
@@ -61,9 +61,10 @@
             <version>4.00</version>
         </dependency>
         <application>Wireless</application>
-        <desc>Cellular Module control functions for Renesas MCUs.</desc>
-        <details>Use UART to control RYZ014A and connect to the Internet.</details>
+        <desc>Cellular Module control functions for Renesas RX MCUs with BG96 support.</desc>
+        <details>Use UART to control a Quectel BG96 cellular module and connect to the Internet. This package is based on Renesas r_cellular v1.13 and carries the BG96 adaptations validated by the CK-RX65N BG96 OTA sample: BG96 power/reset/status control, BG96 AT command mapping, high-speed UART handoff, and QIOPEN URC handling.</details>
         <function>connectivity</function>
+        <incdir>r_config</incdir>
         <incdir>r_cellular</incdir>
         <incdir>r_cellular/src/at_command/ryz014/include</incdir>
         <incdir>r_cellular/src/include</incdir>
