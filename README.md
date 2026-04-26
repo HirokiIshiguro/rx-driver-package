@@ -45,14 +45,17 @@
 
 | Module | Version | Source repository | Description |
 |---|---|---|---|
+| `r_cellular` | 1.14 | [fitmodules/r_cellular/r_cellular](https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_cellular/r_cellular) | BG96-enabled cellular driver FIT module derived from Renesas `r_cellular` v1.13. Adds BG96 power/reset/status control, Quectel `QI*` socket/APN command mapping, high-speed UART handoff, and `+QIOPEN:` URC handling. Reference application: [ck-rx65n/bg96-ota/bg96](https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/example/ck-rx65n/bg96-ota/bg96). |
 | `r_ssd1306_rx` | 1.00 | [fitmodules/r_ssd1306_rx/r_ssd1306_rx](https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_ssd1306_rx/r_ssd1306_rx) | SSD1306 128x64 monochrome OLED driver. I2C backend selectable between `r_riic_rx` and `r_sci_iic_rx`. Optional `R_SSD1306_Gfx_*` and `R_SSD1306_FrameSched_*` helpers. Reference application: [128_64_display_badapple](https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/example/tb-rx671/128_64_display_badapple). |
+| `r_simple_glcdc_config_rx` | 1.00 | [fitmodules/r_simple_glcdc_config_rx/r_simple_glcdc_config_rx](https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_glcdc_config_rx/r_simple_glcdc_config_rx) | RX72N Envision Kit 480x272 RGB565 GLCDC configuration helper for Smart Configurator generated projects. |
+| `r_simple_graphic_rx` | 1.00 | [fitmodules/r_simple_graphic_rx/r_simple_graphic_rx](https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_graphic_rx/r_simple_graphic_rx) | Lightweight text drawing helper for RX GLCDC frame buffers. Used with `r_simple_glcdc_config_rx` in display examples. |
 
 ## How to use
 
 ```bash
 git clone --recurse-submodules <this-fork>
 cd rx-driver-package
-make            # builds FITModules/r_ssd1306_rx_v1.00.{zip,xml,_extend.mdf} alongside official modules
+make            # builds official modules and SAFFTI modules into FITModules/
 ```
 
 `FITModules/` から下記の Smart Configurator 検出フォルダにコピーすれば、
