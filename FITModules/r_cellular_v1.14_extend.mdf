@@ -11,7 +11,7 @@
 ***********************************************************************************************************************/
 -->
 <module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
-    <fileVersion>1.13</fileVersion>
+    <fileVersion>1.14</fileVersion>
     <formatVersion>2.00</formatVersion>
 
     <fileTemplate></fileTemplate>
@@ -36,7 +36,7 @@ Example: (empty), 4g, etc.</description>
             <description>Enter the PIN lock code of your SIM card.
 Example: (empty), 0000, etc.</description>
         </property>
-        <property id="CELLULAR_CFG_AUTH_TYPE" display="Authentication protocol type." default="0" type="combobox">
+        <property id="CELLULAR_CFG_AUTH_TYPE" display="Authentication protocol type." default="2" type="combobox">
             <option id="CELLULAR_CFG_AUTH_TYPE.0" display="0" value="0"/>
             <option id="CELLULAR_CFG_AUTH_TYPE.1" display="1" value="1"/>
             <option id="CELLULAR_CFG_AUTH_TYPE.2" display="2" value="2"/>
@@ -120,7 +120,7 @@ Enable = Use user URC charget() function.
 This function is called if a URC is received from the RYZ014A module.
 The function prototype is "void (function name)(void *);".</description>
         </property>
-        <property id="CELLULAR_CFG_DEBUGLOG" display="Debug log output level." default="0" type="combobox">
+        <property id="CELLULAR_CFG_DEBUGLOG" display="Debug log output level." default="4" type="combobox">
             <option id="CELLULAR_CFG_DEBUGLOG.0" display="0" value="0"/>
             <option id="CELLULAR_CFG_DEBUGLOG.1" display="1" value="1"/>
             <option id="CELLULAR_CFG_DEBUGLOG.2" display="2" value="2"/>
@@ -204,6 +204,11 @@ RTS(Hardware), CTS(Software): RTS hardware flow control is enabled. CTS flow con
 Example: 0x0BU.
 Please check the user's manual.</description>
         </property>
+        <property id="CELLULAR_CFG_BG96_USE_HW_CTS" display="Use BG96 hardware CTS" default="0" type="combobox">
+            <option id="CELLULAR_CFG_BG96_USE_HW_CTS.0" display="Disable hardware CTS for BG96" value="0"/>
+            <option id="CELLULAR_CFG_BG96_USE_HW_CTS.1" display="Enable hardware CTS for BG96" value="1"/>
+            <description>Selects whether the BG96 build enables SCI hardware CTS. The CK-RX65N BG96 OTA sample leaves this disabled and controls RTS as GPIO.</description>
+        </property>
         <property id="CELLULAR_CFG_RTS_PORT" display="RTS port number" default="0" type="combobox">
             <option id="CELLULAR_CFG_RTS_PORT.0" display="PORT0" value="0"/>
             <option id="CELLULAR_CFG_RTS_PORT.1" display="PORT1" value="1"/>
@@ -280,7 +285,28 @@ Please check the user's manual.</description>
             <option id="CELLULAR_CFG_RESET_PIN.7" display="BIT7" value="7"/>
             <description>RESET pin setting.</description>
         </property>
-        <property id="CELLULAR_CFG_IRQ_NUM" display="IRQ Number" default="5" type="combobox">
+        <property id="CELLULAR_CFG_BG96_PWRKEY_PORT" display="BG96 PWRKEY port number" default="B" type="textbox">
+            <constraint display="Use a Renesas RX port label such as 0, 5, B, or J" actionOnFail="error">/^([0-9A-HJ-NQ])$/.test("${CELLULAR_CFG_BG96_PWRKEY_PORT}")</constraint>
+            <description>GPIO port connected to the BG96 PWRKEY signal.</description>
+        </property>
+        <property id="CELLULAR_CFG_BG96_PWRKEY_PIN" display="BG96 PWRKEY pin number" default="7" type="textbox">
+            <constraint display="Value must be an integer in 0..7" actionOnFail="error">testInteger("${CELLULAR_CFG_BG96_PWRKEY_PIN}") &amp;&amp; ("${CELLULAR_CFG_BG96_PWRKEY_PIN}" &gt;= 0) &amp;&amp; ("${CELLULAR_CFG_BG96_PWRKEY_PIN}" &lt;= 7)</constraint>
+            <description>GPIO bit connected to the BG96 PWRKEY signal.</description>
+        </property>
+        <property id="CELLULAR_CFG_BG96_STATUS_PORT" display="BG96 STATUS port number" default="B" type="textbox">
+            <constraint display="Use a Renesas RX port label such as 0, 5, B, or J" actionOnFail="error">/^([0-9A-HJ-NQ])$/.test("${CELLULAR_CFG_BG96_STATUS_PORT}")</constraint>
+            <description>GPIO port connected to the BG96 STATUS signal.</description>
+        </property>
+        <property id="CELLULAR_CFG_BG96_STATUS_PIN" display="BG96 STATUS pin number" default="6" type="textbox">
+            <constraint display="Value must be an integer in 0..7" actionOnFail="error">testInteger("${CELLULAR_CFG_BG96_STATUS_PIN}") &amp;&amp; ("${CELLULAR_CFG_BG96_STATUS_PIN}" &gt;= 0) &amp;&amp; ("${CELLULAR_CFG_BG96_STATUS_PIN}" &lt;= 7)</constraint>
+            <description>GPIO bit connected to the BG96 STATUS signal.</description>
+        </property>
+        <property id="CELLULAR_CFG_BG96_STATUS_RUNNING_LEVEL" display="BG96 STATUS running level" default="1" type="combobox">
+            <option id="CELLULAR_CFG_BG96_STATUS_RUNNING_LEVEL.0" display="Low" value="0"/>
+            <option id="CELLULAR_CFG_BG96_STATUS_RUNNING_LEVEL.1" display="High" value="1"/>
+            <description>Logic level that indicates the BG96 module is running.</description>
+        </property>
+        <property id="CELLULAR_CFG_IRQ_NUM" display="IRQ Number" default="4" type="combobox">
             <option id="CELLULAR_CFG_IRQ_NUM.0" display="0" value="0"/>
             <option id="CELLULAR_CFG_IRQ_NUM.1" display="1" value="1"/>
             <option id="CELLULAR_CFG_IRQ_NUM.2" display="2" value="2"/>
