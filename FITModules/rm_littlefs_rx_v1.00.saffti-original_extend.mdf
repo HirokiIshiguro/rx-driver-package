@@ -11,14 +11,28 @@
     <formatVersion>2.00</formatVersion>
     <fileTemplate></fileTemplate>
     <configuration>
-        <property id="RM_LITTLEFS_CFG_READ_SIZE" display="Default littlefs read size." default="4" type="text"/>
-        <property id="RM_LITTLEFS_CFG_PROG_SIZE" display="Default littlefs program size." default="4" type="text"/>
-        <property id="RM_LITTLEFS_CFG_BLOCK_SIZE" display="Default littlefs block size." default="128" type="text"/>
-        <property id="RM_LITTLEFS_CFG_CACHE_SIZE" display="Default littlefs cache size." default="64" type="text"/>
-        <property id="RM_LITTLEFS_CFG_LOOKAHEAD_SIZE" display="Default littlefs lookahead size." default="16" type="text"/>
+        <property id="RM_LITTLEFS_CFG_READ_SIZE" display="Default littlefs read size." default="4" type="textbox">
+            <description>Default minimum read size in bytes used when RM_LITTLEFS_Open() receives a zero read_size.</description>
+        </property>
+        <property id="RM_LITTLEFS_CFG_PROG_SIZE" display="Default littlefs program size." default="4" type="textbox">
+            <description>Default minimum program size in bytes used when RM_LITTLEFS_Open() receives a zero prog_size.</description>
+        </property>
+        <property id="RM_LITTLEFS_CFG_BLOCK_SIZE" display="Default littlefs block size." default="128" type="textbox">
+            <description>Default littlefs block size in bytes. This value should match the RX data flash erase block size.</description>
+        </property>
+        <property id="RM_LITTLEFS_CFG_CACHE_SIZE" display="Default littlefs cache size." default="64" type="textbox">
+            <description>Default littlefs cache size in bytes. The value must be a multiple of the read and program sizes.</description>
+        </property>
+        <property id="RM_LITTLEFS_CFG_LOOKAHEAD_SIZE" display="Default littlefs lookahead size." default="16" type="textbox">
+            <description>Default littlefs lookahead buffer size in bytes. The value should be a multiple of 8.</description>
+        </property>
+        <property id="RM_LITTLEFS_CFG_FLASH_WAIT_TASK_ID" display="RTOS abstraction task ID used while waiting for data flash BGO." default="0" type="textbox">
+            <description>Task identifier passed to RM_RTOS_ABSTRACTION_SleepTask() while r_flash_rx data flash BGO is busy.</description>
+        </property>
         <property id="RM_LITTLEFS_CFG_PROVIDE_ABORT" display="Provide abort() for littlefs assert." default="1" type="combobox">
             <option id="RM_LITTLEFS_CFG_PROVIDE_ABORT.0" display="Disabled" value="0"/>
             <option id="RM_LITTLEFS_CFG_PROVIDE_ABORT.1" display="Enabled" value="1"/>
+            <description>Set to 1 when the application does not provide abort() but littlefs asserts may reference it.</description>
         </property>
     </configuration>
 </module>

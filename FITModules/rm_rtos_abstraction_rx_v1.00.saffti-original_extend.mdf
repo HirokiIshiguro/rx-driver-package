@@ -11,14 +11,10 @@
     <formatVersion>2.00</formatVersion>
     <fileTemplate></fileTemplate>
     <configuration>
-        <property id="RM_SFD_CFG_REGION_SIZE_BYTES" display="Default data flash region size in bytes." default="32768" type="textbox">
-            <description>Default shared data flash region size in bytes used when RM_SFD_Open() receives a zero region_size.</description>
-        </property>
-        <property id="RM_SFD_CFG_MAX_OBJECTS" display="Maximum number of stored labels." default="20" type="textbox">
-            <description>Maximum number of labeled objects stored in one SFD mounted region.</description>
-        </property>
-        <property id="RM_SFD_CFG_LABEL_MAX_BYTES" display="Maximum label length in bytes." default="40" type="textbox">
-            <description>Maximum object label length in bytes, including the terminating NUL byte.</description>
+        <property id="RM_RTOS_ABSTRACTION_CFG_PARAM_CHECKING_ENABLE" display="Enable parameter checking." default="1" type="combobox">
+            <option id="RM_RTOS_ABSTRACTION_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0"/>
+            <option id="RM_RTOS_ABSTRACTION_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled" value="1"/>
+            <description>Set to 1 to include parameter checking code. Set to 0 to compile out parameter checking code.</description>
         </property>
     </configuration>
 </module>

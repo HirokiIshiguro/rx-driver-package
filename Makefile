@@ -24,7 +24,7 @@ MODULE_NAME_LIST_LATEST = 	r_aeropoint_rx r_aes_rx \
 					r_vbatt_rx \
 					r_wdt_rx r_wifi_da16xxx \
 					rm_cli_rx rm_comms_uart_rx rm_comms_usb_pcdc_rx rm_littlefs_rx rm_mcuboot \
-					rm_rai_data_collector_rx rm_rai_data_shipper_rx rm_sfd_rx rm_touch_qe \
+					rm_rai_data_collector_rx rm_rai_data_shipper_rx rm_rtos_abstraction_rx rm_sfd_rx rm_touch_qe \
 
 all:
 	for i in $(MODULE_NAME_LIST_LATEST); do \

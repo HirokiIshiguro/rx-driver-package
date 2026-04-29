@@ -30,23 +30,19 @@
     </target>
     <package>
         <type>fitmodule</type>
-        <name>rm_sfd_rx</name>
+        <name>rm_rtos_abstraction_rx</name>
         <version>1.00.saffti-original</version>
-        <zipsource>rm_sfd_rx_v1.00.saffti-original.zip</zipsource>
+        <zipsource>rm_rtos_abstraction_rx_v1.00.saffti-original.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>7.70</version>
         </dependency>
-        <dependency>
-            <module>r_flash_rx</module>
-            <version>5.30</version>
-        </dependency>
         <application>Middleware</application>
-        <application>Storage</application>
-        <desc>Small shared data-flash key/value store for Renesas RX bootloader and application provisioning data.</desc>
-        <details>This module mounts a caller-specified data flash range and stores labeled binary objects with a two-slot copy-on-write commit format.</details>
+        <application>RTOS</application>
+        <desc>Small RTOS abstraction middleware for Renesas RX middleware hooks.</desc>
+        <details>This module provides RTOS-neutral hooks such as task sleep/yield. The module reads BSP_CFG_RTOS_USED from r_bsp, keeps bare-metal projects no-op safe, and reports missing bindings when an RTOS is selected.</details>
         <incdir>r_config</incdir>
-        <incdir>rm_sfd_rx</incdir>
-        <incdir>rm_sfd_rx/src</incdir>
+        <incdir>rm_rtos_abstraction_rx</incdir>
+        <incdir>rm_rtos_abstraction_rx/src</incdir>
     </package>
 </refinfo>
