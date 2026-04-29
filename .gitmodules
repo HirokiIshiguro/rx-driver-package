@@ -21,3 +21,6 @@
 [submodule "source/rm_cli_rx"]
 	path = source/rm_cli_rx
 	url = https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/rm_cli_rx/rm_cli_rx.git
+[submodule "source/rm_rtos_abstraction_rx"]
+	path = source/rm_rtos_abstraction_rx
+	url = https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/rm_rtos_abstraction_rx/rm_rtos_abstraction_rx.git

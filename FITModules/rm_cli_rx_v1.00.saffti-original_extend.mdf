@@ -11,9 +11,14 @@
     <formatVersion>2.00</formatVersion>
     <fileTemplate></fileTemplate>
     <configuration>
-        <property id="RM_CLI_CFG_DEFAULT_SCI_CHANNEL" display="Default SCI channel." default="0" type="text"/>
-        <property id="RM_CLI_CFG_DEFAULT_BAUD_RATE" display="Default UART baud rate." default="115200" type="text"/>
-        <property id="RM_CLI_CFG_LINE_MAX" display="Maximum command line length." default="160" type="text"/>
+        <property id="RM_CLI_CFG_DEFAULT_SCI_CHANNEL" display="Default SCI channel." default="0" type="textbox">
+            <description>Default SCI channel number used when RM_CLI_Open() receives no channel override.</description>
+        </property>
+        <property id="RM_CLI_CFG_DEFAULT_BAUD_RATE" display="Default UART baud rate." default="115200" type="textbox">
+            <description>Default UART baud rate used by the sample open path when the application does not provide another baud rate.</description>
+        </property>
+        <property id="RM_CLI_CFG_LINE_MAX" display="Maximum command line length." default="160" type="textbox">
+            <description>Maximum number of characters accepted for one command line, including the terminating NUL byte.</description>
+        </property>
     </configuration>
 </module>
-

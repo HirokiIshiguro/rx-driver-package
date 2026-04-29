@@ -15963,6 +15963,15 @@
     </urls>
   </module>
   <module rdp_version="1.00.saffti-original">
+    <name>rm_rtos_abstraction_rx</name>
+    <version>1.00.saffti-original</version>
+    <urls>
+      <url>https://gitlab.saffti.jp/oss/import/github/renesas/rx-driver-package/-/raw/master/FITModules/rm_rtos_abstraction_rx_v1.00.saffti-original.zip</url>
+      <url>https://gitlab.saffti.jp/oss/import/github/renesas/rx-driver-package/-/raw/master/FITModules/rm_rtos_abstraction_rx_v1.00.saffti-original.xml</url>
+      <url>https://gitlab.saffti.jp/oss/import/github/renesas/rx-driver-package/-/raw/master/FITModules/rm_rtos_abstraction_rx_v1.00.saffti-original_extend.mdf</url>
+    </urls>
+  </module>
+  <module rdp_version="1.00.saffti-original">
     <name>rm_sfd_rx</name>
     <version>1.00.saffti-original</version>
     <urls>

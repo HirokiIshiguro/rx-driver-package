@@ -35,11 +35,11 @@
         <zipsource>rm_cli_rx_v1.00.saffti-original.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.52</version>
+            <version>7.70</version>
         </dependency>
         <dependency>
             <module>r_sci_rx</module>
-            <version>5.40</version>
+            <version>5.60</version>
         </dependency>
         <application>Middleware</application>
         <application>Command</application>

@@ -35,11 +35,15 @@
         <zipsource>rm_littlefs_rx_v1.00.saffti-original.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
-            <version>7.52</version>
+            <version>7.70</version>
         </dependency>
         <dependency>
             <module>r_flash_rx</module>
-            <version>5.22</version>
+            <version>5.30</version>
+        </dependency>
+        <dependency>
+            <module>rm_rtos_abstraction_rx</module>
+            <version>1.00.saffti-original</version>
         </dependency>
         <application>Middleware</application>
         <application>Storage</application>
@@ -51,4 +55,3 @@
         <incdir>rm_littlefs_rx/third_party/littlefs</incdir>
     </package>
 </refinfo>
-
