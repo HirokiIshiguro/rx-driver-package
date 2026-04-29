@@ -12,3 +12,12 @@
 [submodule "source/r_cellular"]
 	path = source/r_cellular
 	url = https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_cellular/r_cellular.git
+[submodule "source/rm_sfd_rx"]
+	path = source/rm_sfd_rx
+	url = https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/rm_sfd_rx/rm_sfd_rx.git
+[submodule "source/rm_littlefs_rx"]
+	path = source/rm_littlefs_rx
+	url = https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/rm_littlefs_rx/rm_littlefs_rx.git
+[submodule "source/rm_cli_rx"]
+	path = source/rm_cli_rx
+	url = https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/rm_cli_rx/rm_cli_rx.git
