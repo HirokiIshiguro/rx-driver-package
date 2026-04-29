@@ -23,8 +23,8 @@ MODULE_NAME_LIST_LATEST = 	r_aeropoint_rx r_aes_rx \
 					r_usb_pcdc r_usb_pcdc_mini r_usb_phid r_usb_phid_mini r_usb_pmsc r_usb_pmsc_mini \
 					r_vbatt_rx \
 					r_wdt_rx r_wifi_da16xxx \
-					rm_comms_uart_rx rm_comms_usb_pcdc_rx rm_mcuboot rm_rai_data_collector_rx rm_rai_data_shipper_rx \
-					rm_touch_qe \
+					rm_cli_rx rm_comms_uart_rx rm_comms_usb_pcdc_rx rm_littlefs_rx rm_mcuboot \
+					rm_rai_data_collector_rx rm_rai_data_shipper_rx rm_sfd_rx rm_touch_qe \
 
 all:
 	for i in $(MODULE_NAME_LIST_LATEST); do \

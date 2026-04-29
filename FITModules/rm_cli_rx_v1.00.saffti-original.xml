@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/***********************************************************************************************************************
+* Copyright (c) 2026 SAFFTI (Smart Agriculture, Forestry & Fisheries Technology Institute) and contributors
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+-->
+<refinfo>
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.03.00</version>
+        <version>3.04.00</version>
+        <version>3.05.00</version>
+        <version>3.06.00</version>
+        <version>3.07.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202202</version>
+        <version>8.03.00.202411</version>
+        <version>14.02.00.202505</version>
+    </toolchain>
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+    <package>
+        <type>fitmodule</type>
+        <name>rm_cli_rx</name>
+        <version>1.00.saffti-original</version>
+        <zipsource>rm_cli_rx_v1.00.saffti-original.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>7.52</version>
+        </dependency>
+        <dependency>
+            <module>r_sci_rx</module>
+            <version>5.40</version>
+        </dependency>
+        <application>Middleware</application>
+        <application>Command</application>
+        <desc>Small UART CLI middleware for Renesas RX command dispatch.</desc>
+        <details>This module uses r_sci_rx in UART mode and provides a line parser plus an external command registration API.</details>
+        <incdir>r_config</incdir>
+        <incdir>rm_cli_rx</incdir>
+        <incdir>rm_cli_rx/src</incdir>
+    </package>
+</refinfo>
