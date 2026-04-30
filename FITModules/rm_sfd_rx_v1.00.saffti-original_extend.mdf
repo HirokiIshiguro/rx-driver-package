@@ -20,5 +20,18 @@
         <property id="RM_SFD_CFG_LABEL_MAX_BYTES" display="Maximum label length in bytes." default="40" type="textbox">
             <description>Maximum object label length in bytes, including the terminating NUL byte.</description>
         </property>
+        <property id="RM_SFD_CFG_PARAM_CHECKING_ENABLE" display="Enable parameter checking." default="1" type="combobox">
+            <option id="RM_SFD_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0"/>
+            <option id="RM_SFD_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled (default)" value="1"/>
+            <description>Set to 1 to include API parameter checking code. Set to 0 to compile out parameter checking code.</description>
+        </property>
+        <property id="RM_SFD_CFG_DEBUG_LOG_ENABLE" display="Enable debug logging." default="0" type="combobox">
+            <option id="RM_SFD_CFG_DEBUG_LOG_ENABLE.0" display="Disabled (default)" value="0"/>
+            <option id="RM_SFD_CFG_DEBUG_LOG_ENABLE.1" display="Enabled" value="1"/>
+            <description>Set to 1 to enable the optional debug log hook.</description>
+        </property>
+        <property id="RM_SFD_CFG_DEBUG_PRINTF" display="Debug printf expression." default="((void)0)" type="textbox">
+            <description>Expression used by the debug log hook. The macro receives one argument named x.</description>
+        </property>
     </configuration>
 </module>

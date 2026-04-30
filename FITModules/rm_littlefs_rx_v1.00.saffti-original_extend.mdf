@@ -26,8 +26,21 @@
         <property id="RM_LITTLEFS_CFG_LOOKAHEAD_SIZE" display="Default littlefs lookahead size." default="16" type="textbox">
             <description>Default littlefs lookahead buffer size in bytes. The value should be a multiple of 8.</description>
         </property>
+        <property id="RM_LITTLEFS_CFG_BLOCK_CYCLES" display="Default littlefs block cycles." default="500" type="textbox">
+            <description>Default littlefs block wear-leveling cycle count used when RM_LITTLEFS_Open() receives zero block_cycles.</description>
+        </property>
         <property id="RM_LITTLEFS_CFG_FLASH_WAIT_TASK_ID" display="RTOS abstraction task ID used while waiting for data flash BGO." default="0" type="textbox">
             <description>Task identifier passed to RM_RTOS_ABSTRACTION_SleepTask() while r_flash_rx data flash BGO is busy.</description>
+        </property>
+        <property id="RM_LITTLEFS_CFG_FORMAT_IF_MOUNT_FAILED" display="Format if mount fails." default="0" type="combobox">
+            <option id="RM_LITTLEFS_CFG_FORMAT_IF_MOUNT_FAILED.0" display="Disabled (default)" value="0"/>
+            <option id="RM_LITTLEFS_CFG_FORMAT_IF_MOUNT_FAILED.1" display="Enabled" value="1"/>
+            <description>Set to 1 to format the littlefs volume automatically when mounting fails.</description>
+        </property>
+        <property id="RM_LITTLEFS_CFG_PARAM_CHECKING_ENABLE" display="Enable parameter checking." default="1" type="combobox">
+            <option id="RM_LITTLEFS_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0"/>
+            <option id="RM_LITTLEFS_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled (default)" value="1"/>
+            <description>Set to 1 to include API parameter checking code. Set to 0 to compile out parameter checking code.</description>
         </property>
         <property id="RM_LITTLEFS_CFG_PROVIDE_ABORT" display="Provide abort() for littlefs assert." default="1" type="combobox">
             <option id="RM_LITTLEFS_CFG_PROVIDE_ABORT.0" display="Disabled" value="0"/>
