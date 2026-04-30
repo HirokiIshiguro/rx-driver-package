@@ -17,8 +17,41 @@
         <property id="RM_CLI_CFG_DEFAULT_BAUD_RATE" display="Default UART baud rate." default="115200" type="textbox">
             <description>Default UART baud rate used by the sample open path when the application does not provide another baud rate.</description>
         </property>
-        <property id="RM_CLI_CFG_LINE_MAX" display="Maximum command line length." default="160" type="textbox">
+        <property id="RM_CLI_CFG_DEFAULT_INTERRUPT_PRIO" display="Default SCI interrupt priority." default="5" type="textbox">
+            <constraint display="Value must be an integer in the range 1 to 15.">(1 &lt;= ${RM_CLI_CFG_DEFAULT_INTERRUPT_PRIO}) &amp;&amp; (${RM_CLI_CFG_DEFAULT_INTERRUPT_PRIO} &lt;= 15)</constraint>
+            <description>Default SCI interrupt priority used by the sample open path when the application does not provide another priority.</description>
+        </property>
+        <property id="RM_CLI_CFG_LINE_MAX" display="Maximum command line length." default="160" type="combobox">
+            <option id="RM_CLI_CFG_LINE_MAX.80" display="80 bytes" value="80"/>
+            <option id="RM_CLI_CFG_LINE_MAX.160" display="160 bytes (default)" value="160"/>
+            <option id="RM_CLI_CFG_LINE_MAX.256" display="256 bytes" value="256"/>
+            <option id="RM_CLI_CFG_LINE_MAX.512" display="512 bytes" value="512"/>
+            <option id="RM_CLI_CFG_LINE_MAX.1024" display="1024 bytes" value="1024"/>
             <description>Maximum number of characters accepted for one command line, including the terminating NUL byte.</description>
+        </property>
+        <property id="RM_CLI_CFG_ARG_MAX" display="Maximum argv tokens." default="8" type="combobox">
+            <option id="RM_CLI_CFG_ARG_MAX.4" display="4 tokens" value="4"/>
+            <option id="RM_CLI_CFG_ARG_MAX.8" display="8 tokens (default)" value="8"/>
+            <option id="RM_CLI_CFG_ARG_MAX.16" display="16 tokens" value="16"/>
+            <option id="RM_CLI_CFG_ARG_MAX.32" display="32 tokens" value="32"/>
+            <description>Maximum number of argv tokens parsed from one command line.</description>
+        </property>
+        <property id="RM_CLI_CFG_USER_COMMAND_MAX" display="Maximum user commands." default="8" type="combobox">
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.4" display="4 commands" value="4"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.8" display="8 commands (default)" value="8"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.16" display="16 commands" value="16"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.32" display="32 commands" value="32"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.64" display="64 commands" value="64"/>
+            <description>Maximum number of commands that the application can register with RM_CLI_RegisterCommand().</description>
+        </property>
+        <property id="RM_CLI_CFG_BINARY_MAX" display="Maximum binary receive size." default="1024" type="textbox">
+            <constraint display="Value must be a non-negative integer.">(0 &lt;= ${RM_CLI_CFG_BINARY_MAX})</constraint>
+            <description>Reserved maximum binary receive size in bytes.</description>
+        </property>
+        <property id="RM_CLI_CFG_PARAM_CHECKING_ENABLE" display="Enable parameter checking." default="1" type="combobox">
+            <option id="RM_CLI_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0"/>
+            <option id="RM_CLI_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled (default)" value="1"/>
+            <description>Set to 1 to include parameter checking code. Set to 0 to compile out parameter checking code.</description>
         </property>
     </configuration>
 </module>
