@@ -17,8 +17,94 @@
         <property id="RM_CLI_CFG_DEFAULT_BAUD_RATE" display="Default UART baud rate." default="115200" type="textbox">
             <description>Default UART baud rate used by the sample open path when the application does not provide another baud rate.</description>
         </property>
+        <property id="RM_CLI_CFG_DEFAULT_INTERRUPT_PRIO" display="Default SCI interrupt priority." default="5" type="textbox">
+            <constraint display="Value must be an integer in the range 1 to 15.">(1 &lt;= ${RM_CLI_CFG_DEFAULT_INTERRUPT_PRIO}) &amp;&amp; (${RM_CLI_CFG_DEFAULT_INTERRUPT_PRIO} &lt;= 15)</constraint>
+            <description>Default SCI interrupt priority used by the sample open path when the application does not provide another priority.</description>
+        </property>
         <property id="RM_CLI_CFG_LINE_MAX" display="Maximum command line length." default="160" type="textbox">
             <description>Maximum number of characters accepted for one command line, including the terminating NUL byte.</description>
+        </property>
+        <property id="RM_CLI_CFG_ARG_MAX" display="Maximum argv tokens." default="8" type="combobox">
+            <option id="RM_CLI_CFG_ARG_MAX.0" display="0 tokens" value="0"/>
+            <option id="RM_CLI_CFG_ARG_MAX.1" display="1 token" value="1"/>
+            <option id="RM_CLI_CFG_ARG_MAX.2" display="2 tokens" value="2"/>
+            <option id="RM_CLI_CFG_ARG_MAX.3" display="3 tokens" value="3"/>
+            <option id="RM_CLI_CFG_ARG_MAX.4" display="4 tokens" value="4"/>
+            <option id="RM_CLI_CFG_ARG_MAX.5" display="5 tokens" value="5"/>
+            <option id="RM_CLI_CFG_ARG_MAX.6" display="6 tokens" value="6"/>
+            <option id="RM_CLI_CFG_ARG_MAX.7" display="7 tokens" value="7"/>
+            <option id="RM_CLI_CFG_ARG_MAX.8" display="8 tokens (default)" value="8"/>
+            <option id="RM_CLI_CFG_ARG_MAX.9" display="9 tokens" value="9"/>
+            <option id="RM_CLI_CFG_ARG_MAX.10" display="10 tokens" value="10"/>
+            <option id="RM_CLI_CFG_ARG_MAX.11" display="11 tokens" value="11"/>
+            <option id="RM_CLI_CFG_ARG_MAX.12" display="12 tokens" value="12"/>
+            <option id="RM_CLI_CFG_ARG_MAX.13" display="13 tokens" value="13"/>
+            <option id="RM_CLI_CFG_ARG_MAX.14" display="14 tokens" value="14"/>
+            <option id="RM_CLI_CFG_ARG_MAX.15" display="15 tokens" value="15"/>
+            <option id="RM_CLI_CFG_ARG_MAX.16" display="16 tokens" value="16"/>
+            <option id="RM_CLI_CFG_ARG_MAX.17" display="17 tokens" value="17"/>
+            <option id="RM_CLI_CFG_ARG_MAX.18" display="18 tokens" value="18"/>
+            <option id="RM_CLI_CFG_ARG_MAX.19" display="19 tokens" value="19"/>
+            <option id="RM_CLI_CFG_ARG_MAX.20" display="20 tokens" value="20"/>
+            <option id="RM_CLI_CFG_ARG_MAX.21" display="21 tokens" value="21"/>
+            <option id="RM_CLI_CFG_ARG_MAX.22" display="22 tokens" value="22"/>
+            <option id="RM_CLI_CFG_ARG_MAX.23" display="23 tokens" value="23"/>
+            <option id="RM_CLI_CFG_ARG_MAX.24" display="24 tokens" value="24"/>
+            <option id="RM_CLI_CFG_ARG_MAX.25" display="25 tokens" value="25"/>
+            <option id="RM_CLI_CFG_ARG_MAX.26" display="26 tokens" value="26"/>
+            <option id="RM_CLI_CFG_ARG_MAX.27" display="27 tokens" value="27"/>
+            <option id="RM_CLI_CFG_ARG_MAX.28" display="28 tokens" value="28"/>
+            <option id="RM_CLI_CFG_ARG_MAX.29" display="29 tokens" value="29"/>
+            <option id="RM_CLI_CFG_ARG_MAX.30" display="30 tokens" value="30"/>
+            <option id="RM_CLI_CFG_ARG_MAX.31" display="31 tokens" value="31"/>
+            <option id="RM_CLI_CFG_ARG_MAX.32" display="32 tokens" value="32"/>
+            <description>Maximum number of argv tokens parsed from one command line.</description>
+        </property>
+        <property id="RM_CLI_CFG_USER_COMMAND_MAX" display="Maximum user commands." default="8" type="combobox">
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.0" display="0 commands" value="0"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.1" display="1 command" value="1"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.2" display="2 commands" value="2"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.3" display="3 commands" value="3"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.4" display="4 commands" value="4"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.5" display="5 commands" value="5"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.6" display="6 commands" value="6"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.7" display="7 commands" value="7"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.8" display="8 commands (default)" value="8"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.9" display="9 commands" value="9"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.10" display="10 commands" value="10"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.11" display="11 commands" value="11"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.12" display="12 commands" value="12"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.13" display="13 commands" value="13"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.14" display="14 commands" value="14"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.15" display="15 commands" value="15"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.16" display="16 commands" value="16"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.17" display="17 commands" value="17"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.18" display="18 commands" value="18"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.19" display="19 commands" value="19"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.20" display="20 commands" value="20"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.21" display="21 commands" value="21"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.22" display="22 commands" value="22"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.23" display="23 commands" value="23"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.24" display="24 commands" value="24"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.25" display="25 commands" value="25"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.26" display="26 commands" value="26"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.27" display="27 commands" value="27"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.28" display="28 commands" value="28"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.29" display="29 commands" value="29"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.30" display="30 commands" value="30"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.31" display="31 commands" value="31"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.32" display="32 commands" value="32"/>
+            <option id="RM_CLI_CFG_USER_COMMAND_MAX.64" display="64 commands" value="64"/>
+            <description>Maximum number of commands that the application can register with RM_CLI_RegisterCommand().</description>
+        </property>
+        <property id="RM_CLI_CFG_BINARY_MAX" display="Maximum binary receive size." default="1024" type="textbox">
+            <constraint display="Value must be a non-negative integer.">(0 &lt;= ${RM_CLI_CFG_BINARY_MAX})</constraint>
+            <description>Reserved maximum binary receive size in bytes.</description>
+        </property>
+        <property id="RM_CLI_CFG_PARAM_CHECKING_ENABLE" display="Enable parameter checking." default="1" type="combobox">
+            <option id="RM_CLI_CFG_PARAM_CHECKING_ENABLE.0" display="Disabled" value="0"/>
+            <option id="RM_CLI_CFG_PARAM_CHECKING_ENABLE.1" display="Enabled (default)" value="1"/>
+            <description>Set to 1 to include parameter checking code. Set to 0 to compile out parameter checking code.</description>
         </property>
     </configuration>
 </module>
