@@ -70,7 +70,7 @@ Set between 0~65535.</description>
             <description>TCP connection timeout to peer.
 Set between 0~65535.</description>
         </property>
-        <property id="CELLULAR_CFG_SCI_PRIORITY" display="SCI interrupt priority" default="4" type="textbox">
+        <property id="CELLULAR_CFG_SCI_PRIORITY" display="SCI interrupt priority" default="6" type="textbox">
             <constraint display="Value must be an integer" actionOnFail="error">testInteger("${CELLULAR_CFG_SCI_PRIORITY}")</constraint>
             <constraint display="Value must be in the range 2 ~ 15" actionOnFail="error">("${CELLULAR_CFG_SCI_PRIORITY}" &gt;= 2) &amp;&amp; ("${CELLULAR_CFG_SCI_PRIORITY}" &lt;= 15)</constraint>
             <description>SCI interrupt priority.
@@ -247,6 +247,11 @@ Please check the user's manual.</description>
             <option id="CELLULAR_CFG_RTS_PIN.7" display="BIT7" value="7"/>
             <description>RTS pin setting</description>
         </property>
+        <property id="CELLULAR_CFG_BG96_RTS_IDLE_LEVEL" display="BG96 RTS boot idle level" default="0" type="combobox">
+            <option id="CELLULAR_CFG_BG96_RTS_IDLE_LEVEL.0" display="Low" value="0"/>
+            <option id="CELLULAR_CFG_BG96_RTS_IDLE_LEVEL.1" display="High" value="1"/>
+            <description>GPIO output level driven on RTS while BG96 power/control pins are prepared. SCI open drives RTS ready after the UART is configured.</description>
+        </property>
         <property id="CELLULAR_CFG_RESET_PORT" display="Reset port number" default="5" type="combobox">
             <option id="CELLULAR_CFG_RESET_PORT.0" display="PORT0" value="0"/>
             <option id="CELLULAR_CFG_RESET_PORT.1" display="PORT1" value="1"/>
@@ -293,6 +298,11 @@ Please check the user's manual.</description>
             <constraint display="Value must be an integer in 0..7" actionOnFail="error">testInteger("${CELLULAR_CFG_BG96_PWRKEY_PIN}") &amp;&amp; ("${CELLULAR_CFG_BG96_PWRKEY_PIN}" &gt;= 0) &amp;&amp; ("${CELLULAR_CFG_BG96_PWRKEY_PIN}" &lt;= 7)</constraint>
             <description>GPIO bit connected to the BG96 PWRKEY signal.</description>
         </property>
+        <property id="CELLULAR_CFG_BG96_PWRKEY_ACTIVE_LEVEL" display="BG96 PWRKEY MCU active level" default="1" type="combobox">
+            <option id="CELLULAR_CFG_BG96_PWRKEY_ACTIVE_LEVEL.0" display="Low" value="0"/>
+            <option id="CELLULAR_CFG_BG96_PWRKEY_ACTIVE_LEVEL.1" display="High" value="1"/>
+            <description>MCU GPIO level that asserts PWRKEY after any board-level inversion.</description>
+        </property>
         <property id="CELLULAR_CFG_BG96_STATUS_PORT" display="BG96 STATUS port number" default="B" type="textbox">
             <constraint display="Use a Renesas RX port label such as 0, 5, B, or J" actionOnFail="error">/^([0-9A-HJ-NQ])$/.test("${CELLULAR_CFG_BG96_STATUS_PORT}")</constraint>
             <description>GPIO port connected to the BG96 STATUS signal.</description>
@@ -305,6 +315,48 @@ Please check the user's manual.</description>
             <option id="CELLULAR_CFG_BG96_STATUS_RUNNING_LEVEL.0" display="Low" value="0"/>
             <option id="CELLULAR_CFG_BG96_STATUS_RUNNING_LEVEL.1" display="High" value="1"/>
             <description>Logic level that indicates the BG96 module is running.</description>
+        </property>
+        <property id="CELLULAR_CFG_BG96_POWER_ENABLE" display="Use BG96 external power enable GPIO" default="0" type="combobox">
+            <option id="CELLULAR_CFG_BG96_POWER_ENABLE.0" display="Disable" value="0"/>
+            <option id="CELLULAR_CFG_BG96_POWER_ENABLE.1" display="Enable" value="1"/>
+            <description>Enables an optional board power switch before BG96 PWRKEY/RESET_N control.</description>
+        </property>
+        <property id="CELLULAR_CFG_BG96_POWER_ENABLE_PORT" display="BG96 power enable port number" default="B" type="textbox">
+            <constraint display="when BG96 external power enable GPIO is Enable only" actionOnFail="disable">${CELLULAR_CFG_BG96_POWER_ENABLE} == ${CELLULAR_CFG_BG96_POWER_ENABLE.1}</constraint>
+            <constraint display="Use a Renesas RX port label such as 0, 5, B, or J" actionOnFail="error">/^([0-9A-HJ-NQ])$/.test("${CELLULAR_CFG_BG96_POWER_ENABLE_PORT}")</constraint>
+            <description>GPIO port connected to an optional BG96 power enable signal.</description>
+        </property>
+        <property id="CELLULAR_CFG_BG96_POWER_ENABLE_PIN" display="BG96 power enable pin number" default="5" type="textbox">
+            <constraint display="when BG96 external power enable GPIO is Enable only" actionOnFail="disable">${CELLULAR_CFG_BG96_POWER_ENABLE} == ${CELLULAR_CFG_BG96_POWER_ENABLE.1}</constraint>
+            <constraint display="Value must be an integer in 0..7" actionOnFail="error">testInteger("${CELLULAR_CFG_BG96_POWER_ENABLE_PIN}") &amp;&amp; ("${CELLULAR_CFG_BG96_POWER_ENABLE_PIN}" &gt;= 0) &amp;&amp; ("${CELLULAR_CFG_BG96_POWER_ENABLE_PIN}" &lt;= 7)</constraint>
+            <description>GPIO bit connected to an optional BG96 power enable signal.</description>
+        </property>
+        <property id="CELLULAR_CFG_BG96_POWER_ENABLE_ACTIVE_LEVEL" display="BG96 power enable active level" default="1" type="combobox">
+            <constraint display="when BG96 external power enable GPIO is Enable only" actionOnFail="disable">${CELLULAR_CFG_BG96_POWER_ENABLE} == ${CELLULAR_CFG_BG96_POWER_ENABLE.1}</constraint>
+            <option id="CELLULAR_CFG_BG96_POWER_ENABLE_ACTIVE_LEVEL.0" display="Low" value="0"/>
+            <option id="CELLULAR_CFG_BG96_POWER_ENABLE_ACTIVE_LEVEL.1" display="High" value="1"/>
+            <description>GPIO level that enables the external BG96 power switch.</description>
+        </property>
+        <property id="CELLULAR_CFG_BG96_DTR_ENABLE" display="Use BG96 DTR GPIO" default="0" type="combobox">
+            <option id="CELLULAR_CFG_BG96_DTR_ENABLE.0" display="Disable" value="0"/>
+            <option id="CELLULAR_CFG_BG96_DTR_ENABLE.1" display="Enable" value="1"/>
+            <description>Drives an optional BG96 DTR GPIO while the module is initialized.</description>
+        </property>
+        <property id="CELLULAR_CFG_BG96_DTR_PORT" display="BG96 DTR port number" default="A" type="textbox">
+            <constraint display="when BG96 DTR GPIO is Enable only" actionOnFail="disable">${CELLULAR_CFG_BG96_DTR_ENABLE} == ${CELLULAR_CFG_BG96_DTR_ENABLE.1}</constraint>
+            <constraint display="Use a Renesas RX port label such as 0, 5, B, or J" actionOnFail="error">/^([0-9A-HJ-NQ])$/.test("${CELLULAR_CFG_BG96_DTR_PORT}")</constraint>
+            <description>GPIO port connected to the BG96 DTR signal.</description>
+        </property>
+        <property id="CELLULAR_CFG_BG96_DTR_PIN" display="BG96 DTR pin number" default="7" type="textbox">
+            <constraint display="when BG96 DTR GPIO is Enable only" actionOnFail="disable">${CELLULAR_CFG_BG96_DTR_ENABLE} == ${CELLULAR_CFG_BG96_DTR_ENABLE.1}</constraint>
+            <constraint display="Value must be an integer in 0..7" actionOnFail="error">testInteger("${CELLULAR_CFG_BG96_DTR_PIN}") &amp;&amp; ("${CELLULAR_CFG_BG96_DTR_PIN}" &gt;= 0) &amp;&amp; ("${CELLULAR_CFG_BG96_DTR_PIN}" &lt;= 7)</constraint>
+            <description>GPIO bit connected to the BG96 DTR signal.</description>
+        </property>
+        <property id="CELLULAR_CFG_BG96_DTR_IDLE_LEVEL" display="BG96 DTR idle level" default="1" type="combobox">
+            <constraint display="when BG96 DTR GPIO is Enable only" actionOnFail="disable">${CELLULAR_CFG_BG96_DTR_ENABLE} == ${CELLULAR_CFG_BG96_DTR_ENABLE.1}</constraint>
+            <option id="CELLULAR_CFG_BG96_DTR_IDLE_LEVEL.0" display="Low" value="0"/>
+            <option id="CELLULAR_CFG_BG96_DTR_IDLE_LEVEL.1" display="High" value="1"/>
+            <description>GPIO output level driven on DTR during BG96 initialization.</description>
         </property>
         <property id="CELLULAR_CFG_IRQ_NUM" display="IRQ Number" default="4" type="combobox">
             <option id="CELLULAR_CFG_IRQ_NUM.0" display="0" value="0"/>
