@@ -207,7 +207,12 @@ Please check the user's manual.</description>
         <property id="CELLULAR_CFG_BG96_USE_HW_CTS" display="Use BG96 hardware CTS" default="0" type="combobox">
             <option id="CELLULAR_CFG_BG96_USE_HW_CTS.0" display="Disable hardware CTS for BG96" value="0"/>
             <option id="CELLULAR_CFG_BG96_USE_HW_CTS.1" display="Enable hardware CTS for BG96" value="1"/>
-            <description>Selects whether the BG96 build enables SCI hardware CTS. The CK-RX65N BG96 OTA sample leaves this disabled and controls RTS as GPIO.</description>
+            <description>Selects whether the BG96 build enables SCI hardware CTS after AT+IFC=2,2 succeeds.</description>
+        </property>
+        <property id="CELLULAR_CFG_BG96_FLOW_CONTROL" display="Enable BG96 UART flow control" default="1" type="combobox">
+            <option id="CELLULAR_CFG_BG96_FLOW_CONTROL.0" display="Disable AT+IFC=2,2" value="0"/>
+            <option id="CELLULAR_CFG_BG96_FLOW_CONTROL.1" display="Enable AT+IFC=2,2" value="1"/>
+            <description>Selects whether the BG96 build sends AT+IFC=2,2 during module reset to enable modem-side UART hardware flow control.</description>
         </property>
         <property id="CELLULAR_CFG_RTS_PORT" display="RTS port number" default="0" type="combobox">
             <option id="CELLULAR_CFG_RTS_PORT.0" display="PORT0" value="0"/>
