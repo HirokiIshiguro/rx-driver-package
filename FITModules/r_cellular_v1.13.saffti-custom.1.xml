@@ -46,8 +46,8 @@
     <package>
         <type>fitmodule</type>
         <name>r_cellular</name>
-        <version>1.13.saffti-custom</version>
-        <zipsource>r_cellular_v1.13.saffti-custom.zip</zipsource>
+        <version>1.13.saffti-custom.1</version>
+        <zipsource>r_cellular_v1.13.saffti-custom.1.zip</zipsource>
         <dependency>
             <module>r_bsp</module>
             <version>7.10</version>
@@ -62,7 +62,7 @@
         </dependency>
         <application>Wireless</application>
         <desc>Cellular Module control functions for Renesas RX MCUs with BG96 support.</desc>
-        <details>Use UART to control a Quectel BG96 cellular module and connect to the Internet. This package is based on Renesas r_cellular v1.13 and carries the BG96 adaptations validated by the CK-RX65N BG96 OTA sample: BG96 power/reset/status control, BG96 AT command mapping, high-speed UART handoff, and QIOPEN URC handling.</details>
+        <details>Use UART to control a Quectel BG96 cellular module and connect to the Internet. This package is based on Renesas r_cellular v1.13 and carries the BG96 adaptations validated by the CK-RX65N BG96 OTA sample: BG96 power/reset/status control, BG96 AT command mapping, high-speed UART handoff, UART flow control, and QIOPEN URC handling.</details>
         <function>connectivity</function>
         <incdir>r_config</incdir>
         <incdir>r_cellular</incdir>
