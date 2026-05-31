@@ -15944,6 +15944,15 @@
       <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_glcdc_config_rx/r_simple_glcdc_config_rx/-/releases/v1.00.saffti-original/downloads/r_simple_glcdc_config_rx_v1.00.saffti-original_extend.mdf</url>
     </urls>
   </module>
+  <module rdp_version="1.01.saffti-original">
+    <name>r_simple_glcdc_config_rx</name>
+    <version>1.01.saffti-original</version>
+    <urls>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_glcdc_config_rx/r_simple_glcdc_config_rx/-/releases/v1.01.saffti-original/downloads/r_simple_glcdc_config_rx_v1.01.saffti-original.zip</url>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_glcdc_config_rx/r_simple_glcdc_config_rx/-/releases/v1.01.saffti-original/downloads/r_simple_glcdc_config_rx_v1.01.saffti-original.xml</url>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_glcdc_config_rx/r_simple_glcdc_config_rx/-/releases/v1.01.saffti-original/downloads/r_simple_glcdc_config_rx_v1.01.saffti-original_extend.mdf</url>
+    </urls>
+  </module>
   <module rdp_version="1.00.saffti-original">
     <name>r_simple_graphic_rx</name>
     <version>1.00.saffti-original</version>
@@ -15951,6 +15960,15 @@
       <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_graphic_rx/r_simple_graphic_rx/-/releases/v1.00.saffti-original/downloads/r_simple_graphic_rx_v1.00.saffti-original.zip</url>
       <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_graphic_rx/r_simple_graphic_rx/-/releases/v1.00.saffti-original/downloads/r_simple_graphic_rx_v1.00.saffti-original.xml</url>
       <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_graphic_rx/r_simple_graphic_rx/-/releases/v1.00.saffti-original/downloads/r_simple_graphic_rx_v1.00.saffti-original_extend.mdf</url>
+    </urls>
+  </module>
+  <module rdp_version="1.01.saffti-original">
+    <name>r_simple_graphic_rx</name>
+    <version>1.01.saffti-original</version>
+    <urls>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_graphic_rx/r_simple_graphic_rx/-/releases/v1.01.saffti-original/downloads/r_simple_graphic_rx_v1.01.saffti-original.zip</url>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_graphic_rx/r_simple_graphic_rx/-/releases/v1.01.saffti-original/downloads/r_simple_graphic_rx_v1.01.saffti-original.xml</url>
+      <url>https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_graphic_rx/r_simple_graphic_rx/-/releases/v1.01.saffti-original/downloads/r_simple_graphic_rx_v1.01.saffti-original_extend.mdf</url>
     </urls>
   </module>
   <module rdp_version="1.00.saffti-original">
