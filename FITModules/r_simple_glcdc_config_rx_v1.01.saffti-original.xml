@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/***********************************************************************************************************************
+* Copyright (c) 2026 SAFFTI (Smart Agriculture, Forestry & Fisheries Technology Institute) and contributors
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+-->
+<refinfo>
+
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.03.00</version>
+        <version>3.04.00</version>
+        <version>3.05.00</version>
+        <version>3.06.00</version>
+        <version>3.07.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202202</version>
+        <version>8.03.00.202411</version>
+        <version>14.02.00.202505</version>
+    </toolchain>
+
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+
+    <package>
+        <type>fitmodule</type>
+        <name>r_simple_glcdc_config_rx</name>
+        <version>1.01.saffti-original</version>
+        <zipsource>r_simple_glcdc_config_rx_v1.01.saffti-original.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>7.52</version>
+        </dependency>
+        <dependency>
+            <module>r_glcdc_rx</module>
+            <version>1.30</version>
+        </dependency>
+        <application>Display</application>
+        <application>Graphics</application>
+        <desc>Simple GLCDC configuration helper for 480x272 RGB565 LCD output on RX.</desc>
+        <details>This module wraps r_glcdc_rx setup for a CLUT8 frame buffer on a 480x272 RGB565 LCD panel and exposes R_SIMPLE_GLCDC_CONFIG_Open/Close plus lcd_get_frame_buffer_pointer. LCD DISP and backlight control pins are selected by board presets; AUTO uses BSP macros for RX65N-RSK-2MB and RX72N Envision Kit, with the original RX72N Envision Kit pins as the fallback.</details>
+        <incdir>r_config</incdir>
+        <incdir>r_simple_glcdc_config_rx</incdir>
+        <incdir>r_simple_glcdc_config_rx/src</incdir>
+    </package>
+
+</refinfo>
