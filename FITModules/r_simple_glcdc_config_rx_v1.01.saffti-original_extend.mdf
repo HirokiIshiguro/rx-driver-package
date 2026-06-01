@@ -13,11 +13,11 @@
     <configuration>
         <property id="XSIZE_PHYS" display="LCD width in pixels" default="480" type="textbox">
             <constraint display="Value must be a positive integer" actionOnFail="error">testInteger("${XSIZE_PHYS}") &amp;&amp; ("${XSIZE_PHYS}" &gt; 0)</constraint>
-            <description>Horizontal active pixel width. The RX65N-RSK-2MB on-board TFT uses 480.</description>
+            <description>Horizontal active pixel width. The RX72N Envision Kit and RX65N-RSK-2MB on-board TFTs use 480.</description>
         </property>
         <property id="YSIZE_PHYS" display="LCD height in pixels" default="272" type="textbox">
             <constraint display="Value must be a positive integer" actionOnFail="error">testInteger("${YSIZE_PHYS}") &amp;&amp; ("${YSIZE_PHYS}" &gt; 0)</constraint>
-            <description>Vertical active pixel height. The RX65N-RSK-2MB on-board TFT uses 272.</description>
+            <description>Vertical active pixel height. The RX72N Envision Kit and RX65N-RSK-2MB on-board TFTs use 272.</description>
         </property>
         <property id="XSIZE_OUTOF_DISPLAY" display="Line offset padding in pixels" default="32" type="textbox">
             <constraint display="Value must be a non-negative integer" actionOnFail="error">testInteger("${XSIZE_OUTOF_DISPLAY}") &amp;&amp; ("${XSIZE_OUTOF_DISPLAY}" &gt;= 0)</constraint>
@@ -29,17 +29,11 @@
         <property id="_CONTRAST" display="LCD contrast setting" default="0x80" type="textbox">
             <description>GLCDC contrast setting value used by the simple configuration helper.</description>
         </property>
-        <property id="DISP_SIGNAL_PORT_DIRECTION" display="DISP port direction bit" default="PORT9.PDR.BIT.B7" type="textbox">
-            <description>Port direction bit for the LCD DISP signal. The default is RX65N-RSK-2MB OnTFT-DISP.</description>
-        </property>
-        <property id="DISP_SIGNAL_PORT_OUTPUT_DATA" display="DISP port output bit" default="PORT9.PODR.BIT.B7" type="textbox">
-            <description>Port output bit for the LCD DISP signal. The default is RX65N-RSK-2MB OnTFT-DISP.</description>
-        </property>
-        <property id="BACKLIGHT_SIGNAL_PORT_DIRECTION" display="Backlight port direction bit" default="PORTB.PDR.BIT.B7" type="textbox">
-            <description>Port direction bit for the LCD backlight enable signal. The default is RX65N-RSK-2MB OnTFT-BACKLIGHT.</description>
-        </property>
-        <property id="BACKLIGHT_SIGNAL_PORT_OUTPUT_DATA" display="Backlight port output bit" default="PORTB.PODR.BIT.B7" type="textbox">
-            <description>Port output bit for the LCD backlight enable signal. The default is RX65N-RSK-2MB OnTFT-BACKLIGHT.</description>
+        <property id="R_SIMPLE_GLCDC_CFG_BOARD" display="LCD control pin board preset" default="0" type="combobox">
+            <option id="R_SIMPLE_GLCDC_CFG_BOARD.0" display="Auto-detect from r_bsp (default)" value="0"/>
+            <option id="R_SIMPLE_GLCDC_CFG_BOARD.1" display="RX72N Envision Kit" value="1"/>
+            <option id="R_SIMPLE_GLCDC_CFG_BOARD.2" display="RX65N-RSK-2MB" value="2"/>
+            <description>Selects the DISP and backlight GPIO preset. Auto-detect uses BSP_BOARD_GENERIC_RX65N with BSP_MCU_RX65N_2MB for RX65N-RSK-2MB, BSP_BOARD_GENERIC_RX72N for RX72N Envision Kit, and falls back to the original RX72N Envision Kit pins for unknown boards.</description>
         </property>
     </configuration>
 </module>

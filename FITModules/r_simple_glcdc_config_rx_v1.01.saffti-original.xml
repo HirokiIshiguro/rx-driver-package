@@ -47,7 +47,7 @@
         <application>Display</application>
         <application>Graphics</application>
         <desc>Simple GLCDC configuration helper for 480x272 RGB565 LCD output on RX.</desc>
-        <details>This module wraps r_glcdc_rx setup for a CLUT8 frame buffer on a 480x272 RGB565 LCD panel and exposes R_SIMPLE_GLCDC_CONFIG_Open/Close plus lcd_get_frame_buffer_pointer. The default control pins target the RX65N-RSK-2MB on-board TFT and can be overridden in configuration.</details>
+        <details>This module wraps r_glcdc_rx setup for a CLUT8 frame buffer on a 480x272 RGB565 LCD panel and exposes R_SIMPLE_GLCDC_CONFIG_Open/Close plus lcd_get_frame_buffer_pointer. LCD DISP and backlight control pins are selected by board presets; AUTO uses BSP macros for RX65N-RSK-2MB and RX72N Envision Kit, with the original RX72N Envision Kit pins as the fallback.</details>
         <incdir>r_config</incdir>
         <incdir>r_simple_glcdc_config_rx</incdir>
         <incdir>r_simple_glcdc_config_rx/src</incdir>
