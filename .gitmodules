@@ -24,3 +24,6 @@
 [submodule "source/rm_rtos_abstraction_rx"]
 	path = source/rm_rtos_abstraction_rx
 	url = https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/rm_rtos_abstraction_rx/rm_rtos_abstraction_rx.git
+[submodule "source/r_sdio_rx"]
+	path = source/r_sdio_rx
+	url = https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_sdio_rx/r_sdio_rx.git

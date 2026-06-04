@@ -15936,6 +15936,15 @@
     </urls>
   </module>
   <module rdp_version="1.00.saffti-original">
+    <name>r_sdio_rx</name>
+    <version>1.00.saffti-original</version>
+    <urls>
+      <url>https://gitlab.saffti.jp/oss/import/github/renesas/rx-driver-package/-/raw/master/FITModules/r_sdio_rx_v1.00.saffti-original.zip</url>
+      <url>https://gitlab.saffti.jp/oss/import/github/renesas/rx-driver-package/-/raw/master/FITModules/r_sdio_rx_v1.00.saffti-original.xml</url>
+      <url>https://gitlab.saffti.jp/oss/import/github/renesas/rx-driver-package/-/raw/master/FITModules/r_sdio_rx_v1.00.saffti-original_extend.mdf</url>
+    </urls>
+  </module>
+  <module rdp_version="1.00.saffti-original">
     <name>r_simple_glcdc_config_rx</name>
     <version>1.00.saffti-original</version>
     <urls>
