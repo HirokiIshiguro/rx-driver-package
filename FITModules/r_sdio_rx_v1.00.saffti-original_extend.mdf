@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+/***********************************************************************************************************************
+* Copyright (c) 2026 SAFFTI (Smart Agriculture, Forestry & Fisheries Technology Institute) and contributors
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+-->
+<module xmlns:xs="http://www.w3.org/2001/XMLSchema-instance" schemaVersion="2.0" xs:noNamespaceSchemaLocation="schema_mdf_2.00.xsd">
+    <fileVersion>1.00</fileVersion>
+    <formatVersion>2.00</formatVersion>
+    <fileTemplate></fileTemplate>
+    <configuration>
+        <property id="SDIO_CFG_PARAM_CHECKING_ENABLE" display="Parameter check" default="BSP_CFG_PARAM_CHECKING_ENABLE" type="combobox">
+            <option id="SDIO_CFG_PARAM_CHECKING_ENABLE.BSP_CFG_PARAM_CHECKING_ENABLE" display="Use system default" value="BSP_CFG_PARAM_CHECKING_ENABLE"/>
+            <option id="SDIO_CFG_PARAM_CHECKING_ENABLE.0" display="Disable parameter checks" value="0"/>
+            <option id="SDIO_CFG_PARAM_CHECKING_ENABLE.1" display="Enable parameter checks" value="1"/>
+            <description>Selects whether to include parameter checking in the module.</description>
+        </property>
+        <property id="SDIO_CFG_CMD53_MAX_BYTE_COUNT" display="Maximum CMD53 byte-mode count" default="512" type="textbox">
+            <constraint display="Value must be an integer in 1..512" actionOnFail="error">testInteger("${SDIO_CFG_CMD53_MAX_BYTE_COUNT}") &amp;&amp; ("${SDIO_CFG_CMD53_MAX_BYTE_COUNT}" &gt;= 1) &amp;&amp; ("${SDIO_CFG_CMD53_MAX_BYTE_COUNT}" &lt;= 512)</constraint>
+            <description>Maximum byte-mode CMD53 transfer count accepted by the module. SDIO byte mode supports 1..512 bytes, encoded as 1..511 or 0 for 512.</description>
+        </property>
+        <property id="SDIO_CFG_IO_READY_POLL_COUNT" display="Function ready poll count" default="1000" type="textbox">
+            <constraint display="Value must be a positive integer" actionOnFail="error">testInteger("${SDIO_CFG_IO_READY_POLL_COUNT}") &amp;&amp; ("${SDIO_CFG_IO_READY_POLL_COUNT}" &gt; 0)</constraint>
+            <description>Default number of CCCR IO_READY polling attempts used by R_SDIO_EnableFunction when the runtime configuration does not override it.</description>
+        </property>
+        <property id="SDIO_CFG_BACKPLANE_WINDOW_CACHE_ENABLE" display="Cache Broadcom backplane window" default="1" type="combobox">
+            <option id="SDIO_CFG_BACKPLANE_WINDOW_CACHE_ENABLE.0" display="Always rewrite window registers" value="0"/>
+            <option id="SDIO_CFG_BACKPLANE_WINDOW_CACHE_ENABLE.1" display="Cache current window" value="1"/>
+            <description>When enabled, Broadcom/Infineon backplane helpers skip redundant writes to SBADDRHIGH/MID/LOW when the requested address is already in the current cached window.</description>
+        </property>
+    </configuration>
+</module>

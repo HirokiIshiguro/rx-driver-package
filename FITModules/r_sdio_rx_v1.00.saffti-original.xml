@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+/***********************************************************************************************************************
+* Copyright (c) 2026 SAFFTI (Smart Agriculture, Forestry & Fisheries Technology Institute) and contributors
+*
+* SPDX-License-Identifier: BSD-3-Clause
+***********************************************************************************************************************/
+-->
+<refinfo>
+
+    <toolchain>
+        <brand>Renesas</brand>
+        <product>RXC</product>
+        <version>3.03.00</version>
+        <version>3.04.00</version>
+        <version>3.05.00</version>
+        <version>3.06.00</version>
+        <version>3.07.00</version>
+    </toolchain>
+    <toolchain>
+        <brand>GNU</brand>
+        <product>GNURX</product>
+        <version>8.03.00.202004</version>
+        <version>8.03.00.202102</version>
+        <version>8.03.00.202202</version>
+        <version>8.03.00.202411</version>
+        <version>14.02.00.202505</version>
+    </toolchain>
+
+    <target>
+        <family omit_series="true">RX</family>
+    </target>
+
+    <package>
+        <type>fitmodule</type>
+        <name>r_sdio_rx</name>
+        <version>1.00.saffti-original</version>
+        <zipsource>r_sdio_rx_v1.00.saffti-original.zip</zipsource>
+        <dependency>
+            <module>r_bsp</module>
+            <version>7.70</version>
+        </dependency>
+        <application>Wireless</application>
+        <application>Storage</application>
+        <desc>SAFFTI original SDIO protocol helpers for RX MCUs.</desc>
+        <details>This module provides reusable SDIO protocol helpers above an application-supplied host driver such as r_sdhi_rx. The lower host issues CMD52 and CMD53 transactions through callbacks. The module includes CCCR/FBR helpers, CIS pointer reads, function enable polling, interrupt register helpers, CMD53 byte/block wrappers, and Broadcom/Infineon backplane-window helpers proven on EK-RX671 with Murata Type 1YN.</details>
+        <incdir>r_config</incdir>
+        <incdir>r_sdio_rx</incdir>
+        <incdir>r_sdio_rx/src</incdir>
+    </package>
+
+</refinfo>
