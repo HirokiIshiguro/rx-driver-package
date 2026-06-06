@@ -40,10 +40,14 @@
             <module>r_bsp</module>
             <version>7.70</version>
         </dependency>
+        <dependency>
+            <module>r_sdhi_rx</module>
+            <version>2.20</version>
+        </dependency>
         <application>Wireless</application>
         <application>Storage</application>
         <desc>SAFFTI original SDIO protocol helpers for RX MCUs.</desc>
-        <details>This module provides reusable SDIO protocol helpers above an application-supplied host driver such as r_sdhi_rx. The lower host issues CMD52 and CMD53 transactions through callbacks. The module includes CCCR/FBR helpers, CIS pointer reads, function enable polling, interrupt register helpers, CMD53 byte/block wrappers, and Broadcom/Infineon backplane-window helpers. CMD53 byte-mode function-1 read/write paths have been proven on EK-RX671 with Murata Type 1YN.</details>
+        <details>This module provides reusable SDIO protocol helpers above an RX SDHI host driver. The lower host issues CMD52 and CMD53 transactions through callbacks. The module includes CCCR/FBR helpers, CIS pointer reads, function enable polling, interrupt register helpers, CMD53 byte/block wrappers, and Broadcom/Infineon backplane-window helpers. CMD53 byte-mode function-1 read/write paths have been proven on EK-RX671 with Murata Type 1YN.</details>
         <incdir>r_config</incdir>
         <incdir>r_sdio_rx</incdir>
         <incdir>r_sdio_rx/src</incdir>
