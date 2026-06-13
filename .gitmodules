@@ -4,7 +4,7 @@
 [submodule "source/r_simple_glcdc_config_rx"]
 	path = source/r_simple_glcdc_config_rx
 	url = https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_glcdc_config_rx/r_simple_glcdc_config_rx.git
-	branch = codex/rx65n-rsk-lcd-fit-fixes
+	branch = main
 [submodule "source/r_simple_graphic_rx"]
 	path = source/r_simple_graphic_rx
 	url = https://gitlab.saffti.jp/oss/experiment/embedded/mcu/renesas/rx/fitmodules/r_simple_graphic_rx/r_simple_graphic_rx.git
